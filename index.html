@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Color Prediction</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+
+<style>
+body{margin:0;background:#0b0b12;font-family:sans-serif;color:#fff}
+.app{max-width:420px;margin:auto;padding:20px;text-align:center}
+button{padding:14px;border:none;border-radius:12px;color:#fff;font-size:16px}
+.red{background:#ff2f2f}
+.green{background:#00c853}
+.violet{background:#7c4dff}
+input{width:100%;padding:12px;border-radius:10px;border:none;margin:12px 0}
+.result{margin-top:15px;padding:15px;background:#151525;border-radius:12px}
+</style>
+</head>
+
+<body>
+<div class="app">
+  <h2>🎯 Color Prediction</h2>
+  Balance: ₹<span id="bal">1000</span>
+
+  <input id="amt" type="number" placeholder="Enter Amount">
+
+  <div>
+    <button class="red" onclick="bet('red')">RED</button>
+    <button class="green" onclick="bet('green')">GREEN</button>
+    <button class="violet" onclick="bet('violet')">VIOLET</button>
+  </div>
+
+  <p>⏳ Time Left: <span id="timer">--</span>s</p>
+  <div class="result" id="res">Place Bet</div>
+</div>
+
+<script>
+// 🔥 FIREBASE CONFIG (TUMHARA)
+firebase.initializeApp({
+  apiKey: "AIzaSyDXJ0F2MptlZQGRHWw1CW_At6ssvvcBgYM",
+  authDomain: "avioatornew.firebaseapp.com",
+  databaseURL: "https://avioatornew-default-rtdb.asia-southeast1.firebasedatabase.app",
+  projectId: "avioatornew"
+});
+const db=firebase.database();
+
+let balance=1000, myBet=null;
+
+// BET
+function bet(c){
+  let a=parseInt(amt.value);
+  if(!a||a>balance){alert("Invalid");return;}
+  myBet={c,a};
+  res.innerText="Bet Placed: "+c.toUpperCase();
+}
+
+// TIMER + RESULT
+db.ref("currentRound").on("value",s=>{
+  let r=s.val(); if(!r) return;
+
+  let t=setInterval(()=>{
+    let sec=Math.floor((r.endTime-Date.now())/1000);
+    timer.innerText=sec>0?sec:0;
+  },500);
+
+  if(r.status==="closed" && myBet){
+    let win=myBet.c===r.color;
+    if(win){balance+=myBet.a*2;res.innerText="🎉 YOU WIN";}
+    else{balance-=myBet.a;res.innerText="❌ YOU LOSE";}
+    bal.innerText=Math.floor(balance);
+    myBet=null;
+  }
+});
+</script>
+</body>
+</html>
