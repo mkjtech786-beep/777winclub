@@ -1,79 +1,895 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-<meta charset="UTF-8">
-<title>Color Prediction</title>
-<meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lucky Code: Red vs Black</title>
+    <style>
+        :root {
+            --bg-color: #0f172a;
+            --card-bg: #1e293b;
+            --primary: #3b82f6;
+            --accent: #8b5cf6;
+            --text: #f8fafc;
+            --text-muted: #94a3b8;
+            --red: #ef4444;
+            --black: #000000;
+            --green: #22c55e;
+            --border: #334155;
+        }
 
-<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
-<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
 
-<style>
-body{margin:0;background:#0b0b12;font-family:sans-serif;color:#fff}
-.app{max-width:420px;margin:auto;padding:20px;text-align:center}
-button{padding:14px;border:none;border-radius:12px;color:#fff;font-size:16px}
-.red{background:#ff2f2f}
-.green{background:#00c853}
-.violet{background:#7c4dff}
-input{width:100%;padding:12px;border-radius:10px;border:none;margin:12px 0}
-.result{margin-top:15px;padding:15px;background:#151525;border-radius:12px}
-</style>
+        body {
+            background-color: var(--bg-color);
+            color: var(--text);
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            align-items: center;
+        }
+
+        /* --- Header --- */
+        header {
+            width: 100%;
+            background-color: var(--card-bg);
+            padding: 1rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--border);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .brand {
+            font-size: 1.5rem;
+            font-weight: bold;
+            background: linear-gradient(to right, var(--primary), var(--accent));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .user-info {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+            font-size: 0.9rem;
+        }
+
+        .balance-chip {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 0.3rem 0.8rem;
+            border-radius: 20px;
+            border: 1px solid var(--accent);
+        }
+
+        /* --- Layout --- */
+        main {
+            width: 100%;
+            max-width: 600px;
+            padding: 1rem;
+            flex: 1;
+        }
+
+        /* --- Sections (SPA Feel) --- */
+        section {
+            display: none; /* Hidden by default */
+            animation: fadeIn 0.3s ease;
+        }
+
+        section.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* --- Login Section --- */
+        .login-container {
+            text-align: center;
+            margin-top: 3rem;
+        }
+
+        .input-group {
+            margin-bottom: 1rem;
+            text-align: left;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: var(--text-muted);
+        }
+
+        input {
+            width: 100%;
+            padding: 0.8rem;
+            background: var(--bg-color);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            color: var(--text);
+            outline: none;
+        }
+
+        input:focus {
+            border-color: var(--primary);
+        }
+
+        .btn {
+            width: 100%;
+            padding: 0.8rem;
+            border: none;
+            border-radius: 8px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: transform 0.1s;
+        }
+
+        .btn:active {
+            transform: scale(0.98);
+        }
+
+        .btn-primary { background: var(--primary); color: white; }
+        .btn-accent { background: var(--accent); color: white; }
+        .btn-red { background: var(--red); color: white; }
+        .btn-black { background: var(--black); color: white; border: 1px solid #333; }
+
+        /* --- Game Area --- */
+        .game-controls {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .color-btn {
+            height: 100px;
+            font-size: 1.2rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            border-radius: 12px;
+        }
+
+        .code-display-area {
+            background: var(--card-bg);
+            padding: 2rem;
+            border-radius: 12px;
+            text-align: center;
+            margin-bottom: 1.5rem;
+            border: 2px dashed var(--border);
+        }
+
+        #generated-code {
+            font-family: 'Courier New', monospace;
+            font-size: 2.5rem;
+            font-weight: bold;
+            letter-spacing: 2px;
+            color: var(--primary);
+            min-height: 3.5rem;
+        }
+
+        .status-msg {
+            margin-top: 1rem;
+            font-size: 1.1rem;
+            min-height: 1.5rem;
+        }
+
+        .win { color: var(--green); }
+        .loss { color: var(--red); }
+
+        /* --- Payments --- */
+        .payment-methods {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .method-card {
+            background: var(--card-bg);
+            padding: 1rem;
+            text-align: center;
+            border-radius: 8px;
+            cursor: pointer;
+            border: 1px solid var(--border);
+        }
+        
+        .method-card.selected {
+            border-color: var(--green);
+            background: rgba(34, 197, 94, 0.1);
+        }
+
+        .history-list {
+            list-style: none;
+            margin-top: 1rem;
+        }
+
+        .history-item {
+            background: var(--card-bg);
+            padding: 0.8rem;
+            margin-bottom: 0.5rem;
+            border-radius: 6px;
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.9rem;
+        }
+
+        .status-pending { color: orange; }
+        .status-approved { color: var(--green); }
+        .status-rejected { color: var(--red); }
+
+        /* --- Admin Panel --- */
+        .admin-dashboard {
+            background: var(--card-bg);
+            padding: 1rem;
+            border-radius: 12px;
+        }
+
+        .table-container {
+            overflow-x: auto;
+            margin-top: 1rem;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.85rem;
+        }
+
+        th, td {
+            padding: 0.8rem;
+            text-align: left;
+            border-bottom: 1px solid var(--border);
+        }
+        
+        .action-btn {
+            padding: 0.2rem 0.5rem;
+            border-radius: 4px;
+            border: none;
+            cursor: pointer;
+            font-size: 0.8rem;
+            margin-right: 0.3rem;
+        }
+
+        /* --- Navigation Bottom Bar --- */
+        .nav-bar {
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+            background: var(--card-bg);
+            border-top: 1px solid var(--border);
+            display: flex;
+            justify-content: space-around;
+            padding: 0.8rem 0;
+            z-index: 99;
+        }
+
+        .nav-item {
+            text-align: center;
+            color: var(--text-muted);
+            cursor: pointer;
+            font-size: 0.8rem;
+            flex: 1;
+        }
+
+        .nav-item.active {
+            color: var(--primary);
+        }
+
+        .nav-icon {
+            font-size: 1.2rem;
+            margin-bottom: 2px;
+            display: block;
+        }
+
+        /* --- Toast Notification --- */
+        .toast {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #333;
+            color: #fff;
+            padding: 10px 20px;
+            border-radius: 5px;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s;
+            z-index: 1000;
+        }
+        .toast.show { opacity: 1; }
+    </style>
 </head>
-
 <body>
-<div class="app">
-  <h2>🎯 Color Prediction</h2>
-  Balance: ₹<span id="bal">1000</span>
 
-  <input id="amt" type="number" placeholder="Enter Amount">
+    <!-- Toast Notification -->
+    <div id="toast" class="toast">Action Successful</div>
 
-  <div>
-    <button class="red" onclick="bet('red')">RED</button>
-    <button class="green" onclick="bet('green')">GREEN</button>
-    <button class="violet" onclick="bet('violet')">VIOLET</button>
-  </div>
+    <!-- Header -->
+    <header id="app-header" style="display:none;">
+        <div class="brand">Lucky Code</div>
+        <div class="user-info">
+            <div class="balance-chip">RS <span id="user-balance">0</span></div>
+        </div>
+    </header>
 
-  <p>⏳ Time Left: <span id="timer">--</span>s</p>
-  <div class="result" id="res">Place Bet</div>
-</div>
+    <main>
+        <!-- 1. LOGIN SECTION -->
+        <section id="login-section" class="active">
+            <div class="login-container">
+                <h1 style="margin-bottom: 2rem;">Welcome</h1>
+                <div class="input-group">
+                    <label>Email</label>
+                    <input type="email" id="email" placeholder="user@example.com">
+                </div>
+                <div class="input-group">
+                    <label>Password</label>
+                    <input type="password" id="password" placeholder="********">
+                </div>
+                <button class="btn btn-primary" onclick="app.login()">Login</button>
+                <p style="margin-top: 1rem; font-size: 0.8rem; color: var(--text-muted);">
+                    Admin login: admin@lucky.com / admin123
+                </p>
+            </div>
+        </section>
 
-<script>
-// 🔥 FIREBASE CONFIG (TUMHARA)
-firebase.initializeApp({
-  apiKey: "AIzaSyDXJ0F2MptlZQGRHWw1CW_At6ssvvcBgYM",
-  authDomain: "avioatornew.firebaseapp.com",
-  databaseURL: "https://avioatornew-default-rtdb.asia-southeast1.firebasedatabase.app",
-  projectId: "avioatornew"
-});
-const db=firebase.database();
+        <!-- 2. GAME SECTION -->
+        <section id="game-section">
+            <h2 style="margin-bottom: 1rem;">Place Your Bet</h2>
+            
+            <div class="input-group">
+                <label>Bet Amount</label>
+                <input type="number" id="bet-amount" placeholder="Enter amount (e.g., 100)">
+            </div>
 
-let balance=1000, myBet=null;
+            <div class="game-controls">
+                <button class="btn color-btn btn-red" onclick="app.placeBet('red')">
+                    RED
+                </button>
+                <button class="btn color-btn btn-black" onclick="app.placeBet('black')">
+                    BLACK
+                </button>
+            </div>
 
-// BET
-function bet(c){
-  let a=parseInt(amt.value);
-  if(!a||a>balance){alert("Invalid");return;}
-  myBet={c,a};
-  res.innerText="Bet Placed: "+c.toUpperCase();
-}
+            <div class="code-display-area">
+                <p style="color: var(--text-muted); margin-bottom: 0.5rem;">Result Code</p>
+                <div id="generated-code">???</div>
+                <div id="game-message" class="status-msg">Waiting for bet...</div>
+            </div>
+            
+            <p style="text-align: center; font-size: 0.9rem; color: var(--text-muted);">
+                Copy the code generated. The system will determine the color.
+            </p>
+        </section>
 
-// TIMER + RESULT
-db.ref("currentRound").on("value",s=>{
-  let r=s.val(); if(!r) return;
+        <!-- 3. PAYMENT SECTION -->
+        <section id="payment-section">
+            <h2 style="margin-bottom: 1rem;">Wallet</h2>
+            
+            <!-- Tabs -->
+            <div style="display: flex; gap: 1rem; margin-bottom: 1rem;">
+                <button class="btn btn-primary" style="width: auto;" onclick="ui.showPaymentTab('deposit')">Deposit</button>
+                <button class="btn btn-primary" style="width: auto;" onclick="ui.showPaymentTab('withdraw')">Withdraw</button>
+            </div>
 
-  let t=setInterval(()=>{
-    let sec=Math.floor((r.endTime-Date.now())/1000);
-    timer.innerText=sec>0?sec:0;
-  },500);
+            <!-- Deposit Form -->
+            <div id="deposit-form" class="payment-form">
+                <h3>Deposit Funds</h3>
+                <div class="input-group" style="margin-top: 1rem;">
+                    <label>Select Method</label>
+                    <div class="payment-methods">
+                        <div class="method-card" onclick="ui.selectMethod(this, 'Easypaisa')">Easypaisa</div>
+                        <div class="method-card" onclick="ui.selectMethod(this, 'JazzCash')">JazzCash</div>
+                        <div class="method-card" onclick="ui.selectMethod(this, 'Binance')">Binance</div>
+                    </div>
+                    <input type="hidden" id="deposit-method">
+                </div>
+                <div class="input-group">
+                    <label>Amount</label>
+                    <input type="number" id="deposit-amount" placeholder="RS">
+                </div>
+                <div class="input-group">
+                    <label>Transaction ID (Trx ID)</label>
+                    <input type="text" id="deposit-trx" placeholder="Paste Trx ID here">
+                </div>
+                <button class="btn btn-green" style="background: var(--green); color: white;" onclick="app.submitDeposit()">Submit Deposit</button>
+            </div>
 
-  if(r.status==="closed" && myBet){
-    let win=myBet.c===r.color;
-    if(win){balance+=myBet.a*2;res.innerText="🎉 YOU WIN";}
-    else{balance-=myBet.a;res.innerText="❌ YOU LOSE";}
-    bal.innerText=Math.floor(balance);
-    myBet=null;
-  }
-});
-</script>
+            <!-- Withdraw Form -->
+            <div id="withdraw-form" class="payment-form" style="display: none;">
+                <h3>Withdraw Funds</h3>
+                <div class="input-group" style="margin-top: 1rem;">
+                    <label>Select Method</label>
+                    <div class="payment-methods">
+                        <div class="method-card" onclick="ui.selectMethod(this, 'Easypaisa')">Easypaisa</div>
+                        <div class="method-card" onclick="ui.selectMethod(this, 'JazzCash')">JazzCash</div>
+                        <div class="method-card" onclick="ui.selectMethod(this, 'Binance')">Binance</div>
+                    </div>
+                    <input type="hidden" id="withdraw-method">
+                </div>
+                <div class="input-group">
+                    <label>Account Number / Wallet Address</label>
+                    <input type="text" id="withdraw-account" placeholder="0300...">
+                </div>
+                <div class="input-group">
+                    <label>Amount</label>
+                    <input type="number" id="withdraw-amount" placeholder="RS">
+                </div>
+                <button class="btn btn-accent" onclick="app.submitWithdraw()">Request Withdraw</button>
+            </div>
+
+            <!-- History -->
+            <h3 style="margin-top: 2rem;">History</h3>
+            <ul id="transaction-history" class="history-list">
+                <!-- Filled by JS -->
+                <li class="history-item" style="justify-content: center; color: var(--text-muted);">No history yet.</li>
+            </ul>
+        </section>
+
+        <!-- 4. ADMIN SECTION -->
+        <section id="admin-section">
+            <h2 style="margin-bottom: 1rem; color: var(--accent);">Admin Panel</h2>
+            
+            <div class="admin-dashboard">
+                <h3>Code & Color Generator</h3>
+                <p style="font-size: 0.9rem; color: var(--text-muted); margin-bottom: 1rem;">
+                    Generate a code to see its color (for admin reference).
+                </p>
+                <div style="display: flex; gap: 0.5rem;">
+                    <input type="text" id="admin-code-preview" readonly placeholder="Generated code appears here">
+                    <button class="btn btn-primary" style="width: auto;" onclick="app.adminGenerateCode()">Generate</button>
+                </div>
+                <div id="admin-color-indicator" style="margin-top: 1rem; font-weight: bold;"></div>
+            </div>
+
+            <div class="admin-dashboard" style="margin-top: 2rem;">
+                <h3>Pending Requests</h3>
+                <div class="table-container">
+                    <table id="admin-table">
+                        <thead>
+                            <tr>
+                                <th>Type</th>
+                                <th>Method</th>
+                                <th>Amount</th>
+                                <th>User</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- Filled by JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Navigation Bar -->
+    <nav id="nav-bar" class="nav-bar" style="display: none;">
+        <div class="nav-item active" onclick="ui.navigate('game-section', this)">
+            <span class="nav-icon">🎲</span>
+            Game
+        </div>
+        <div class="nav-item" onclick="ui.navigate('payment-section', this)">
+            <span class="nav-icon">💰</span>
+            Wallet
+        </div>
+        <div class="nav-item" id="admin-nav-link" style="display: none;" onclick="ui.navigate('admin-section', this)">
+            <span class="nav-icon">⚙️</span>
+            Admin
+        </div>
+        <div class="nav-item" onclick="app.logout()">
+            <span class="nav-icon">🚪</span>
+            Logout
+        </div>
+    </nav>
+
+    <!-- Firebase SDK -->
+    <script type="module">
+        // --- 1. FIREBASE SETUP ---
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-app.js";
+        import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-analytics.js";
+        import { getDatabase, ref, set, get, push, update, child } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-database.js";
+        import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-auth.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyArw_JZNXKJ_bXdi3yUR1efQ7pAsoaGd4k",
+            authDomain: "tkcoin-8281a.firebaseapp.com",
+            databaseURL: "https://tkcoin-8281a-default-rtdb.asia-southeast1.firebasedatabase.app",
+            projectId: "tkcoin-8281a",
+            storageBucket: "tkcoin-8281a.firebasestorage.app",
+            messagingSenderId: "877042943142",
+            appId: "1:877042943142:web:88921ed0f2d567e211e067",
+            measurementId: "G-017VEJSHWQ"
+        };
+
+        // Initialize Firebase
+        const firebaseApp = initializeApp(firebaseConfig);
+        const analytics = getAnalytics(firebaseApp);
+        const db = getDatabase(firebaseApp);
+        const auth = getAuth(firebaseApp);
+
+        // Make available globally
+        window.fbDB = db;
+        window.fbAuth = auth;
+        window.fbRef = ref;
+        window.fbSet = set;
+        window.fbGet = get;
+        window.fbPush = push;
+        window.fbUpdate = update;
+        window.fbChild = child;
+
+        // --- 2. GAME LOGIC ---
+
+        const Game = {
+            user: null,
+            balance: 0,
+            isAdmin: false,
+            transactions: [], // Local cache for UI
+
+            // Login
+            login: async () => {
+                const email = document.getElementById('email').value;
+                const password = document.getElementById('password').value;
+
+                if(!email || !password) return ui.showToast('Please enter email and password');
+
+                try {
+                    await signInWithEmailAndPassword(auth, email, password);
+                    // Auth state listener will handle the rest
+                } catch (error) {
+                    ui.showToast("Login Failed: " + error.message);
+                }
+            },
+
+            logout: async () => {
+                await signOut(auth);
+                window.location.reload();
+            },
+
+            // Core Game Mechanics
+            placeBet: (colorChoice) => {
+                const betAmountInput = document.getElementById('bet-amount');
+                const betAmount = parseFloat(betAmountInput.value);
+
+                if (isNaN(betAmount) || betAmount <= 0) return ui.showToast("Enter valid amount");
+                if (betAmount > Game.balance) return ui.showToast("Insufficient Balance!");
+
+                // Generate Code
+                const code = Game.generateRandomCode();
+                const resultColor = Game.getColorFromCode(code);
+
+                // Display Code
+                document.getElementById('generated-code').innerText = code;
+                
+                // Logic: Win or Loss?
+                // If code color matches bet color -> Win (Double money)
+                // Else -> Loss
+                const isWin = (colorChoice === resultColor);
+                const messageEl = document.getElementById('game-message');
+
+                if (isWin) {
+                    const winAmount = betAmount * 2;
+                    Game.balance += betAmount; // Add profit
+                    messageEl.innerText = `RESULT: ${resultColor.toUpperCase()} - YOU WON ${winAmount}!`;
+                    messageEl.className = "status-msg win";
+                    ui.showToast("You Won! 🎉");
+                } else {
+                    Game.balance -= betAmount;
+                    messageEl.innerText = `RESULT: ${resultColor.toUpperCase()} - YOU LOST`;
+                    messageEl.className = "status-msg loss";
+                }
+
+                // Update Firebase Balance
+                Game.updateUserData({ balance: Game.balance });
+                
+                // Clear bet input
+                betAmountInput.value = '';
+            },
+
+            // Generate a random string (e.g., "A92B")
+            generateRandomCode: () => {
+                const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+                let result = "";
+                for (let i = 0; i < 4; i++) {
+                    result += chars.charAt(Math.floor(Math.random() * chars.length));
+                }
+                return result;
+            },
+
+            // Determine color: Logic -> Even numbers/positions = Red, Odd = Black? 
+            // Or just map chars. Let's map character codes to determine deterministic color.
+            getColorFromCode: (code) => {
+                let val = 0;
+                for(let i=0; i<code.length; i++) {
+                    val += code.charCodeAt(i);
+                }
+                return (val % 2 === 0) ? 'red' : 'black';
+            },
+
+            // Payment Handling
+            submitDeposit: () => {
+                const method = document.getElementById('deposit-method').value;
+                const amount = document.getElementById('deposit-amount').value;
+                const trx = document.getElementById('deposit-trx').value;
+
+                if(!method || !amount || !trx) return ui.showToast("Fill all fields");
+
+                const transaction = {
+                    type: 'deposit',
+                    method: method,
+                    amount: parseFloat(amount),
+                    status: 'pending',
+                    date: new Date().toISOString(),
+                    user: Game.user.email
+                };
+
+                // Save to DB
+                const newRef = push(ref(db, 'transactions'));
+                set(newRef, transaction).then(() => {
+                    ui.showToast("Deposit Request Sent");
+                    Game.loadHistory(); // Refresh local list
+                });
+            },
+
+            submitWithdraw: () => {
+                const method = document.getElementById('withdraw-method').value;
+                const amount = document.getElementById('withdraw-amount').value;
+                const account = document.getElementById('withdraw-account').value;
+
+                if(!method || !amount || !account) return ui.showToast("Fill all fields");
+                if(parseFloat(amount) > Game.balance) return ui.showToast("Insufficient Balance");
+
+                const transaction = {
+                    type: 'withdraw',
+                    method: method,
+                    details: account,
+                    amount: parseFloat(amount),
+                    status: 'pending',
+                    date: new Date().toISOString(),
+                    user: Game.user.email
+                };
+
+                // Deduct balance temporarily (or hold until approval, but simple logic here deducts)
+                Game.balance -= parseFloat(amount);
+                Game.updateUserData({ balance: Game.balance });
+
+                const newRef = push(ref(db, 'transactions'));
+                set(newRef, transaction).then(() => {
+                    ui.showToast("Withdraw Request Sent");
+                    Game.loadHistory();
+                });
+            },
+
+            // Admin Functions
+            adminGenerateCode: () => {
+                const code = Game.generateRandomCode();
+                const color = Game.getColorFromCode(code);
+                const display = document.getElementById('admin-code-preview');
+                const indicator = document.getElementById('admin-color-indicator');
+
+                display.value = code;
+                indicator.innerText = `This code is: ${color.toUpperCase()}`;
+                indicator.style.color = (color === 'red') ? 'var(--red)' : 'var(--text)';
+            },
+
+            // Data Syncing
+            updateUserData: (data) => {
+                if(Game.user) {
+                    update(ref(db, 'users/' + Game.user.uid), data);
+                }
+            },
+
+            initListener: () => {
+                onAuthStateChanged(auth, (user) => {
+                    if (user) {
+                        Game.user = user;
+                        // Check if admin
+                        if(user.email === 'admin@lucky.com') {
+                            Game.isAdmin = true;
+                            document.getElementById('admin-nav-link').style.display = 'block';
+                        }
+
+                        // Show App UI
+                        document.getElementById('login-section').classList.remove('active');
+                        document.getElementById('app-header').style.display = 'flex';
+                        document.getElementById('nav-bar').style.display = 'flex';
+                        ui.navigate('game-section', document.querySelector('.nav-item')); // Go to game
+
+                        // Fetch User Data
+                        get(ref(db, 'users/' + user.uid)).then((snapshot) => {
+                            if (snapshot.exists()) {
+                                const data = snapshot.val();
+                                Game.balance = data.balance || 0;
+                            } else {
+                                // New user setup
+                                Game.balance = 100; // Bonus
+                                set(ref(db, 'users/' + user.uid), { balance: 100 });
+                            }
+                            ui.updateBalance();
+                            Game.loadHistory();
+                            if(Game.isAdmin) Game.loadAdminRequests();
+                        });
+
+                    } else {
+                        // Logged out
+                        document.getElementById('login-section').classList.add('active');
+                        document.getElementById('app-header').style.display = 'none';
+                        document.getElementById('nav-bar').style.display = 'none';
+                    }
+                });
+            },
+
+            loadHistory: () => {
+                get(ref(db, 'transactions')).then((snapshot) => {
+                    const list = document.getElementById('transaction-history');
+                    list.innerHTML = '';
+                    
+                    if(snapshot.exists()) {
+                        const data = snapshot.val();
+                        // Convert to array and reverse to show newest first
+                        const txs = Object.values(data).reverse();
+                        // Filter for current user only in game view (optional, but good practice)
+                        // Here showing all for demo simplicity or filtered by email
+                        
+                        txs.forEach(tx => {
+                            if (tx.user === Game.user.email) {
+                                const li = document.createElement('li');
+                                li.className = 'history-item';
+                                const statusClass = tx.status === 'approved' ? 'status-approved' : (tx.status === 'rejected' ? 'status-rejected' : 'status-pending');
+                                const icon = tx.type === 'deposit' ? '↓' : '↑';
+                                li.innerHTML = `
+                                    <div>
+                                        <strong>${tx.type.toUpperCase()} ${icon}</strong> 
+                                        <br><small>${tx.method}</small>
+                                    </div>
+                                    <div style="text-align: right;">
+                                        <div>${tx.amount}</div>
+                                        <small class="${statusClass}">${tx.status}</small>
+                                    </div>
+                                `;
+                                list.appendChild(li);
+                            }
+                        });
+                        if(list.innerHTML === '') list.innerHTML = '<li class="history-item" style="justify-content:center">No history</li>';
+                    }
+                });
+            },
+
+            loadAdminRequests: () => {
+                if(!Game.isAdmin) return;
+                
+                // Realtime listener for admin table would be better, but interval is okay for simple
+                setInterval(() => {
+                    get(ref(db, 'transactions')).then((snapshot) => {
+                        const tbody = document.querySelector('#admin-table tbody');
+                        tbody.innerHTML = '';
+
+                        if(snapshot.exists()) {
+                            const data = snapshot.val();
+                            Object.entries(data).forEach(([key, tx]) => {
+                                if(tx.status === 'pending') {
+                                    const tr = document.createElement('tr');
+                                    tr.innerHTML = `
+                                        <td>${tx.type.toUpperCase()}</td>
+                                        <td>${tx.method}</td>
+                                        <td>${tx.amount}</td>
+                                        <td>${tx.user.split('@')[0]}</td>
+                                        <td>
+                                            <button class="action-btn" style="background:var(--green); color:white;" onclick="window.approveTx('${key}', '${tx.user}', '${tx.amount}', '${tx.type}')">✓</button>
+                                            <button class="action-btn" style="background:var(--red); color:white;" onclick="window.rejectTx('${key}')">✗</button>
+                                        </td>
+                                    `;
+                                    tbody.appendChild(tr);
+                                }
+                            });
+                        }
+                        if(tbody.innerHTML === '') tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; color:gray;">No pending requests</td></tr>';
+                    });
+                }, 3000);
+            }
+        };
+
+        // Global functions for HTML onclick attributes
+        window.app = Game;
+        
+        window.approveTx = (key, email, amount, type) => {
+            // Find user uid (this requires a user lookup, simplified here by searching users)
+            // In a real app, store uid in transaction.
+            // We will iterate users to find match (less efficient but works for this scope)
+            
+            get(ref(db, 'users')).then(usersSnap => {
+                if(usersSnap.exists()) {
+                    const users = usersSnap.val();
+                    for (const uid in users) {
+                        if(users[uid].email === email) {
+                            // Update balance if deposit
+                            if(type === 'deposit') {
+                                const currentBal = users[uid].balance || 0;
+                                update(ref(db, 'users/' + uid), { balance: currentBal + parseFloat(amount) });
+                            }
+                            // Update transaction status
+                            update(ref(db, 'transactions/' + key), { status: 'approved' });
+                            ui.showToast("Approved");
+                            return; // Stop loop
+                        }
+                    }
+                }
+            });
+        };
+
+        window.rejectTx = (key) => {
+            update(ref(db, 'transactions/' + key), { status: 'rejected' });
+            ui.showToast("Rejected");
+        };
+
+
+        // --- 3. UI HELPERS ---
+        const ui = {
+            navigate: (sectionId, navEl) => {
+                // Hide all sections
+                document.querySelectorAll('section').forEach(sec => sec.classList.remove('active'));
+                // Show target
+                document.getElementById(sectionId).classList.add('active');
+                
+                // Update Nav
+                document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
+                if(navEl) navEl.classList.add('active');
+
+                // Reload history if opening wallet
+                if(sectionId === 'payment-section') Game.loadHistory();
+                if(sectionId === 'admin-section') Game.loadAdminRequests();
+            },
+
+            updateBalance: () => {
+                const el = document.getElementById('user-balance');
+                // Animate number
+                el.innerText = Game.balance;
+            },
+
+            showPaymentTab: (tab) => {
+                document.getElementById('deposit-form').style.display = 'none';
+                document.getElementById('withdraw-form').style.display = 'none';
+                document.getElementById(tab + '-form').style.display = 'block';
+            },
+
+            selectMethod: (el, method) => {
+                // Remove selected class from siblings
+                el.parentElement.querySelectorAll('.method-card').forEach(c => c.classList.remove('selected'));
+                el.classList.add('selected');
+                
+                // Set hidden input based on active form
+                if(document.getElementById('deposit-form').style.display !== 'none') {
+                    document.getElementById('deposit-method').value = method;
+                } else {
+                    document.getElementById('withdraw-method').value = method;
+                }
+            },
+
+            showToast: (msg) => {
+                const t = document.getElementById('toast');
+                t.innerText = msg;
+                t.classList.add('show');
+                setTimeout(() => t.classList.remove('show'), 3000);
+            }
+        };
+
+        window.ui = ui;
+
+        // Start App
+        Game.initListener();
+
+    </script>
 </body>
 </html>
