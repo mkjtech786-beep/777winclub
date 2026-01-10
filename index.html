@@ -121,8 +121,8 @@
         .history-item { background: var(--bg-card); padding: 15px; border-radius: 8px; margin-bottom: 10px; box-shadow: var(--shadow); border-left: 4px solid var(--border); color: var(--text-main); }
         .history-item.deposit { border-left-color: var(--success); }
         .history-item.withdraw { border-left-color: var(--primary); }
-        .history-item.sent { border-left-color: var(--danger); } /* Added for Send */
-        .history-item.received { border-left-color: var(--primary); } /* Added for Receive */
+        .history-item.sent { border-left-color: var(--danger); }
+        .history-item.received { border-left-color: var(--primary); }
         .hist-head { display: flex; justify-content: space-between; margin-bottom:5px; }
         .hist-amount { font-weight: bold; font-size: 1.1rem; }
         .hist-date { font-size: 0.8rem; color: var(--text-sec); }
@@ -153,6 +153,17 @@
         .comment-user { font-weight: bold; color: var(--primary); }
         .comment-input-wrapper { display: flex; gap: 5px; margin-top: 10px; }
         .comment-input { padding: 8px; font-size: 0.85rem; }
+        
+        /* Lock Style for Comments */
+        .comment-lock-msg {
+            text-align: center; 
+            padding: 5px; 
+            font-size: 0.75rem; 
+            color: var(--text-sec); 
+            background: rgba(0,0,0,0.03);
+            border-radius: 4px;
+            margin-top: 5px;
+        }
 
         /* --- Profile --- */
         .profile-header { text-align: center; padding: 20px 0; position: relative; }
@@ -252,14 +263,12 @@
         </div>
     </div>
 
-    <!-- Notification Popup Modal (New Feature) -->
+    <!-- Notification Popup Modal -->
     <div id="notif-modal" class="modal-overlay">
         <div class="modal-content">
             <span class="material-icons-round notif-icon">notifications_active</span>
             <div class="modal-title">New Notifications</div>
-            <div class="modal-body" id="notif-list">
-                <!-- Notifications will be injected here -->
-            </div>
+            <div class="modal-body" id="notif-list"></div>
             <button class="btn btn-primary" style="margin-top:15px;" onclick="app.closeModal('notif-modal')">Close</button>
         </div>
     </div>
@@ -436,7 +445,6 @@
         <section id="history-section" class="section">
             <h3 style="margin-bottom: 15px;" data-i18n="transactions">My Transactions</h3>
             <div id="history-list">
-                <!-- History items will be loaded here -->
                 <p style="text-align:center; color:var(--text-sec);">Loading history...</p>
             </div>
         </section>
@@ -452,7 +460,7 @@
                 <div id="profile-badge-container"></div>
             </div>
 
-            <!-- NEW FEATURE: Send/Transfer Card -->
+            <!-- Transfer Feature -->
             <div class="transfer-card">
                 <h4 style="color: var(--primary); margin-bottom: 15px;">Send / Transfer Coins</h4>
                 <div class="form-group">
@@ -476,9 +484,7 @@
                 <div class="ref-code-box" id="my-referral-code">------</div>
                 <button class="btn btn-primary btn-sm" onclick="app.copyReferralCode()" data-i18n="copy_code">Copy Code</button>
 
-                <div class="ref-list" id="referral-list">
-                    <!-- Referrals List -->
-                </div>
+                <div class="ref-list" id="referral-list"></div>
             </div>
 
             <!-- Win/Loss Card -->
@@ -681,7 +687,6 @@
                 const snapshot = await db.ref('users/' + cleanEmail).once('value');
                 if (snapshot.exists()) return false;
                 
-                // Initialize empty arrays for new features
                 userObj.transactions = userObj.transactions || [];
                 userObj.notifications = userObj.notifications || [];
                 
@@ -764,19 +769,16 @@
             async getUserHistory(userEmail) {
                 const cleanEmail = userEmail.replace('.', ',');
                 
-                // 1. Get Admin Requests
                 const reqSnapshot = await db.ref('requests').orderByChild('userEmail').equalTo(userEmail).once('value');
                 const history = [];
                 reqSnapshot.forEach(child => {
                      history.push(child.val());
                 });
 
-                // 2. Get User P2P Transactions
                 const userSnapshot = await db.ref('users/' + cleanEmail).once('value');
                 if (userSnapshot.exists()) {
                     const uData = userSnapshot.val();
                     if (uData.transactions && Array.isArray(uData.transactions)) {
-                        // Push transactions with a flag to identify type
                         uData.transactions.forEach(t => {
                             history.push({ ...t, isInternal: true });
                         });
@@ -792,7 +794,6 @@
                 const senderEmailClean = sender.email.replace('.', ',');
                 const receiverEmailClean = receiverEmail.replace('.', ',');
                 
-                // Get fresh receiver data
                 const receiverSnapshot = await db.ref('users/' + receiverEmailClean).once('value');
                 if (!receiverSnapshot.exists()) return { success: false, message: 'User not found' };
                 
@@ -800,9 +801,7 @@
 
                 if (sender.balance < amount) return { success: false, message: 'Insufficient Balance' };
 
-                // Deduct from sender
                 sender.balance = parseFloat(sender.balance) - parseFloat(amount);
-                // Add sender transaction record
                 if (!sender.transactions) sender.transactions = [];
                 sender.transactions.push({
                     type: 'sent',
@@ -811,9 +810,7 @@
                     date: new Date().toISOString()
                 });
 
-                // Add to receiver
                 receiver.balance = parseFloat(receiver.balance) + parseFloat(amount);
-                // Add receiver transaction record
                 if (!receiver.transactions) receiver.transactions = [];
                 receiver.transactions.push({
                     type: 'received',
@@ -822,14 +819,12 @@
                     date: new Date().toISOString()
                 });
 
-                // Add Notification to Receiver
                 if (!receiver.notifications) receiver.notifications = [];
                 receiver.notifications.push({
                     msg: `Received ${amount} TK from ${sender.name} (${sender.email})`,
                     date: new Date().toISOString()
                 });
 
-                // Save both
                 await db.ref('users/' + senderEmailClean).update({ balance: sender.balance, transactions: sender.transactions });
                 await db.ref('users/' + receiverEmailClean).update({ balance: receiver.balance, transactions: receiver.transactions, notifications: receiver.notifications });
 
@@ -859,12 +854,10 @@
                         document.getElementById('main-app').classList.remove('hidden');
                         await app.loadUI();
                         
-                        // --- Check for Notifications ---
                         if (freshUser.notifications && freshUser.notifications.length > 0) {
                             app.showNotifications(freshUser.notifications);
-                            // Clear notifications after showing (optional, usually user wants to mark read)
                             await dataService.updateUser({ ...freshUser, notifications: [] });
-                            dataService.currentUser.notifications = []; // Update local session
+                            dataService.currentUser.notifications = []; 
                         }
 
                     } else {
@@ -873,7 +866,6 @@
                 }
             },
 
-            // --- Notification Popup Logic ---
             showNotifications: (notifs) => {
                 const container = document.getElementById('notif-list');
                 container.innerHTML = '';
@@ -886,7 +878,6 @@
                 app.openModal('notif-modal');
             },
 
-            // --- Transfer Logic ---
             checkUserExists: async () => {
                 const email = document.getElementById('transfer-email').value.trim().toLowerCase();
                 const resultDiv = document.getElementById('user-check-result');
@@ -895,7 +886,6 @@
                     return;
                 }
                 
-                // Basic validation
                 if(email === dataService.currentUser.email) {
                     resultDiv.innerHTML = '<span class="status-notfound">You cannot send to yourself</span>';
                     return;
@@ -917,27 +907,22 @@
 
                 if(!email || !amount) return app.toast('Please enter email and amount', 'error');
 
-                // Show loading animation
                 btn.disabled = true;
                 btn.innerHTML = '<div class="spinner"></div> Sending...';
 
-                // Add slight artificial delay for animation visibility
                 setTimeout(async () => {
                     const result = await dataService.sendCoins(dataService.currentUser, email, amount);
                     
                     if(result.success) {
                         app.toast(result.message, 'success');
-                        // Reset inputs
                         document.getElementById('transfer-email').value = '';
                         document.getElementById('transfer-amount').value = '';
                         document.getElementById('user-check-result').innerHTML = '';
-                        // Refresh UI
                         await app.loadUI(); 
                     } else {
                         app.toast(result.message, 'error');
                     }
                     
-                    // Reset button
                     btn.disabled = false;
                     btn.innerHTML = originalBtnText;
                 }, 1500);
@@ -982,8 +967,8 @@
                     invitedBy: refCode || null,
                     referrals: [],
                     rewardedReferrals: [],
-                    transactions: [], // For P2P
-                    notifications: [] // For Alerts
+                    transactions: [],
+                    notifications: []
                 };
 
                 const success = await dataService.signup(user);
@@ -1022,7 +1007,6 @@
 
                 const user = await dataService.getUser(email);
                 if (user) {
-                    // Ensure old users have new arrays
                     if (!user.transactions) user.transactions = [];
                     if (!user.notifications) user.notifications = [];
                     
@@ -1044,18 +1028,15 @@
                 const user = dataService.currentUser;
                 if (!user) return;
 
-                // Update Header
                 document.getElementById('user-balance').innerText = parseFloat(user.balance).toFixed(2);
                 document.getElementById('user-pkr-val').innerText = (parseFloat(user.balance) * app.globalSettings.rate).toFixed(2);
 
-                // Profile Info
                 document.getElementById('profile-name').innerText = user.name;
                 document.getElementById('profile-avatar').innerText = user.name.charAt(0).toUpperCase();
                 document.getElementById('profile-balance').innerText = parseFloat(user.balance).toFixed(2);
                 document.getElementById('my-referral-code').innerText = user.referralCode || '------';
                 document.getElementById('profile-rate').innerText = app.globalSettings.rate;
 
-                // Stats
                 document.getElementById('pnl-invested').innerText = user.totalInvestmentPKR || 0;
                 document.getElementById('pnl-current').innerText = (parseFloat(user.balance) * app.globalSettings.rate).toFixed(2);
                 const pnl = (parseFloat(user.balance) * app.globalSettings.rate) - (user.totalInvestmentPKR || 0);
@@ -1063,12 +1044,10 @@
                 pnlEl.innerText = `PKR ${pnl.toFixed(2)}`;
                 pnlEl.className = pnl >= 0 ? 'pnl-positive' : 'pnl-negative';
 
-                // Posts count
                 const posts = await dataService.getPosts();
                 const myPosts = posts.filter(p => p.userEmail === user.email);
                 document.getElementById('profile-posts').innerText = myPosts.length;
 
-                // Referrals List
                 const refList = document.getElementById('referral-list');
                 refList.innerHTML = '';
                 if (user.referrals && user.referrals.length > 0) {
@@ -1082,7 +1061,6 @@
                     refList.innerHTML = '<div style="text-align:center; color:var(--text-sec); font-size:0.8rem;">No referrals yet</div>';
                 }
 
-                // Status Badge
                 const badgeContainer = document.getElementById('profile-badge-container');
                 badgeContainer.innerHTML = '';
                 if (user.isPro) {
@@ -1092,10 +1070,8 @@
                     document.getElementById('user-status-display').style.color = "#000";
                 }
                 
-                // History (Updated to include P2P)
                 app.loadHistory();
                 
-                // Admin specific
                 if (user.email === 'admin@tkcoin.com') {
                     app.loadAdminPanel();
                 }
@@ -1115,14 +1091,12 @@
                     const el = document.createElement('div');
                     const dateStr = new Date(item.date).toLocaleString();
                     
-                    // Determine Type & Style
                     let title = '';
                     let sub = '';
                     let amountClass = '';
                     let itemClass = '';
 
                     if (item.isInternal) {
-                        // P2P Transfer
                         if (item.type === 'sent') {
                             title = 'Sent to ' + item.to;
                             sub = `You sent ${item.amount} TK`;
@@ -1135,7 +1109,6 @@
                             itemClass = 'received';
                         }
                     } else {
-                        // Admin Requests (Deposit/Withdraw)
                         if (item.type === 'deposit') {
                             title = 'Deposit Request';
                             sub = `TRX: ${item.trxId}`;
@@ -1164,7 +1137,6 @@
                 });
             },
 
-            // --- Market Logic ---
             updateDepositInfo: () => {
                 const method = document.getElementById('deposit-method').value;
                 const nums = app.globalSettings.depositNums || {};
@@ -1241,13 +1213,11 @@
                 let tax = 0;
 
                 if (type === 'instant') {
-                    // Normal tax logic
                     const isPro = dataService.currentUser.isPro;
                     const taxRate = isPro ? 0 : 0.03;
                     coinsNeeded = (receivePKR / app.globalSettings.rate) / (1 - taxRate);
                     tax = (coinsNeeded * app.globalSettings.rate) - receivePKR;
                 } else {
-                    // Hold logic (simplified: 0% tax for demo based on prompt logic)
                     coinsNeeded = receivePKR / app.globalSettings.rate;
                     tax = 0;
                 }
@@ -1281,14 +1251,13 @@
                 app.loadHistory();
             },
 
-            // --- Feed Logic ---
+            // --- Feed Logic (UPDATED FOR COMMENT LOCK) ---
             loadFeed: async () => {
                 const posts = await dataService.getPosts();
                 const container = document.getElementById('posts-container');
                 container.innerHTML = '';
                 const isPro = dataService.currentUser.isPro;
 
-                // Limit logic for normal users
                 let limit = isPro ? 100 : 10;
                 let count = 0;
 
@@ -1305,6 +1274,21 @@
                         Object.values(post.comments).forEach(c => {
                             commentsHtml += `<div class="comment-item"><span class="comment-user">${c.user}:</span> ${c.text}</div>`;
                         });
+                    }
+
+                    // NEW: Check if user is PRO for comments
+                    let commentInputHtml = '';
+                    if (isPro) {
+                        commentInputHtml = `
+                            <div class="comment-input-wrapper">
+                                <input type="text" id="input-${post.id}" class="comment-input" placeholder="Write a comment...">
+                                <button class="btn btn-primary btn-sm" onclick="app.submitComment('${post.id}')">Send</button>
+                            </div>`;
+                    } else {
+                        commentInputHtml = `
+                            <div class="comment-lock-msg">
+                                <span class="material-icons-round" style="font-size:14px; vertical-align:middle; color:var(--pro-gold);">lock</span> Only Pro Members can comment
+                            </div>`;
                     }
 
                     el.innerHTML = `
@@ -1326,10 +1310,7 @@
                         </div>
                         <div id="comments-${post.id}" class="comments-section">
                             <div>${commentsHtml}</div>
-                            <div class="comment-input-wrapper">
-                                <input type="text" id="input-${post.id}" class="comment-input" placeholder="Write a comment...">
-                                <button class="btn btn-primary btn-sm" onclick="app.submitComment('${post.id}')">Send</button>
-                            </div>
+                            ${commentInputHtml}
                         </div>
                         ${post.userEmail === dataService.currentUser.email ? `<button class="delete-btn" onclick="app.deletePost('${post.id}')"><span class="material-icons-round">delete</span></button>` : ''}
                     `;
@@ -1385,7 +1366,6 @@
                     text: text
                 });
                 app.loadFeed();
-                // Re-open comment section after reload
                 setTimeout(() => document.getElementById(`comments-${id}`).classList.add('show'), 100);
             },
 
@@ -1438,7 +1418,6 @@
             handleReq: async (reqId, status) => {
                 await db.ref('requests/' + reqId).update({ status: status });
                 
-                // If approved, update user balance
                 if (status === 'approved') {
                     const snapshot = await db.ref('requests/' + reqId).once('value');
                     const req = snapshot.val();
@@ -1447,12 +1426,10 @@
                     if (req.type === 'deposit') {
                         user.balance = parseFloat(user.balance) + parseFloat(req.amountTK);
                     } else if (req.type === 'withdraw') {
-                        // Already deducted from UI view, but ensure DB consistency if needed
-                        // In a real app, we lock funds. Here we just assume valid.
+                        // Already deducted from UI view
                     }
                     
                     await dataService.updateUser(user);
-                    // Add transaction history for approved deposit
                     if(!user.transactions) user.transactions = [];
                     user.transactions.push({
                         type: 'deposit_approved',
@@ -1482,7 +1459,6 @@
                 app.toast('Referral Code Copied!', 'success');
             },
 
-            // --- Utils ---
             nav: (section, el) => {
                 document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
                 document.getElementById(section + '-section').classList.add('active');
@@ -1515,14 +1491,12 @@
                 app.currentLang = app.currentLang === 'en' ? 'ur' : 'en';
                 document.getElementById('lang-btn').innerText = app.currentLang.toUpperCase();
                 
-                // RTL support
                 if (app.currentLang === 'ur') {
                     document.body.classList.add('urdu-mode');
                 } else {
                     document.body.classList.remove('urdu-mode');
                 }
 
-                // Simple Text Replacement
                 document.querySelectorAll('[data-i18n]').forEach(el => {
                     const key = el.getAttribute('data-i18n');
                     if (i18n[app.currentLang][key]) {
@@ -1548,7 +1522,6 @@
             }
         };
 
-        // Initialize App
         window.addEventListener('load', app.init);
     </script>
 </body>
