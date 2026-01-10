@@ -410,15 +410,16 @@
         <section id="feed-section" class="section">
             <h3 style="margin-bottom: 15px;" data-i18n="community_feed">Community Feed</h3>
             
-            <!-- Pro Only Message -->
-            <div id="post-pro-only-msg" class="post-create hidden" style="text-align:center; border: 1px dashed var(--pro-gold);">
-                <span class="material-icons-round" style="font-size: 32px; color: var(--pro-gold); display:block; margin-bottom:10px;">lock</span>
-                <p style="color: var(--text-main); margin-bottom: 10px;">Only <strong>PRO Members</strong> can post in community feed.</p>
-                <button class="btn btn-primary btn-sm" onclick="app.navToProfile()" style="margin: 0 auto; width: auto;">Upgrade to PRO</button>
+            <!-- Pro Only Message (Locked for Normal) -->
+            <div id="post-pro-only-msg" class="post-create" style="text-align:center; border: 2px dashed var(--pro-gold); background: var(--bg-body);">
+                <span class="material-icons-round" style="font-size: 40px; color: var(--pro-gold); display:block; margin-bottom:10px;">lock</span>
+                <p style="color: var(--text-main); margin-bottom: 10px; font-weight:600;">Posting is Locked 🔒</p>
+                <p style="color: var(--text-sec); font-size: 0.85rem; margin-bottom: 10px;">Upgrade to <strong>PRO</strong> to create posts and share your thoughts.</p>
+                <button class="btn btn-primary btn-sm" onclick="app.navToProfile()" style="margin: 0 auto; width: auto; background: var(--pro-gold); color: #000;">Unlock PRO</button>
             </div>
 
-            <!-- Post Input -->
-            <div id="post-create-wrapper" class="post-create">
+            <!-- Post Input (Hidden for Normal) -->
+            <div id="post-create-wrapper" class="post-create hidden">
                 <textarea id="post-content" rows="2" placeholder="What's on your mind?"></textarea>
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 10px;">
                     <span id="post-limit-msg" class="text-small">Daily Limit: Unlimited</span>
@@ -517,7 +518,7 @@
                     <li data-i18n="feat2">View All Feed Posts</li>
                     <li data-i18n="feat3">Verified Blue Tick</li>
                     <li data-i18n="feat4">0% Withdrawal Tax</li>
-                    <li data-i18n="feat5">Comment on Posts</li> <!-- Added benefit -->
+                    <li data-i18n="feat5">Comment on Posts</li>
                 </ul>
                 <button class="btn btn-primary btn-sm" onclick="app.buyPro()" data-i18n="buy_pro_btn">Buy Pro (500 TK)</button>
             </div>
@@ -1044,6 +1045,17 @@
             loadUI: async () => {
                 const user = dataService.currentUser;
                 if (!user) return;
+
+                // --- POST LOCK LOGIC START ---
+                // Show input for Pro, Hide for Normal
+                if (user.isPro) {
+                    document.getElementById('post-create-wrapper').classList.remove('hidden');
+                    document.getElementById('post-pro-only-msg').classList.add('hidden');
+                } else {
+                    document.getElementById('post-create-wrapper').classList.add('hidden');
+                    document.getElementById('post-pro-only-msg').classList.remove('hidden');
+                }
+                // --- POST LOCK LOGIC END ---
 
                 // Update Header
                 document.getElementById('user-balance').innerText = parseFloat(user.balance).toFixed(2);
