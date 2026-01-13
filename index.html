@@ -68,7 +68,7 @@
         .balance-value { font-size: 1.8rem; font-weight: 700; }
         .balance-pkr { font-size: 1.2rem; font-weight: 600; margin-top: 5px; color: var(--primary-light); opacity: 0.9; }
 
-        /* --- News Ticker Styles --- */
+        /* --- News Ticker --- */
         .news-ticker-wrap {
             width: 100%;
             background: var(--primary);
@@ -209,7 +209,7 @@
         .req-actions { display: flex; gap: 5px; margin-top: 10px; }
         .req-detail { font-size: 0.85rem; color: var(--text-main); margin-bottom: 4px; }
 
-        /* --- Transfer Card Styles --- */
+        /* --- Transfer Card --- */
         .transfer-card { background: var(--bg-card); padding: 20px; border-radius: 12px; margin-bottom: 20px; box-shadow: var(--shadow); border:1px solid var(--border); border-left: 4px solid var(--primary); }
         .user-check-status { font-size: 0.8rem; margin-top: 5px; font-weight: 600; }
         .status-found { color: var(--success); }
@@ -225,11 +225,6 @@
             animation: spin 1s ease-in-out infinite;
         }
         @keyframes spin { to { transform: rotate(360deg); } }
-
-        /* Notification Popup */
-        #notif-modal .modal-content { text-align: center; }
-        .notif-icon { font-size: 48px; color: var(--primary); margin-bottom: 15px; }
-        .notif-item { background: var(--bg-body); padding: 10px; margin-bottom: 8px; border-radius: 6px; text-align: left; font-size: 0.9rem; border-left: 3px solid var(--primary); }
 
         /* --- Toast Notification --- */
         #toast-container { position: fixed; top: 20px; right: 20px; z-index: 1000; }
@@ -248,10 +243,10 @@
     <!-- Modals -->
     <div id="tc-modal" class="modal-overlay">
         <div class="modal-content">
-            <div class="modal-title" data-i18n="terms">Terms & Conditions</div>
+            <div class="modal-title">Terms & Conditions</div>
             <div class="modal-body">
                 <p>Welcome to <strong>TK COIN</strong>.</p>
-                <p data-i18n="terms_body">By using this application, you agree to following terms:</p>
+                <p>By using this application, you agree to following terms:</p>
                 <p>1. TK Coin is a digital asset platform operating under Singapore regulations.</p>
                 <p>2. All deposit and withdrawal requests are subject to verification by company.</p>
                 <p>3. Normal users are subject to a 3% tax on instant withdrawals.</p>
@@ -264,27 +259,15 @@
 
     <div id="about-modal" class="modal-overlay">
         <div class="modal-content">
-            <div class="modal-title" data-i18n="about_title">About TK COIN</div>
+            <div class="modal-title">About TK COIN</div>
             <div class="modal-body">
-                <p><strong>TK COIN</strong> <span data-i18n="about_desc">is a premier digital currency trading platform.</span></p>
-                <p><span data-i18n="company_lbl">Company:</span> TK COIN PTE LTD</p>
-                <p><span data-i18n="location_lbl">Location:</span> <span data-i18n="location_val">Singapore</span></p>
-                <p data-i18n="mission">We provide a secure and fast environment for buying, selling, and trading TK Coins.</p>
-                <p>Version 2.2 (EMAIL-info@tkcoin.com)</p>
+                <p><strong>TK COIN</strong> is a premier digital currency trading platform.</p>
+                <p>Company: TK COIN PTE LTD</p>
+                <p>Location: Singapore</p>
+                <p>We provide a secure and fast environment for buying, selling, and trading TK Coins.</p>
+                <p>Version 2.2 (EMAIL-info@tkcoin.com</p>
             </div>
             <button class="btn btn-primary" style="margin-top:15px;" onclick="app.closeModal('about-modal')">Close</button>
-        </div>
-    </div>
-
-    <!-- Notification Popup Modal -->
-    <div id="notif-modal" class="modal-overlay">
-        <div class="modal-content">
-            <span class="material-icons-round notif-icon">notifications_active</span>
-            <div class="modal-title">New Notifications</div>
-            <div class="modal-body" id="notif-list">
-                <!-- Notifications will be injected here -->
-            </div>
-            <button class="btn btn-primary" style="margin-top:15px;" onclick="app.closeModal('notif-modal')">Close</button>
         </div>
     </div>
 
@@ -293,8 +276,8 @@
         <div class="auth-card">
             <h2 style="text-align: center; color: var(--primary); margin-bottom: 20px;">TK COIN</h2>
             <div class="auth-tabs">
-                <div class="auth-tab active" onclick="app.toggleAuth('login')" data-i18n="login">Login</div>
-                <div class="auth-tab" onclick="app.toggleAuth('signup')" data-i18n="signup">Sign Up</div>
+                <div class="auth-tab active" onclick="app.toggleAuth('login')">Login</div>
+                <div class="auth-tab" onclick="app.toggleAuth('signup')">Sign Up</div>
             </div>
             <div id="login-form">
                 <div class="form-group">
@@ -307,7 +290,7 @@
                     <input type="checkbox" id="login-tc">
                     <div>I agree to the <span class="btn-text" onclick="app.openModal('tc-modal')">Terms & Conditions</span></div>
                 </div>
-                <button class="btn btn-primary" style="margin-top:15px;" onclick="app.login()" data-i18n="login_btn">Login</button>
+                <button class="btn btn-primary" style="margin-top:15px;" onclick="app.login()">Login</button>
             </div>
             <div id="signup-form" class="hidden">
                 <div class="form-group">
@@ -326,7 +309,7 @@
                     <input type="checkbox" id="reg-tc">
                     <div>I agree to the <span class="btn-text" onclick="app.openModal('tc-modal')">Terms & Conditions</span></div>
                 </div>
-                <button class="btn btn-primary" style="margin-top:15px;" onclick="app.signup()" data-i18n="signup_btn">Create Account</button>
+                <button class="btn btn-primary" style="margin-top:15px;" onclick="app.signup()">Create Account</button>
             </div>
         </div>
     </div>
@@ -342,14 +325,14 @@
                 </div>
             </div>
             <div class="balance-card">
-                <div class="balance-label" data-i18n="total_bal">Total Balance</div>
+                <div class="balance-label">Total Balance</div>
                 <div class="balance-value"><span id="user-balance">0.00</span> <span style="font-size:1.2rem;">TK</span></div>
                 <div class="balance-pkr">PKR <span id="user-pkr-val">0.00</span></div>
             </div>
         </header>
 
         <!-- News Ticker -->
-        <div class="news-ticker-wrap" id="news-ticker-bar">
+        <div class="news-ticker-wrap">
             <div class="ticker-content" id="ticker-text">Welcome to TK COIN - Stay Updated!</div>
         </div>
 
@@ -357,14 +340,14 @@
 
         <!-- 1. MARKETPLACE -->
         <section id="market-section" class="section active">
-            <h3 style="margin-bottom: 15px;" data-i18n="marketplace">Marketplace</h3>
+            <h3 style="margin-bottom: 15px;">Marketplace</h3>
             <div class="market-tabs">
-                <button class="tab-btn active" onclick="app.switchMarketTab('buy')" data-i18n="buy_tk">Buy TK</button>
-                <button class="tab-btn" onclick="app.switchMarketTab('sell')" data-i18n="sell_withdraw">Sell / Withdraw</button>
+                <button class="tab-btn active" onclick="app.switchMarketTab('buy')">Buy TK</button>
+                <button class="tab-btn" onclick="app.switchMarketTab('sell')">Sell / Withdraw</button>
             </div>
             <div id="buy-tab">
                 <div class="form-group">
-                    <label data-i18n="select_method">Select Payment Method</label>
+                    <label>Select Payment Method</label>
                     <select id="deposit-method" onchange="app.updateDepositInfo()">
                         <option value="easypaisa">EasyPaisa</option>
                         <option value="jazzcash">JazzCash</option>
@@ -373,36 +356,36 @@
                 </div>
                 <div class="method-card">
                     <div class="method-info">
-                        <strong data-i18n="deposit_num">Deposit Number / ID</strong>
+                        <strong>Deposit Number / ID</strong>
                         <span id="deposit-number-display">Select Method</span>
                     </div>
-                    <button class="copy-btn" onclick="app.copyDepositNumber()" data-i18n="copy">COPY</button>
+                    <button class="copy-btn" onclick="app.copyDepositNumber()">COPY</button>
                 </div>
                 <div class="form-group">
-                    <label data-i18n="amount_pkr">Amount in PKR</label>
+                    <label>Amount in PKR</label>
                     <input type="number" id="buy-pkr" placeholder="Enter PKR amount" oninput="app.calcBuy()">
                 </div>
                 <div class="form-group">
                     <label>Transaction ID (TRX ID)</label>
                     <input type="text" id="deposit-trx" placeholder="e.g. 83920123">
-                    <p class="text-small" style="margin-top:5px;" data-i18n="enter_trx">Enter the reference number from your app.</p>
+                    <p class="text-small" style="margin-top:5px;">Enter the reference number from your app.</p>
                 </div>
                 <div style="background: var(--primary-light); padding: 10px; border-radius: 8px; margin-bottom: 15px;">
-                    <span class="text-bold" data-i18n="receive">You will receive:</span> 
+                    <span class="text-bold">You will receive:</span> 
                     <span id="calc-coins" style="float: right; color: var(--primary); font-weight: bold;">0 TK</span>
                 </div>
-                <button class="btn btn-primary" onclick="app.requestDeposit()" data-i18n="submit_deposit">Submit Deposit Request</button>
+                <button class="btn btn-primary" onclick="app.requestDeposit()">Submit Deposit Request</button>
             </div>
             <div id="sell-tab" class="hidden">
                 <div class="form-group">
-                    <label data-i18n="withdraw_type">Withdraw Type</label>
+                    <label>Withdraw Type</label>
                     <select id="withdraw-type" onchange="app.updateWithdrawUI()">
-                        <option value="instant" data-i18n="instant_tax">Instant Withdraw (Tax: 3% for Normal)</option>
-                        <option value="hold" data-i18n="hold_tax">Hold Withdraw (Low/No Tax, Lock Period)</option>
+                        <option value="instant">Instant Withdraw (Tax: 3% for Normal)</option>
+                        <option value="hold">Hold Withdraw (Low/No Tax, Lock Period)</option>
                     </select>
                 </div>
                 <div id="hold-options" class="hidden form-group">
-                    <label data-i18n="select_hold">Select Hold Duration</label>
+                    <label>Select Hold Duration</label>
                     <select id="hold-days">
                         <option value="1">1 Day (0% Tax)</option>
                         <option value="7">7 Days (0% Tax)</option>
@@ -410,36 +393,35 @@
                     </select>
                 </div>
                 <div class="form-group">
-                    <label data-i18n="withdraw_pkr_input">Amount in PKR to Receive</label>
+                    <label>Amount in PKR to Receive</label>
                     <input type="number" id="sell-pkr" placeholder="e.g. 5000" oninput="app.calcSell()">
                 </div>
                 <div class="form-group">
-                    <label data-i18n="account_details">Account Details (EasyPaisa/JazzCash/Binance ID)</label>
+                    <label>Account Details (EasyPaisa/JazzCash/Binance ID)</label>
                     <textarea id="withdraw-account" rows="2" placeholder="Enter account number or wallet ID"></textarea>
                 </div>
                 <div style="background: #fff3cd; padding: 10px; border-radius: 8px; margin-bottom: 15px;">
                     <div style="display:flex; justify-content:space-between; margin-bottom:5px;">
-                        <span class="text-bold" data-i18n="coins_deduct">Coins to Deduct:</span>
+                        <span class="text-bold">Coins to Deduct:</span>
                         <span id="calc-coins-deduct" style="color:var(--primary); font-weight:bold;">0</span>
                     </div>
                     <div style="display:flex; justify-content:space-between; margin-bottom:5px;">
-                         <span data-i18n="tax">Tax/Deduction:</span>
+                         <span>Tax/Deduction:</span>
                         <span id="sell-tax" style="color:var(--danger)">0</span>
                     </div>
                     <div style="display:flex; justify-content:space-between;">
-                        <span class="text-bold" data-i18n="receive_pkr">You will receive:</span>
+                        <span class="text-bold">You will receive:</span>
                         <span id="calc-pkr" style="color: var(--success); font-weight: bold;">0</span>
                     </div>
                 </div>
-                <button class="btn btn-primary" onclick="app.requestWithdraw()" data-i18n="req_withdraw">Request Withdrawal</button>
+                <button class="btn btn-primary" onclick="app.requestWithdraw()">Request Withdrawal</button>
             </div>
         </section>
 
         <!-- 2. COMMUNITY FEED -->
         <section id="feed-section" class="section">
-            <h3 style="margin-bottom: 15px;" data-i18n="community_feed">Community Feed</h3>
+            <h3 style="margin-bottom: 15px;">Community Feed</h3>
             
-            <!-- Pro Only Message (Locked for Normal) -->
             <div id="post-pro-only-msg" class="post-create" style="text-align:center; border: 2px dashed var(--pro-gold); background: var(--bg-body);">
                 <span class="material-icons-round" style="font-size: 40px; color: var(--pro-gold); display:block; margin-bottom:10px;">lock</span>
                 <p style="color: var(--text-main); margin-bottom: 10px; font-weight:600;">Posting is Locked 🔒</p>
@@ -447,26 +429,24 @@
                 <button class="btn btn-primary btn-sm" onclick="app.navToProfile()" style="margin: 0 auto; width: auto; background: var(--pro-gold); color: #000;">Unlock PRO</button>
             </div>
 
-            <!-- Post Input (Hidden for Normal) -->
             <div id="post-create-wrapper" class="post-create hidden">
                 <textarea id="post-content" rows="2" placeholder="What's on your mind?"></textarea>
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 10px;">
                     <span id="post-limit-msg" class="text-small">Daily Limit: Unlimited</span>
-                    <button class="btn btn-primary btn-sm" onclick="app.createPost()" data-i18n="post_btn">Post</button>
+                    <button class="btn btn-primary btn-sm" onclick="app.createPost()">Post</button>
                 </div>
             </div>
 
             <div id="posts-container"></div>
             <div id="feed-limit-msg" class="hidden" style="text-align: center; padding: 20px; color: var(--text-sec);">
-                <p data-i18n="limit_reached">View limit reached. <span style="color:var(--primary); font-weight:bold; cursor:pointer;" onclick="app.navToProfile()">Buy Pro</span>.</p>
+                <p>View limit reached. <span style="color:var(--primary); font-weight:bold; cursor:pointer;" onclick="app.navToProfile()">Buy Pro</span>.</p>
             </div>
         </section>
 
         <!-- 3. HISTORY -->
         <section id="history-section" class="section">
-            <h3 style="margin-bottom: 15px;" data-i18n="transactions">My Transactions</h3>
+            <h3 style="margin-bottom: 15px;">My Transactions</h3>
             <div id="history-list">
-                <!-- History items will be loaded here -->
                 <p style="text-align:center; color:var(--text-sec);">Loading history...</p>
             </div>
         </section>
@@ -482,7 +462,7 @@
                 <div id="profile-badge-container"></div>
             </div>
 
-            <!-- NEW FEATURE: Send/Transfer Card -->
+            <!-- Transfer Card -->
             <div class="transfer-card">
                 <h4 style="color: var(--primary); margin-bottom: 15px;">Send / Transfer Coins</h4>
                 <div class="form-group">
@@ -499,12 +479,12 @@
 
             <!-- Referral Section -->
             <div class="ref-card">
-                <h4 style="color: var(--warning); margin-bottom: 10px;" data-i18n="invite_earn">Invite & Earn</h4>
-                <p class="text-small" data-i18n="invite_desc">Share your code. Get <strong>2 TK</strong> for every valid member (10 TK for 5).</p>
-                <p class="text-small" data-i18n="invite_cond"><strong>Condition:</strong> Both you and your friend must deposit.</p>
+                <h4 style="color: var(--warning); margin-bottom: 10px;">Invite & Earn</h4>
+                <p class="text-small">Share your code. Get <strong>2 TK</strong> for every valid member (10 TK for 5).</p>
+                <p class="text-small"><strong>Condition:</strong> Both you and your friend must deposit.</p>
                 
                 <div class="ref-code-box" id="my-referral-code">------</div>
-                <button class="btn btn-primary btn-sm" onclick="app.copyReferralCode()" data-i18n="copy_code">Copy Code</button>
+                <button class="btn btn-primary btn-sm" onclick="app.copyReferralCode()">Copy Code</button>
 
                 <div class="ref-list" id="referral-list">
                     <!-- Referrals List -->
@@ -514,15 +494,15 @@
             <!-- Win/Loss Card -->
             <div class="pnl-card">
                 <div class="pnl-row">
-                    <span data-i18n="invested">Invested:</span>
+                    <span>Invested:</span>
                     <span>PKR <span id="pnl-invested">0</span></span>
                 </div>
                 <div class="pnl-row">
-                    <span data-i18n="current_val">Current Value:</span>
+                    <span>Current Value:</span>
                     <span>PKR <span id="pnl-current">0</span></span>
                 </div>
                 <div class="pnl-row total">
-                    <span data-i18n="win_loss">Win / Loss:</span>
+                    <span>Win / Loss:</span>
                     <span id="pnl-result">PKR 0</span>
                 </div>
             </div>
@@ -534,52 +514,51 @@
                 </div>
                 <div class="stat-box">
                     <div class="stat-val" id="profile-posts">0</div>
-                    <div class="stat-label" data-i18n="posts_lbl">Posts</div>
+                    <div class="stat-label">Posts</div>
                 </div>
             </div>
 
-            <button class="btn btn-outline" style="margin-bottom:10px;" onclick="app.openModal('about-modal')" data-i18n="about_btn">About TK COIN</button>
+            <button class="btn btn-outline" style="margin-bottom:10px;" onclick="app.openModal('about-modal')">About TK COIN</button>
 
             <div id="pro-upgrade-card" class="admin-panel" style="border-left-color: var(--pro-gold);">
-                <h4 style="color: var(--pro-gold);" data-i18n="upgrade_pro">Upgrade to PRO</h4>
+                <h4 style="color: var(--pro-gold);">Upgrade to PRO</h4>
                 <ul class="text-small" style="margin: 10px 0; padding-left: 20px;">
-                    <li data-i18n="feat1">Unlimited Posting</li>
-                    <li data-i18n="feat2">View All Feed Posts</li>
-                    <li data-i18n="feat3">Verified Blue Tick</li>
-                    <li data-i18n="feat4">0% Withdrawal Tax</li>
-                    <li data-i18n="feat5">Comment on Posts</li>
+                    <li>Unlimited Posting</li>
+                    <li>View All Feed Posts</li>
+                    <li>Verified Blue Tick</li>
+                    <li>0% Withdrawal Tax</li>
+                    <li>Comment on Posts</li>
                 </ul>
-                <button class="btn btn-primary btn-sm" onclick="app.buyPro()" data-i18n="buy_pro_btn">Buy Pro (500 TK)</button>
+                <button class="btn btn-primary btn-sm" onclick="app.buyPro()">Buy Pro (500 TK)</button>
             </div>
 
             <div class="admin-panel">
-                <h4 data-i18n="current_rates">Current Rates</h4>
+                <h4>Current Rates</h4>
                 <div style="display:flex; justify-content:space-between; margin-top:10px;">
                     <span>1 TK Coin = </span>
                     <span class="text-bold"><span id="profile-rate">0</span> PKR</span>
                 </div>
             </div>
 
-            <button class="btn btn-outline" onclick="app.logout()" data-i18n="logout">Logout</button>
+            <button class="btn btn-outline" onclick="app.logout()">Logout</button>
         </section>
 
         <!-- 5. ADMIN PANEL -->
         <section id="admin-section" class="section">
-            <h3 style="color: var(--primary);" data-i18n="admin_dash">Admin Dashboard</h3>
+            <h3 style="color: var(--primary);">Admin Dashboard</h3>
             <div class="admin-panel">
-                <h4 data-i18n="settings">Settings</h4>
+                <h4>Settings</h4>
                 <div class="form-group">
                     <label>Tk Coin Rate (PKR)</label>
                     <input type="number" id="admin-rate" value="290">
                 </div>
                 
-                <!-- News Text Input -->
                 <div class="form-group">
                     <label>News / Notice Text (For Ticker)</label>
                     <input type="text" id="admin-news" placeholder="Enter news text here...">
                 </div>
 
-                <label style="margin-top:10px;" data-i18n="deposit_nums">Deposit Numbers</label>
+                <label style="margin-top:10px;">Deposit Numbers</label>
                 <div class="form-group">
                     <label style="font-weight:400; font-size:0.8rem;">EasyPaisa</label>
                     <input type="text" id="admin-easypaisa" value="03001234567">
@@ -592,14 +571,14 @@
                     <label style="font-weight:400; font-size:0.8rem;">Binance ID</label>
                     <input type="text" id="admin-binance" value="123456789">
                 </div>
-                <button class="btn btn-primary btn-sm" onclick="app.updateSettings()" data-i18n="update_btn">Update Settings</button>
+                <button class="btn btn-primary btn-sm" onclick="app.updateSettings()">Update Settings</button>
             </div>
             <div class="admin-panel">
-                <h4 data-i18n="dep_req">Deposit Requests</h4>
+                <h4>Deposit Requests</h4>
                 <div id="admin-deposit-list"></div>
             </div>
             <div class="admin-panel">
-                <h4 data-i18n="with_req">Withdrawal Requests</h4>
+                <h4>Withdrawal Requests</h4>
                 <div id="admin-withdraw-list"></div>
             </div>
         </section>
@@ -608,19 +587,19 @@
         <nav class="nav-bar">
             <a class="nav-item active" onclick="app.nav('market', this)">
                 <span class="material-icons-round">storefront</span>
-                <span data-i18n="nav_market">Market</span>
+                <span>Market</span>
             </a>
             <a class="nav-item" onclick="app.nav('feed', this)">
                 <span class="material-icons-round">groups</span>
-                <span data-i18n="nav_feed">Feed</span>
+                <span>Feed</span>
             </a>
             <a class="nav-item" onclick="app.nav('history', this)">
                 <span class="material-icons-round">history</span>
-                <span data-i18n="nav_history">History</span>
+                <span>History</span>
             </a>
             <a class="nav-item" onclick="app.nav('profile', this)">
                 <span class="material-icons-round">person</span>
-                <span data-i18n="nav_profile">Profile</span>
+                <span>Profile</span>
             </a>
             <a class="nav-item hidden" id="admin-nav-link" onclick="app.nav('admin', this)">
                 <span class="material-icons-round">admin_panel_settings</span>
@@ -630,50 +609,6 @@
     </div>
 
     <script>
-        // Translations
-        const i18n = {
-            en: {
-                login: "Login", signup: "Sign Up", terms: "Terms & Conditions", terms_body: "By using this application, you agree to following terms:",
-                login_btn: "Login", signup_btn: "Create Account", total_bal: "Total Balance", marketplace: "Marketplace",
-                buy_tk: "Buy TK", sell_withdraw: "Sell / Withdraw", select_method: "Select Payment Method", deposit_num: "Deposit Number / ID",
-                copy: "COPY", amount_pkr: "Amount in PKR", enter_trx: "Enter the reference number from your app.", receive: "You will receive:",
-                submit_deposit: "Submit Deposit Request", withdraw_type: "Withdraw Type", instant_tax: "Instant Withdraw (Tax: 3% for Normal)",
-                hold_tax: "Hold Withdraw (Low/No Tax, Lock Period)", select_hold: "Select Hold Duration", coins_withdraw: "Coins to Withdraw",
-                withdraw_pkr_input: "Amount in PKR to Receive",
-                account_details: "Account Details (EasyPaisa/JazzCash/Binance ID)", tax: "Tax/Deduction:", receive_pkr: "You will receive:",
-                req_withdraw: "Request Withdrawal", coins_deduct: "Coins to Deduct:", community_feed: "Community Feed", post_btn: "Post",
-                limit_reached: "View limit reached. ", buy_pro_link: "Buy Pro", transactions: "My Transactions", invite_earn: "Invite & Earn",
-                invite_desc: "Share your code. Get 2 TK for every valid member (10 TK for 5).", invite_cond: "Condition: Both you and your friend must deposit.",
-                copy_code: "Copy Code", invested: "Invested:", current_val: "Current Value:", win_loss: "Win / Loss:", posts_lbl: "Posts",
-                about_btn: "About TK COIN", upgrade_pro: "Upgrade to PRO", feat1: "Unlimited Posting", feat2: "View All Feed Posts",
-                feat3: "Verified Blue Tick", feat4: "0% Withdrawal Tax", feat5: "Comment on Posts", buy_pro_btn: "Buy Pro (500 TK)", current_rates: "Current Rates",
-                logout: "Logout", admin_dash: "Admin Dashboard", settings: "Settings", deposit_nums: "Deposit Numbers", update_btn: "Update Settings",
-                dep_req: "Deposit Requests", with_req: "Withdrawal Requests", nav_market: "Market", nav_feed: "Feed", nav_history: "History",
-                nav_profile: "Profile", about_title: "About TK COIN", about_desc: "is a premier digital currency trading platform.",
-                company_lbl: "Company:", location_lbl: "Location:", location_val: "Singapore", mission: "We provide a secure and fast environment for buying, selling, and trading TK Coins."
-            },
-            ur: {
-                login: "لاگ ان کریں", signup: "سائن اپ کریں", terms: "شرائط و ضوابط", terms_body: "اس ایپلیکیشن کا استعمال کرنے پر، آپ درج ذیل شرائط پر راضی ہیں:",
-                login_btn: "لاگ ان", signup_btn: "اکاؤنٹ بنائیں", total_bal: "کل بیلنس", marketplace: "مارکیٹ پلیس",
-                buy_tk: "ٹی کے خریدیں", sell_withdraw: "بیچیں / واپس لیں", select_method: "ادائیگی کا طریقہ منتخب کریں", deposit_num: "ڈپازٹ نمبر / آئی ڈی",
-                copy: "کاپی", amount_pkr: "PKR میں رقم", enter_trx: "اپنے ایپ سے حوالہ نمبر درج کریں۔", receive: "آپ کو ملے گا:",
-                submit_deposit: "ڈپازٹ کی درخواست بھیجیں", withdraw_type: "واپسی کی قسم", instant_tax: "فوری واپسی (عام صارفین پر 3% ٹیکس)",
-                hold_tax: "ہولڈ واپسی (کم/کوئی ٹیکس)", select_hold: "ہولڈ کی مدت منتخب کریں", coins_withdraw: "کوئنز واپس لینے کے لیے",
-                withdraw_pkr_input: "وصول کرنے کے لیے PKR میں رقم",
-                account_details: "اکاؤنٹ کی تفصیلات (ایزی پیسہ/جاز کیش/بیننس)", tax: "ٹیکس/کٹوتی:", receive_pkr: "آپ کو PKR میں ملے گا:",
-                req_withdraw: "ویڈرال درخواست بھیجیں", coins_deduct: "کتنے کوئنز کاٹے جائیں گے:", community_feed: "کمیونٹی فیڈ", post_btn: "پوسٹ کریں",
-                limit_reached: "دیکھنے کی حد ختم ہو گئی۔ ", buy_pro_link: "پرو خریدیں", transactions: "میرے لین دین", invite_earn: "دعوت دیں اور کمائیں",
-                invite_desc: "اپنا کوڈ شیئر کریں۔ ہر درست رکن کے لیے 2 ٹی کے ملیں گے (5 کے لیے 10 ٹی کے)۔", invite_cond: "شرط: آپ اور آپ کا دوست دونوں ڈپازٹ کریں۔",
-                copy_code: "کوڈ کاپی کریں", invested: "سرمایہ کاری:", current_val: "موجودہ قدر:", win_loss: "نفعان / نقصان:", posts_lbl: "پوسٹس",
-                about_btn: "ٹی کے سکے کے بارے میں", upgrade_pro: "پرو میں اپگریڈ", feat1: "لامحدود پوسٹنگ", feat2: "تمام پوسٹس دیکھیں",
-                feat3: "تصدیق شدہ نیلے ٹک", feat4: "0% واپسی ٹیکس", feat5: "پوسٹس پر تبصرہ کریں", buy_pro_btn: "پرو خریدیں (500 ٹی کے)", current_rates: "موجودہ شرح",
-                logout: "لاگ آؤٹ", admin_dash: "ایڈمن ڈیش بورڈ", settings: "ترتیبات", deposit_nums: "ڈپازٹ نمبرز", update_btn: "ترتیبات اپ ڈیٹ کریں",
-                dep_req: "ڈپازٹ کی درخواستیں", with_req: "ویڈرال کی درخواستیں", nav_market: "مارکیٹ", nav_feed: "فیڈ", nav_history: "تاریخ",
-                nav_profile: "پروفائل", about_title: "ٹی کے سکے کے بارے میں", about_desc: "ڈیجیٹ کرنسی ٹریڈنگ کا ایک پریمیر پلیٹ فارم ہے۔",
-                company_lbl: "کمپنی:", location_lbl: "مقام:", location_val: "سنگاپور", mission: "ہم ٹی کے سکے خریدنے، بیچنے اور ٹریڈ کرنے کے لیے محفوظ اور تیز ماحول فراہم کرتے ہیں۔"
-            }
-        };
-
         // Firebase Configuration
         const firebaseConfig = {
             apiKey: "AIzaSyB7atEHWnOo_EzCuFxBRg4xWF51x4atfRQ",
@@ -692,7 +627,7 @@
         }
         const db = firebase.database();
 
-        // Data Service - Uses Firebase
+        // Data Service
         class DataService {
             constructor() {
                 const storedUser = localStorage.getItem('tk_user_session');
@@ -801,136 +736,209 @@
             async getUserHistory(userEmail) {
                 const cleanEmail = userEmail.replace('.', ',');
                 
-                // 1. Get Admin Requests
                 const reqSnapshot = await db.ref('requests').orderByChild('userEmail').equalTo(userEmail).once('value');
                 const history = [];
                 reqSnapshot.forEach(child => {
                      history.push(child.val());
                 });
 
-                // 2. Get User P2P Transactions
                 const userSnapshot = await db.ref('users/' + cleanEmail).once('value');
                 if (userSnapshot.exists()) {
                     const uData = userSnapshot.val();
                     if (uData.transactions && Array.isArray(uData.transactions)) {
                         uData.transactions.forEach(t => {
-                            history.push(t);
+                            history.push({ ...t, isInternal: true });
                         });
                     }
                 }
+
                 return history.sort((a, b) => new Date(b.date) - new Date(a.date));
             }
 
-            async handleAdminAction(reqId, action, amount, userEmail, rate) {
-                const reqRef = db.ref('requests/' + reqId);
-                const userRef = db.ref('users/' + userEmail.replace('.', ','));
+            async sendCoins(sender, receiverEmail, amount) {
+                const senderEmailClean = sender.email.replace('.', ',');
+                const receiverEmailClean = receiverEmail.replace('.', ',');
                 
-                const userSnap = await userRef.once('value');
-                if (!userSnap.exists()) return;
-                const user = userSnap.val();
+                const receiverSnapshot = await db.ref('users/' + receiverEmailClean).once('value');
+                if (!receiverSnapshot.exists()) return { success: false, message: 'User not found' };
+                
+                const receiver = receiverSnapshot.val();
 
-                if (action === 'approve') {
-                    // Add balance if deposit
-                    if (user.type === 'deposit') {
-                        user.balance = (parseFloat(user.balance) || 0) + parseFloat(amount);
-                    }
-                    // If withdraw, balance was already deducted when requested? 
-                    // Logic: Usually deduct on request, or deduct on approval. 
-                    // Assuming deduct on request for simplicity in UI, but let's fix logic here.
-                    // If 'deposit', add coins. If 'withdraw', status just changes to approved.
-                }
+                if (sender.balance < amount) return { success: false, message: 'Insufficient Balance' };
 
-                await reqRef.update({ status: action === 'approve' ? 'approved' : 'rejected' });
-                await userRef.update({ balance: user.balance });
+                sender.balance = parseFloat(sender.balance) - parseFloat(amount);
+                
+                if (!sender.transactions) sender.transactions = [];
+                sender.transactions.push({
+                    type: 'sent',
+                    to: receiverEmail,
+                    amount: parseFloat(amount),
+                    date: new Date().toISOString(),
+                    status: 'completed'
+                });
+
+                receiver.balance = parseFloat(receiver.balance) + parseFloat(amount);
+                if (!receiver.transactions) receiver.transactions = [];
+                receiver.transactions.push({
+                    type: 'received',
+                    from: sender.email,
+                    amount: parseFloat(amount),
+                    date: new Date().toISOString(),
+                    status: 'completed'
+                });
+
+                await db.ref('users/' + senderEmailClean).update({
+                    balance: sender.balance,
+                    transactions: sender.transactions
+                });
+                
+                await db.ref('users/' + receiverEmailClean).update({
+                    balance: receiver.balance,
+                    transactions: receiver.transactions
+                });
+
+                return { success: true, message: 'Coins sent successfully!' };
             }
         }
 
         const dataService = new DataService();
 
-        // App Logic
+        // Main App Logic
         const app = {
-            lang: 'en',
             settings: {},
-            currentMarketTab: 'buy',
-
+            
             init: async function() {
-                this.loadSettings();
+                const sessionUser = dataService.currentUser;
                 
-                if (dataService.currentUser) {
+                if (sessionUser) {
+                    await this.migrateUser(sessionUser);
+
+                    // CRITICAL FIX: Fetch FRESH data from DB
+                    const freshUser = await dataService.getUser(sessionUser.email);
+                    if (freshUser) {
+                        dataService.currentUser = freshUser;
+                        dataService.saveSession(freshUser);
+                    } else {
+                        dataService.clearSession();
+                        location.reload();
+                        return;
+                    }
+                    
                     document.getElementById('auth-screen').classList.add('hidden');
                     document.getElementById('main-app').classList.remove('hidden');
-                    this.updateUI();
-                    this.checkAdmin();
+                    this.loadUserData();
+                    this.loadSettings();
                 }
+            },
+            
+            migrateUser: async function(user) {
+                let needsUpdate = false;
+                if (!user.transactions) { user.transactions = []; needsUpdate = true; }
+                if (!user.notifications) { user.notifications = []; needsUpdate = true; }
+                if (typeof user.balance !== 'number') { user.balance = parseFloat(user.balance) || 0; needsUpdate = true; }
 
-                // Load saved language
-                const savedLang = localStorage.getItem('tk_lang');
-                if (savedLang) {
-                    this.lang = savedLang;
-                    this.setLanguage(this.lang);
-                }
-
-                // Load saved theme
-                if (localStorage.getItem('tk_theme') === 'dark') {
-                    document.body.classList.add('dark-mode');
-                    document.getElementById('theme-icon').innerText = 'light_mode';
+                if (needsUpdate) {
+                    await dataService.updateUser(user);
+                    dataService.saveSession(user);
                 }
             },
 
             loadSettings: async function() {
                 this.settings = await dataService.getSettings();
+                document.getElementById('admin-rate').value = this.settings.rate;
+                document.getElementById('admin-easypaisa').value = this.settings.depositNums.easypaisa;
+                document.getElementById('admin-jazzcash').value = this.settings.depositNums.jazzcash;
+                document.getElementById('admin-binance').value = this.settings.depositNums.binance;
                 
-                // Update UI with settings
-                document.getElementById('ticker-text').innerText = this.settings.newsText || "Welcome to TK COIN";
-                document.getElementById('profile-rate').innerText = this.settings.rate;
-                
-                if(this.settings.depositNums) {
-                    this.updateDepositInfo();
-                }
-                
-                // Admin fields
-                document.getElementById('admin-rate').value = this.settings.rate || 290;
-                document.getElementById('admin-news').value = this.settings.newsText || "";
-                if(this.settings.depositNums) {
-                    document.getElementById('admin-easypaisa').value = this.settings.depositNums.easypaisa || "";
-                    document.getElementById('admin-jazzcash').value = this.settings.depositNums.jazzcash || "";
-                    document.getElementById('admin-binance').value = this.settings.depositNums.binance || "";
-                }
+                const tickerText = this.settings.newsText || "Welcome to TK COIN - Hold & Earn!";
+                document.getElementById('ticker-text').innerText = tickerText;
+                document.getElementById('admin-news').value = tickerText;
             },
 
-            // Auth
-            toggleAuth: function(type) {
-                document.querySelectorAll('.auth-tab').forEach(t => t.classList.remove('active'));
-                event.target.classList.add('active');
-                if (type === 'login') {
+            updateSettings: async function() {
+                const rate = document.getElementById('admin-rate').value;
+                const ep = document.getElementById('admin-easypaisa').value;
+                const jc = document.getElementById('admin-jazzcash').value;
+                const bin = document.getElementById('admin-binance').value;
+                const news = document.getElementById('admin-news').value; 
+
+                await dataService.updateSettings({
+                    rate: rate,
+                    depositNums: { easypaisa: ep, jazzcash: jc, binance: bin },
+                    newsText: news
+                });
+                
+                document.getElementById('ticker-text').innerText = news;
+                this.toast('Settings Updated', 'success');
+            },
+
+            toggleAuth: function(mode) {
+                if(mode === 'login') {
                     document.getElementById('login-form').classList.remove('hidden');
                     document.getElementById('signup-form').classList.add('hidden');
+                    document.querySelectorAll('.auth-tab')[0].classList.add('active');
+                    document.querySelectorAll('.auth-tab')[1].classList.remove('active');
                 } else {
                     document.getElementById('login-form').classList.add('hidden');
                     document.getElementById('signup-form').classList.remove('hidden');
+                    document.querySelectorAll('.auth-tab')[0].classList.remove('active');
+                    document.querySelectorAll('.auth-tab')[1].classList.add('active');
                 }
             },
 
             login: async function() {
                 const email = document.getElementById('login-email').value;
                 const pass = document.getElementById('login-pass').value;
-                const tc = document.getElementById('login-tc').checked;
+                if(!email || !pass) return this.toast('Please fill all fields', 'error');
 
-                if (!email || !pass) return this.showToast("Fill all fields", "error");
-                if (!tc) return this.showToast("Accept Terms & Conditions", "error");
+                if(email === 'admin@tkcoin.com' && pass === 'admin123') {
+                    let adminUser = await dataService.getUser(email);
+                    
+                    if(!adminUser) {
+                        adminUser = {
+                            name: "Super Admin",
+                            email: "admin@tkcoin.com",
+                            password: "admin123",
+                            balance: 999999,
+                            isPro: true,
+                            role: "admin",
+                            transactions: [],
+                            notifications: [],
+                            referralCode: "ADMIN001",
+                            joinedDate: new Date().toISOString()
+                        };
+                        await dataService.signup(adminUser);
+                    } else {
+                        adminUser.role = 'admin';
+                        adminUser.isPro = true; 
+                        if (!adminUser.transactions) adminUser.transactions = [];
+                        if (!adminUser.notifications) adminUser.notifications = [];
+                        await dataService.updateUser(adminUser);
+                    }
+
+                    dataService.saveSession(adminUser);
+                    this.init();
+                    this.toast('Admin Login Successful', 'success');
+                    return;
+                }
 
                 const user = await dataService.getUser(email);
                 
-                // Simple password check (in real app, use Firebase Auth)
                 if (user && user.password === pass) {
+                    let needsUpdate = false;
+                    if (!user.transactions) { user.transactions = []; needsUpdate = true; }
+                    if (!user.notifications) { user.notifications = []; needsUpdate = true; }
+                    if (typeof user.balance !== 'number') { user.balance = parseFloat(user.balance) || 0; needsUpdate = true; }
+                    
+                    if (needsUpdate) {
+                        await dataService.updateUser(user);
+                    }
+
                     dataService.saveSession(user);
-                    document.getElementById('auth-screen').classList.add('hidden');
-                    document.getElementById('main-app').classList.remove('hidden');
-                    this.updateUI();
-                    this.checkAdmin();
-                    this.showToast("Login Successful", "success");
+                    this.init();
+                    this.toast('Login Successful', 'success');
                 } else {
-                    this.showToast("Invalid Credentials", "error");
+                    this.toast('Invalid Email or Password', 'error');
                 }
             },
 
@@ -938,119 +946,118 @@
                 const name = document.getElementById('reg-name').value;
                 const email = document.getElementById('reg-email').value;
                 const pass = document.getElementById('reg-pass').value;
-                const ref = document.getElementById('reg-referral').value;
-                const tc = document.getElementById('reg-tc').checked;
+                const referral = document.getElementById('reg-referral').value;
 
-                if (!name || !email || !pass) return this.showToast("Fill all fields", "error");
-                if (!tc) return this.showToast("Accept Terms & Conditions", "error");
+                if(!name || !email || !pass) return this.toast('Please fill all fields', 'error');
 
                 const newUser = {
-                    name, email, password: pass, 
-                    balance: 0, 
-                    role: ref === 'ADMIN123' ? 'admin' : 'user', // Backdoor admin
-                    referralCode: email.split('@')[0].toUpperCase(),
-                    transactions: [],
-                    pro: false,
-                    joined: new Date().toISOString()
+                    name, email, password: pass,
+                    balance: 0,
+                    isPro: false,
+                    role: 'user',
+                    referralCode: email.split('@')[0] + Math.floor(Math.random()*1000),
+                    referredBy: referral || null,
+                    joinedDate: new Date().toISOString()
                 };
 
                 const success = await dataService.signup(newUser);
-                if (success) {
-                    this.showToast("Account Created! Please Login.", "success");
-                    this.toggleAuth('login');
+                if(success) {
+                    dataService.saveSession(newUser);
+                    this.init();
+                    this.toast('Account Created', 'success');
                 } else {
-                    this.showToast("Email already exists", "error");
+                    this.toast('Email already exists', 'error');
                 }
             },
 
             logout: function() {
                 dataService.clearSession();
-                window.location.reload();
+                location.reload();
             },
 
-            // UI Updates
-            updateUI: async function() {
-                const user = dataService.currentUser;
-                if (!user) return;
-
-                const bal = parseFloat(user.balance || 0).toFixed(2);
-                const pkr = (bal * this.settings.rate).toFixed(0);
-
-                document.getElementById('user-balance').innerText = bal;
-                document.getElementById('user-pkr-val').innerText = pkr;
-                document.getElementById('profile-balance').innerText = bal;
-                document.getElementById('profile-name').innerText = user.name;
-                document.getElementById('profile-avatar').innerText = user.name.charAt(0).toUpperCase();
-                document.getElementById('my-referral-code').innerText = user.referralCode;
-
-                // Admin/Pro Visibility
-                if (user.role === 'admin') {
-                    document.getElementById('admin-nav-link').classList.remove('hidden');
-                }
+            nav: function(sectionId, element) {
+                document.querySelectorAll('.section').forEach(el => el.classList.remove('active'));
+                document.getElementById(sectionId + '-section').classList.add('active');
                 
-                // Pro Status
-                if (user.pro) {
-                    document.getElementById('user-status-display').innerText = "PRO";
-                    document.getElementById('user-status-display').style.background = "var(--pro-gold)";
-                    document.getElementById('user-status-display').style.color = "black";
+                document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+                if(element) element.classList.add('active');
+
+                if(sectionId === 'history') this.loadHistory();
+                if(sectionId === 'feed') this.loadFeed();
+                if(sectionId === 'profile') this.loadProfile();
+                if(sectionId === 'admin') this.loadAdminRequests();
+            },
+
+            loadUserData: function() {
+                const user = dataService.currentUser;
+                if(!user) return;
+
+                const balance = user.balance || 0;
+
+                document.getElementById('user-balance').innerText = balance.toFixed(2);
+                document.getElementById('user-pkr-val').innerText = (balance * (this.settings.rate || 290)).toFixed(2);
+
+                document.getElementById('profile-name').innerText = user.name || "User";
+                document.getElementById('profile-avatar').innerText = (user.name || "U").charAt(0).toUpperCase();
+                document.getElementById('profile-balance').innerText = balance.toFixed(2);
+                document.getElementById('profile-rate').innerText = this.settings.rate || 290;
+                document.getElementById('my-referral-code').innerText = user.referralCode || "------";
+
+                const badgeContainer = document.getElementById('profile-badge-container');
+                const statusDisplay = document.getElementById('user-status-display');
+                
+                if(user.isPro) {
+                    badgeContainer.innerHTML = '<span class="pro-tag"><span class="material-icons-round">verified</span> PRO MEMBER</span>';
+                    statusDisplay.innerText = "PRO";
+                    statusDisplay.style.background = "var(--pro-gold)";
+                    statusDisplay.style.color = "#000";
+                    
                     document.getElementById('post-pro-only-msg').classList.add('hidden');
                     document.getElementById('post-create-wrapper').classList.remove('hidden');
-                    document.getElementById('pro-upgrade-card').classList.add('hidden');
+                    document.getElementById('feed-limit-msg').classList.add('hidden');
+                } else {
+                    badgeContainer.innerHTML = '';
+                    statusDisplay.innerText = "Normal";
+                    statusDisplay.style.background = "rgba(0,0,0,0.2)";
+                    statusDisplay.style.color = "#fff";
                 }
 
-                // Load Feeds & History if sections active
-                if(document.getElementById('market-section').classList.contains('active')) this.updateDepositInfo();
-                if(document.getElementById('feed-section').classList.contains('active')) this.loadFeed();
-                if(document.getElementById('history-section').classList.contains('active')) this.loadHistory();
-                if(document.getElementById('admin-section').classList.contains('active')) this.loadAdminRequests();
+                if(user.role === 'admin') {
+                    document.getElementById('admin-nav-link').classList.remove('hidden');
+                }
             },
 
-            // Navigation
-            nav: function(section, el) {
-                document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
-                document.getElementById(section + '-section').classList.add('active');
-                
-                document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-                el.classList.add('active');
-
-                if (section === 'feed') this.loadFeed();
-                if (section === 'history') this.loadHistory();
-                if (section === 'admin') this.loadAdminRequests();
-            },
-
-            // Market Logic
             switchMarketTab: function(tab) {
-                this.currentMarketTab = tab;
-                document.querySelectorAll('.market-tabs .tab-btn').forEach(b => b.classList.remove('active'));
-                event.target.classList.add('active');
-
-                if (tab === 'buy') {
+                document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+                if(tab === 'buy') {
                     document.getElementById('buy-tab').classList.remove('hidden');
                     document.getElementById('sell-tab').classList.add('hidden');
+                    document.querySelectorAll('.tab-btn')[0].classList.add('active');
                 } else {
                     document.getElementById('buy-tab').classList.add('hidden');
                     document.getElementById('sell-tab').classList.remove('hidden');
+                    document.querySelectorAll('.tab-btn')[1].classList.add('active');
                 }
             },
 
             updateDepositInfo: function() {
                 const method = document.getElementById('deposit-method').value;
-                const nums = this.settings.depositNums || {};
-                let num = nums[method] || "Contact Admin";
-                document.getElementById('deposit-number-display').innerText = num;
+                const nums = this.settings.depositNums;
+                if(nums) {
+                    document.getElementById('deposit-number-display').innerText = nums[method] || "Not Set";
+                }
             },
 
             copyDepositNumber: function() {
                 const text = document.getElementById('deposit-number-display').innerText;
                 navigator.clipboard.writeText(text);
-                this.showToast("Copied!", "success");
+                this.toast('Copied!', 'success');
             },
 
             calcBuy: function() {
                 const pkr = parseFloat(document.getElementById('buy-pkr').value) || 0;
                 const rate = this.settings.rate || 290;
-                const coins = (pkr / rate).toFixed(2);
-                document.getElementById('calc-coins').innerText = coins + " TK";
+                document.getElementById('calc-coins').innerText = (pkr / rate).toFixed(2) + " TK";
             },
 
             requestDeposit: async function() {
@@ -1058,151 +1065,163 @@
                 const trx = document.getElementById('deposit-trx').value;
                 const method = document.getElementById('deposit-method').value;
 
-                if (!pkr || !trx) return this.showToast("Fill all details", "error");
+                if(!pkr || !trx) return this.toast('Missing details', 'error');
 
                 const req = {
-                    userEmail: dataService.currentUser.email,
                     type: 'deposit',
+                    userEmail: dataService.currentUser.email,
                     method: method,
-                    amountPKR: pkr,
+                    pkrAmount: pkr,
                     trxId: trx,
-                    date: new Date().toISOString(),
-                    status: 'pending'
+                    status: 'pending',
+                    date: new Date().toISOString()
                 };
 
                 await dataService.addRequest(req);
-                this.showToast("Deposit Request Submitted", "success");
-                document.getElementById('buy-pkr').value = "";
-                document.getElementById('deposit-trx').value = "";
+                this.toast('Deposit Request Sent', 'success');
+                document.getElementById('buy-pkr').value = '';
+                document.getElementById('deposit-trx').value = '';
             },
 
             updateWithdrawUI: function() {
                 const type = document.getElementById('withdraw-type').value;
-                const holdOpts = document.getElementById('hold-options');
-                if (type === 'hold') holdOpts.classList.remove('hidden');
-                else holdOpts.classList.add('hidden');
+                const holdOptions = document.getElementById('hold-options');
+                if(type === 'hold') {
+                    holdOptions.classList.remove('hidden');
+                } else {
+                    holdOptions.classList.add('hidden');
+                }
                 this.calcSell();
             },
 
             calcSell: function() {
                 const pkr = parseFloat(document.getElementById('sell-pkr').value) || 0;
+                const rate = this.settings.rate || 290;
                 const type = document.getElementById('withdraw-type').value;
-                const user = dataService.currentUser;
                 
-                let rate = this.settings.rate || 290;
-                let taxRate = 0;
+                let coins = pkr / rate;
+                let tax = 0;
 
-                // Logic for Pro vs Normal tax
-                if (type === 'instant' && !user.pro) {
-                    taxRate = 0.03; // 3%
+                if (type === 'instant' && !dataService.currentUser.isPro) {
+                    tax = coins * 0.03;
                 }
 
-                // Pkr to Coins = pkr * (1+tax) / rate (Wait, user inputs PKR they WANT)
-                // So User Input PKR = Net.
-                // Gross PKR = Net / (1 - tax).
+                const totalCoins = coins + tax;
                 
-                let grossPKR = pkr;
-                if (taxRate > 0) {
-                    grossPKR = pkr / (1 - taxRate);
-                }
-                
-                const tax = grossPKR - pkr;
-                const coinsNeeded = (grossPKR / rate).toFixed(2);
-
+                document.getElementById('calc-coins-deduct').innerText = totalCoins.toFixed(2);
+                document.getElementById('sell-tax').innerText = tax.toFixed(2);
                 document.getElementById('calc-pkr').innerText = pkr.toFixed(0);
-                document.getElementById('sell-tax').innerText = tax.toFixed(0) + " PKR";
-                document.getElementById('calc-coins-deduct').innerText = coinsNeeded + " TK";
             },
 
             requestWithdraw: async function() {
-                const pkr = document.getElementById('sell-pkr').value;
-                const acc = document.getElementById('withdraw-account').value;
+                const pkr = parseFloat(document.getElementById('sell-pkr').value) || 0;
+                const account = document.getElementById('withdraw-account').value;
+                
+                const rate = this.settings.rate || 290;
                 const type = document.getElementById('withdraw-type').value;
-                const user = dataService.currentUser;
-
-                if (!pkr || !acc) return this.showToast("Fill all details", "error");
-
-                // Check balance first locally to prevent spam
-                // Recalculate coins needed
-                let rate = this.settings.rate || 290;
-                let taxRate = (type === 'instant' && !user.pro) ? 0.03 : 0;
-                let grossPKR = parseFloat(pkr) / (1 - taxRate);
-                let coinsNeeded = grossPKR / rate;
-
-                if (user.balance < coinsNeeded) {
-                    return this.showToast("Insufficient Balance for this withdrawal", "error");
+                let coinsNeeded = pkr / rate;
+                let tax = 0;
+                
+                if (type === 'instant' && !dataService.currentUser.isPro) {
+                    tax = coinsNeeded * 0.03;
                 }
+                const totalDeduction = coinsNeeded + tax;
 
-                // Deduct balance immediately
-                const newBal = user.balance - coinsNeeded;
-                user.balance = newBal;
-                await dataService.updateUser(user);
-                dataService.saveSession(user); // update local
-                this.updateUI();
+                if(!pkr || !account) return this.toast('Missing details', 'error');
+                if(dataService.currentUser.balance < totalDeduction) return this.toast('Insufficient Balance', 'error');
+
+                dataService.currentUser.balance -= totalDeduction;
+                await dataService.updateUser(dataService.currentUser);
 
                 const req = {
-                    userEmail: user.email,
                     type: 'withdraw',
-                    account: acc,
-                    amountPKR: pkr, // Net amount
-                    coinsDeducted: coinsNeeded.toFixed(2),
-                    date: new Date().toISOString(),
-                    status: 'pending'
+                    userEmail: dataService.currentUser.email,
+                    pkrAmount: pkr,
+                    account: account,
+                    coinsDeducted: totalDeduction,
+                    status: 'pending',
+                    date: new Date().toISOString()
                 };
 
                 await dataService.addRequest(req);
-                this.showToast("Withdrawal Requested. Balance Deducted.", "success");
-                document.getElementById('sell-pkr').value = "";
-                document.getElementById('withdraw-account').value = "";
+                this.loadUserData(); 
+                this.toast('Withdrawal Requested', 'success');
+                document.getElementById('sell-pkr').value = '';
+                document.getElementById('withdraw-account').value = '';
             },
 
-            // FEED
+            checkUserExists: async function() {
+                const email = document.getElementById('transfer-email').value;
+                const resultDiv = document.getElementById('user-check-result');
+                if(!email) return;
+
+                const user = await dataService.getUser(email);
+                if(user && user.email !== dataService.currentUser.email) {
+                    resultDiv.innerText = "User Found";
+                    resultDiv.className = "user-check-status status-found";
+                } else {
+                    resultDiv.innerText = "User Not Found";
+                    resultDiv.className = "user-check-status status-notfound";
+                }
+            },
+
+            sendCoins: async function() {
+                const toEmail = document.getElementById('transfer-email').value;
+                const amount = parseFloat(document.getElementById('transfer-amount').value);
+
+                if(!toEmail || !amount) return this.toast('Enter valid details', 'error');
+                if(toEmail === dataService.currentUser.email) return this.toast('Cannot send to yourself', 'error');
+
+                const res = await dataService.sendCoins(dataService.currentUser, toEmail, amount);
+                if(res.success) {
+                    this.toast(res.message, 'success');
+                    
+                    // Refresh Data from DB to see new balance immediately
+                    const freshUser = await dataService.getUser(dataService.currentUser.email);
+                    dataService.currentUser = freshUser;
+                    dataService.saveSession(freshUser);
+                    
+                    this.loadUserData();
+                    document.getElementById('transfer-email').value = '';
+                    document.getElementById('transfer-amount').value = '';
+                    document.getElementById('user-check-result').innerText = '';
+                } else {
+                    this.toast(res.message, 'error');
+                }
+            },
+
             loadFeed: async function() {
-                const posts = await dataService.getPosts();
                 const container = document.getElementById('posts-container');
-                container.innerHTML = "";
+                container.innerHTML = '';
+                const posts = await dataService.getPosts();
 
                 posts.forEach(post => {
+                    const isLiked = post.likedBy && post.likedBy.includes(dataService.currentUser.email);
                     const div = document.createElement('div');
                     div.className = 'post-card';
-                    const likes = post.likedBy ? post.likedBy.length : 0;
-                    const isLiked = post.likedBy && post.likedBy.includes(dataService.currentUser.email);
-                    
-                    // Comments HTML
-                    let commentsHtml = '';
-                    if (post.comments) {
-                        Object.values(post.comments).forEach(c => {
-                            commentsHtml += `<div class="comment-item"><span class="comment-user">${c.user}:</span> ${c.text}</div>`;
-                        });
-                    }
-
-                    // Delete button for admin or owner
-                    const deleteBtn = (dataService.currentUser.email === post.email || dataService.currentUser.role === 'admin') 
-                        ? `<button class="delete-btn" onclick="app.deletePost('${post.id}')">delete</button>` : '';
-
                     div.innerHTML = `
-                        ${deleteBtn}
                         <div class="post-header">
-                            <div class="user-avatar">${post.name.charAt(0)}</div>
+                            <div class="user-avatar">${post.userName.charAt(0)}</div>
                             <div>
-                                <div class="user-name">${post.name} ${post.pro ? '<span class="badge-pro">verified</span>' : ''}</div>
+                                <div class="user-name">${post.userName} ${post.isPro ? '<span class="badge-pro">verified</span>' : ''}</div>
                                 <span class="post-time">${new Date(post.date).toLocaleString()}</span>
                             </div>
+                            ${post.userEmail === dataService.currentUser.email ? '<button class="delete-btn" onclick="app.deletePost(\''+post.id+'\')"><span class="material-icons-round">delete</span></button>' : ''}
                         </div>
                         <div class="post-content">${post.content}</div>
                         <div class="post-actions">
                             <button class="action-btn ${isLiked ? 'liked' : ''}" onclick="app.toggleLike('${post.id}')">
-                                <span class="material-icons-round">${isLiked ? 'favorite' : 'favorite_border'}</span> ${likes}
+                                <span class="material-icons-round">${isLiked ? 'favorite' : 'favorite_border'}</span> ${post.likedBy ? post.likedBy.length : 0}
                             </button>
                             <button class="action-btn" onclick="app.toggleComments('${post.id}')">
-                                <span class="material-icons-round">comment</span> ${post.comments ? Object.keys(post.comments).length : 0}
+                                <span class="material-icons-round">comment</span> Comment
                             </button>
                         </div>
-                        <div id="comments-${post.id}" class="comments-section">
-                            ${commentsHtml}
+                        <div class="comments-section" id="comments-${post.id}">
+                            <div id="comment-list-${post.id}"></div>
                             <div class="comment-input-wrapper">
                                 <input type="text" class="comment-input" id="input-${post.id}" placeholder="Write a comment...">
-                                <button class="btn btn-primary btn-sm" onclick="app.postComment('${post.id}')">Send</button>
+                                <button class="btn btn-primary btn-sm" onclick="app.addComment('${post.id}')">Send</button>
                             </div>
                         </div>
                     `;
@@ -1212,27 +1231,24 @@
 
             createPost: async function() {
                 const content = document.getElementById('post-content').value;
-                if (!content) return;
+                if(!content) return;
 
-                const user = dataService.currentUser;
-                const post = {
-                    name: user.name,
-                    email: user.email,
+                await dataService.addPost({
+                    userName: dataService.currentUser.name,
+                    userEmail: dataService.currentUser.email,
+                    isPro: dataService.currentUser.isPro,
                     content: content,
                     date: new Date().toISOString(),
-                    pro: user.pro,
                     likedBy: [],
                     comments: {}
-                };
-
-                await dataService.addPost(post);
-                document.getElementById('post-content').value = "";
+                });
+                this.toast('Posted!', 'success');
+                document.getElementById('post-content').value = '';
                 this.loadFeed();
-                this.showToast("Posted!", "success");
             },
 
             deletePost: async function(id) {
-                if(confirm("Delete post?")) {
+                if(confirm('Delete post?')) {
                     await dataService.deletePost(id);
                     this.loadFeed();
                 }
@@ -1244,378 +1260,227 @@
             },
 
             toggleComments: function(id) {
-                document.getElementById(`comments-${id}`).classList.toggle('show');
+                const el = document.getElementById('comments-' + id);
+                el.classList.toggle('show');
             },
 
-            postComment: async function(postId) {
-                const text = document.getElementById(`input-${postId}`).value;
-                if (!text) return;
-                const user = dataService.currentUser;
+            addComment: async function(postId) {
+                const input = document.getElementById('input-' + postId);
+                const text = input.value;
+                if(!text) return;
                 
-                // Check if pro to comment
-                if (!user.pro) return this.showToast("Pro users only can comment", "error");
-
                 await dataService.addComment(postId, {
-                    user: user.name,
+                    user: dataService.currentUser.name,
                     text: text,
                     date: new Date().toISOString()
                 });
-                
-                this.loadFeed();
-                // Re-open comments
-                setTimeout(() => document.getElementById(`comments-${postId}`).classList.add('show'), 50);
+                input.value = '';
+                this.toast('Comment added', 'success');
             },
 
-            // HISTORY
             loadHistory: async function() {
                 const list = document.getElementById('history-list');
-                list.innerHTML = "Loading...";
-                
+                list.innerHTML = '';
                 const history = await dataService.getUserHistory(dataService.currentUser.email);
-                list.innerHTML = "";
 
-                if (history.length === 0) {
-                    list.innerHTML = "<p style='text-align:center'>No history yet.</p>";
+                if(history.length === 0) {
+                    list.innerHTML = '<p style="text-align:center;">No transactions found.</p>';
                     return;
                 }
 
-                history.forEach(h => {
-                    const div = document.createElement('div');
-                    let typeClass = h.type || 'request';
-                    let title = h.type ? h.type.toUpperCase() : "REQUEST";
-                    let detail = "";
+                history.forEach(item => {
+                    let typeClass = '';
+                    let title = '';
+                    let amount = '';
+                    let status = '';
 
-                    if (h.type === 'deposit') {
+                    const rateToUse = item.rate || this.settings.rate || 290;
+
+                    if(item.type === 'deposit') {
                         typeClass = 'deposit';
-                        detail = `Method: ${h.method} | TRX: ${h.trxId}`;
-                    } else if (h.type === 'withdraw') {
+                        title = 'Deposit via ' + item.method;
+                        amount = '+' + (parseFloat(item.pkrAmount) / rateToUse).toFixed(2) + ' TK';
+                        status = item.status;
+                    } else if (item.type === 'withdraw') {
                         typeClass = 'withdraw';
-                        detail = `To: ${h.account}`;
-                    } else if (h.type === 'sent') {
+                        title = 'Withdraw to ' + item.account;
+                        amount = '-' + parseFloat(item.coinsDeducted).toFixed(2) + ' TK';
+                        status = item.status;
+                    } else if (item.type === 'sent') {
                         typeClass = 'sent';
-                        detail = `To: ${h.to}`;
-                    } else if (h.type === 'received') {
+                        title = 'Sent to ' + item.to;
+                        amount = '-' + item.amount + ' TK';
+                        status = 'Completed';
+                    } else if (item.type === 'received') {
                         typeClass = 'received';
-                        detail = `From: ${h.from}`;
-                    } else {
-                        detail = `PKR: ${h.amountPKR}`;
+                        title = 'Received from ' + item.from;
+                        amount = '+' + item.amount + ' UK'; // Fixed type, keeping TK context
+                        status = 'Completed';
                     }
 
-                    div.className = `history-item ${typeClass}`;
+                    const div = document.createElement('div');
+                    div.className = 'history-item ' + typeClass;
                     div.innerHTML = `
                         <div class="hist-head">
-                            <span class="hist-title">${title}</span>
-                            <span class="status-badge status-${h.status}">${h.status}</span>
+                            <span class="hist-amount" style="color:${typeClass === 'sent' || typeClass === 'withdraw' ? 'var(--danger)' : 'var(--success)'}">${amount}</span>
+                            <span class="status-badge status-${status.toLowerCase()}">${status}</span>
                         </div>
-                        <div class="hist-detail">${detail}</div>
-                        <div class="hist-head">
-                            <span class="hist-amount">${h.amount || h.amountPKR} ${h.type==='deposit'||h.type==='withdraw'?'PKR':'TK'}</span>
-                            <span class="hist-date">${new Date(h.date).toLocaleDateString()}</span>
-                        </div>
+                        <div class="hist-detail">${title}</div>
+                        <div class="hist-date">${new Date(item.date).toLocaleString()}</div>
                     `;
                     list.appendChild(div);
                 });
             },
 
-            // ADMIN
-            checkAdmin: function() {
-                if (dataService.currentUser && dataService.currentUser.role === 'admin') {
-                    document.getElementById('admin-nav-link').classList.remove('hidden');
-                }
-            },
-
-            loadAdminRequests: async function() {
-                const reqs = await dataService.getPendingRequests();
-                const depList = document.getElementById('admin-deposit-list');
-                const withList = document.getElementById('admin-withdraw-list');
-                depList.innerHTML = "";
-                withList.innerHTML = "";
-
-                reqs.forEach(r => {
-                    const div = document.createElement('div');
-                    div.className = "request-item";
-                    div.innerHTML = `
-                        <div class="req-detail"><strong>User:</strong> ${r.userEmail}</div>
-                        <div class="req-detail"><strong>Amount:</strong> ${r.amountPKR} PKR</div>
-                        ${r.method ? `<div class="req-detail"><strong>Method:</strong> ${r.method}</div>` : `<div class="req-detail"><strong>Acct:</strong> ${r.account}</div>`}
-                        ${r.trxId ? `<div class="req-detail"><strong>TRX:</strong> ${r.trxId}</div>` : ''}
-                        <div class="req-actions">
-                            <button class="btn btn-primary btn-sm" onclick="app.adminAction('${r.id}', 'approve', ${r.amountPKR}, '${r.userEmail}')">Approve</button>
-                            <button class="btn btn-danger btn-sm" onclick="app.adminAction('${r.id}', 'reject', 0, '${r.userEmail}')">Reject</button>
-                        </div>
-                    `;
-
-                    if (r.type === 'deposit') depList.appendChild(div);
-                    else withList.appendChild(div);
-                });
-
-                if(depList.innerHTML === "") depList.innerHTML = "<p class='text-small'>No pending deposits.</p>";
-                if(withList.innerHTML === "") withList.innerHTML = "<p class='text-small'>No pending withdrawals.</p>";
-            },
-
-            adminAction: async function(id, action, amount, userEmail) {
-                if(!confirm(`Are you sure you want to ${action}?`)) return;
-
-                // Custom Admin Logic Implementation
-                const reqRef = db.ref('requests/' + id);
-                const userRef = db.ref('users/' + userEmail.replace('.', ','));
-                
-                // Fetch User
-                const userSnap = await userRef.once('value');
-                if (!userSnap.exists()) return this.showToast("User not found", "error");
-                const user = userSnap.val();
-
-                if (action === 'approve') {
-                    const reqSnap = await reqRef.once('value');
-                    const req = reqSnap.val();
-                    
-                    if (req.type === 'deposit') {
-                        const coinsToAdd = amount / this.settings.rate;
-                        user.balance = (parseFloat(user.balance) || 0) + coinsToAdd;
-                        // Add transaction record
-                        if(!user.transactions) user.transactions = [];
-                        user.transactions.push({
-                            type: 'deposit',
-                            amount: coinsToAdd.toFixed(2),
-                            date: new Date().toISOString(),
-                            status: 'completed'
-                        });
-                    } 
-                    // For Withdraw, money is already deducted from user, just approve status
-                }
-
-                await reqRef.update({ status: action === 'approve' ? 'approved' : 'rejected' });
-                await userRef.update({ balance: user.balance, transactions: user.transactions });
-                
-                this.showToast(`Request ${action}ed`, "success");
-                this.loadAdminRequests();
-            },
-
-            updateSettings: async function() {
-                const rate = parseFloat(document.getElementById('admin-rate').value);
-                const news = document.getElementById('admin-news').value;
-                const ep = document.getElementById('admin-easypaisa').value;
-                const jc = document.getElementById('admin-jazzcash').value;
-                const bin = document.getElementById('admin-binance').value;
-
-                const newSettings = {
-                    rate: rate,
-                    newsText: news,
-                    depositNums: {
-                        easypaisa: ep,
-                        jazzcash: jc,
-                        binance: bin
-                    }
-                };
-                
-                await dataService.updateSettings(newSettings);
-                this.settings = newSettings;
-                this.showToast("Settings Updated", "success");
-                this.loadSettings(); // refresh UI
-            },
-
-            // TRANSFER (FIXED)
-            checkUserExists: async function() {
-                const email = document.getElementById('transfer-email').value;
-                const resDiv = document.getElementById('user-check-result');
-                if (!email) {
-                    resDiv.innerHTML = "";
-                    return;
-                }
-
-                const user = await dataService.getUser(email);
-                if (user) {
-                    resDiv.innerHTML = `<span class="status-found">✔ User Found: ${user.name}</span>`;
-                } else {
-                    resDiv.innerHTML = `<span class="status-notfound">✖ User Not Found</span>`;
-                }
-            },
-
-            sendCoins: async function() {
-                const receiverEmail = document.getElementById('transfer-email').value.trim();
-                const amount = parseFloat(document.getElementById('transfer-amount').value);
-                const btn = document.getElementById('btn-send');
-                const originalBtnText = btn.innerHTML;
-
-                // Validation
-                if (!receiverEmail || !amount || amount <= 0) {
-                    this.showToast("Please enter valid email and amount.", "error");
-                    return;
-                }
-                if (receiverEmail === dataService.currentUser.email) {
-                    this.showToast("You cannot send coins to yourself.", "error");
-                    return;
-                }
-
-                // Show Loading
-                btn.innerHTML = `<div class="spinner"></div> Processing...`;
-                btn.disabled = true;
-
-                try {
-                    // 1. Check Receiver exists
-                    const receiver = await dataService.getUser(receiverEmail);
-                    if (!receiver) {
-                        this.showToast("Receiver user not found!", "error");
-                        btn.innerHTML = originalBtnText;
-                        btn.disabled = false;
-                        return;
-                    }
-
-                    // 2. Check Sender Balance
-                    const sender = dataService.currentUser;
-                    if (sender.balance < amount) {
-                        this.showToast("Insufficient Balance!", "error");
-                        btn.innerHTML = originalBtnText;
-                        btn.disabled = false;
-                        return;
-                    }
-
-                    // 3. Calculate New Balances
-                    const newSenderBalance = parseFloat(sender.balance) - amount;
-                    const newReceiverBalance = parseFloat(receiver.balance) + amount;
-
-                    // 4. Create Transaction Records
-                    const date = new Date().toISOString();
-                    
-                    const senderTrans = {
-                        type: 'sent',
-                        amount: amount,
-                        date: date,
-                        to: receiverEmail,
-                        status: 'completed'
-                    };
-
-                    const receiverTrans = {
-                        type: 'received',
-                        amount: amount,
-                        date: date,
-                        from: sender.email,
-                        status: 'completed'
-                    };
-
-                    // 5. Update SENDER in DB
-                    sender.balance = newSenderBalance;
-                    if (!sender.transactions) sender.transactions = []; 
-                    sender.transactions.push(senderTrans);
-                    
-                    await dataService.updateUser(sender); 
-                    dataService.saveSession(sender); // Update local session so UI updates instantly
-
-                    // 6. Update RECEIVER in DB
-                    receiver.balance = newReceiverBalance;
-                    if (!receiver.transactions) receiver.transactions = [];
-                    receiver.transactions.push(receiverTrans);
-
-                    await dataService.updateUser(receiver);
-
-                    // 7. Success
-                    this.showToast(`Success! Sent ${amount} TK to ${receiver.name || receiverEmail}`, "success");
-                    
-                    // Reset Form
-                    document.getElementById('transfer-email').value = '';
-                    document.getElementById('transfer-amount').value = '';
-                    document.getElementById('user-check-result').innerHTML = '';
-                    
-                    // Update UI
-                    this.updateUI(); 
-
-                } catch (error) {
-                    console.error("Transfer Error:", error);
-                    this.showToast("Transaction failed. Please try again.", "error");
-                } finally {
-                    // Reset Button
-                    btn.innerHTML = originalBtnText;
-                    btn.disabled = false;
-                }
-            },
-
-            // UTILS
-            toggleTheme: function() {
-                document.body.classList.toggle('dark-mode');
-                const icon = document.getElementById('theme-icon');
-                if (document.body.classList.contains('dark-mode')) {
-                    icon.innerText = 'light_mode';
-                    localStorage.setItem('tk_theme', 'dark');
-                } else {
-                    icon.innerText = 'dark_mode';
-                    localStorage.setItem('tk_theme', 'light');
-                }
-            },
-
-            toggleLanguage: function() {
-                this.lang = this.lang === 'en' ? 'ur' : 'en';
-                this.setLanguage(this.lang);
-                localStorage.setItem('tk_lang', this.lang);
-            },
-
-            setLanguage: function(lang) {
-                document.getElementById('lang-btn').innerText = lang.toUpperCase();
-                if (lang === 'ur') {
-                    document.body.classList.add('urdu-mode');
-                    document.getElementById('lang-btn').innerText = "اردو";
-                } else {
-                    document.body.classList.remove('urdu-mode');
-                    document.getElementById('lang-btn').innerText = "EN";
-                }
-
-                // Replace text
-                document.querySelectorAll('[data-i18n]').forEach(el => {
-                    const key = el.getAttribute('data-i18n');
-                    if (i18n[lang][key]) {
-                        el.innerText = i18n[lang][key];
-                    }
-                });
+            loadProfile: function() {
+                this.loadUserData();
+                document.getElementById('pnl-invested').innerText = "0"; 
+                document.getElementById('pnl-current').innerText = "0";
+                document.getElementById('pnl-result').innerText = "PKR 0";
             },
 
             buyPro: async function() {
-                const cost = 500;
-                const user = dataService.currentUser;
-                if (user.balance >= cost) {
-                    user.balance -= cost;
-                    user.pro = true;
-                    await dataService.updateUser(user);
-                    dataService.saveSession(user);
-                    this.updateUI();
-                    this.showToast("Upgraded to PRO!", "success");
+                if(dataService.currentUser.balance >= 500) {
+                    if(confirm('Upgrade to Pro for 500 TK?')) {
+                        dataService.currentUser.balance -= 500;
+                        dataService.currentUser.isPro = true;
+                        await dataService.updateUser(dataService.currentUser);
+                        this.loadUserData();
+                        this.toast('Upgraded to PRO!', 'success');
+                    }
                 } else {
-                    this.showToast("Not enough balance", "error");
+                    this.toast('Insufficient Balance', 'error');
                 }
             },
 
             copyReferralCode: function() {
                 const code = document.getElementById('my-referral-code').innerText;
                 navigator.clipboard.writeText(code);
-                this.showToast("Referral Code Copied!", "success");
+                this.toast('Referral Code Copied', 'success');
+            },
+
+            toggleTheme: function() {
+                document.body.classList.toggle('dark-mode');
+                const icon = document.getElementById('theme-icon');
+                if(document.body.classList.contains('dark-mode')) {
+                    icon.innerText = 'light_mode';
+                } else {
+                    icon.innerText = 'dark_mode';
+                }
+            },
+
+            toggleLanguage: function() {
+                const body = document.body;
+                const btn = document.getElementById('lang-btn');
+                if(body.classList.contains('urdu-mode')) {
+                    body.classList.remove('urdu-mode');
+                    btn.innerText = 'EN';
+                } else {
+                    body.classList.add('urdu-mode');
+                    btn.innerText = 'اردو';
+                }
+            },
+
+            navToProfile: function() {
+                const items = document.querySelectorAll('.nav-item');
+                items[3].click(); 
+            },
+
+            loadAdminRequests: async function() {
+                const list = document.getElementById('admin-deposit-list');
+                const wList = document.getElementById('admin-withdraw-list');
+                list.innerHTML = ''; wList.innerHTML = '';
+
+                const reqs = await dataService.getPendingRequests();
+
+                reqs.forEach(req => {
+                    const div = document.createElement('div');
+                    div.className = 'request-item';
+                    div.innerHTML = `
+                        <div class="req-detail"><strong>User:</strong> ${req.userEmail}</div>
+                        <div class="req-detail"><strong>Type:</strong> ${req.type.toUpperCase()}</div>
+                        <div class="req-detail"><strong>Details:</strong> ${req.type === 'deposit' ? req.trxId : req.account}</div>
+                        <div class="req-detail"><strong>Value:</strong> ${req.pkrAmount || req.coinsDeducted}</div>
+                        <div class="req-actions">
+                            <button class="btn btn-primary btn-sm" onclick="app.processRequest('${req.id}', 'approved')">Approve</button>
+                            <button class="btn btn-danger btn-sm" onclick="app.processRequest('${req.id}', 'rejected')">Reject</button>
+                        </div>
+                    `;
+                    
+                    if(req.type === 'deposit') list.appendChild(div);
+                    else wList.appendChild(div);
+                });
+            },
+
+            processRequest: async function(reqId, status) {
+                const snapshot = await db.ref('requests/' + reqId).once('value');
+                const req = snapshot.val();
+
+                if(!req) return;
+
+                if(req.status === 'pending') {
+                    if(status === 'approved') {
+                        if(req.type === 'deposit') {
+                            const settings = await dataService.getSettings();
+                            const rate = parseFloat(settings.rate) || 290;
+                            const coinsToAdd = parseFloat(req.pkrAmount) / rate;
+
+                            const user = await dataService.getUser(req.userEmail);
+                            if(user) {
+                                user.balance = (parseFloat(user.balance) || 0) + coinsToAdd;
+                                
+                                if(!user.transactions) user.transactions = [];
+                                user.transactions.push({
+                                    type: 'deposit',
+                                    amount: coinsToAdd,
+                                    date: new Date().toISOString(),
+                                    status: 'completed'
+                                });
+                                
+                                await dataService.updateUser(user);
+                                this.toast(`Approved! Added ${coinsToAdd.toFixed(2)} TK to user.`, 'success');
+                            }
+                        } else if (req.type === 'withdraw') {
+                            this.toast('Withdrawal Approved. Please process payment manually.', 'success');
+                        }
+                    } else if (status === 'rejected') {
+                        // FIX 2: REFUND WITHDRAWAL COINS ON REJECTION
+                        if(req.type === 'withdraw') {
+                            const user = await dataService.getUser(req.userEmail);
+                            if(user) {
+                                const refundAmount = parseFloat(req.coinsDeducted);
+                                user.balance = (parseFloat(user.balance) || 0) + refundAmount;
+                                await dataService.updateUser(user);
+                                this.toast(`Withdrawal Rejected. ${refundAmount.toFixed(2)} TK refunded.`, 'error');
+                            }
+                        } else {
+                             this.toast('Deposit Request Rejected.', 'error');
+                        }
+                    }
+                }
+
+                await db.ref('requests/' + reqId).update({ status: status });
+                this.loadAdminRequests();
             },
 
             openModal: function(id) {
                 document.getElementById(id).style.display = 'flex';
             },
-
             closeModal: function(id) {
                 document.getElementById(id).style.display = 'none';
             },
-
-            showToast: function(msg, type) {
+            toast: function(msg, type) {
                 const container = document.getElementById('toast-container');
-                const toast = document.createElement('div');
-                toast.className = `toast ${type}`;
-                toast.innerHTML = `<span>${msg}</span>`;
-                container.appendChild(toast);
-                setTimeout(() => toast.remove(), 3000);
-            },
-            
-            navToProfile: function() {
-                const profileBtn = document.querySelectorAll('.nav-item')[3]; // Assuming 4th item is profile
-                this.nav('profile', profileBtn);
+                const div = document.createElement('div');
+                div.className = `toast ${type}`;
+                div.innerText = msg;
+                container.appendChild(div);
+                setTimeout(() => div.remove(), 3000);
             }
         };
 
         // Start App
-        window.onload = function() {
-            app.init();
-        };
-
+        app.init();
     </script>
 </body>
 </html>
