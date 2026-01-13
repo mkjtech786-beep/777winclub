@@ -887,10 +887,29 @@
             
             init: async function() {
                 if (dataService.currentUser) {
+                    // If session exists but might be old, perform migration
+                    await this.migrateUser(dataService.currentUser);
+                    
                     document.getElementById('auth-screen').classList.add('hidden');
                     document.getElementById('main-app').classList.remove('hidden');
                     this.loadUserData();
                     this.loadSettings();
+                }
+            },
+
+            // Helper to migrate old users (add missing fields)
+            migrateUser: async function(user) {
+                let needsUpdate = false;
+                
+                // Check for missing fields
+                if (!user.transactions) { user.transactions = []; needsUpdate = true; }
+                if (!user.notifications) { user.notifications = []; needsUpdate = true; }
+                if (typeof user.balance !== 'number') { user.balance = parseFloat(user.balance) || 0; needsUpdate = true; }
+
+                // If fields were missing, save to DB and Session
+                if (needsUpdate) {
+                    await dataService.updateUser(user);
+                    dataService.saveSession(user);
                 }
             },
 
@@ -913,12 +932,12 @@
                 const ep = document.getElementById('admin-easypaisa').value;
                 const jc = document.getElementById('admin-jazzcash').value;
                 const bin = document.getElementById('admin-binance').value;
-                const news = document.getElementById('admin-news').value; // ADDED
+                const news = document.getElementById('admin-news').value; 
 
                 await dataService.updateSettings({
                     rate: rate,
                     depositNums: { easypaisa: ep, jazzcash: jc, binance: bin },
-                    newsText: news // ADDED
+                    newsText: news
                 });
                 
                 // Update ticker immediately
@@ -948,7 +967,21 @@
                 if(!email || !pass) return this.toast('Please fill all fields', 'error');
 
                 const user = await dataService.getUser(email);
+                
+                // Verify password
                 if (user && user.password === pass) {
+                    // --- FIX FOR OLD ACCOUNTS: MIGRATION ---
+                    // Add missing fields if they don't exist for old users
+                    let needsUpdate = false;
+                    if (!user.transactions) { user.transactions = []; needsUpdate = true; }
+                    if (!user.notifications) { user.notifications = []; needsUpdate = true; }
+                    if (typeof user.balance !== 'number') { user.balance = parseFloat(user.balance) || 0; needsUpdate = true; }
+                    
+                    if (needsUpdate) {
+                        await dataService.updateUser(user);
+                    }
+                    // -----------------------------------
+
                     dataService.saveSession(user);
                     this.init();
                     this.toast('Login Successful', 'success');
@@ -1012,16 +1045,19 @@
                 const user = dataService.currentUser;
                 if(!user) return;
 
+                // SAFETY CHECKS for old users (prevent crashes)
+                const balance = user.balance || 0;
+
                 // Balance Header
-                document.getElementById('user-balance').innerText = user.balance.toFixed(2);
-                document.getElementById('user-pkr-val').innerText = (user.balance * (this.settings.rate || 290)).toFixed(2);
+                document.getElementById('user-balance').innerText = balance.toFixed(2);
+                document.getElementById('user-pkr-val').innerText = (balance * (this.settings.rate || 290)).toFixed(2);
 
                 // Profile
-                document.getElementById('profile-name').innerText = user.name;
-                document.getElementById('profile-avatar').innerText = user.name.charAt(0).toUpperCase();
-                document.getElementById('profile-balance').innerText = user.balance.toFixed(2);
+                document.getElementById('profile-name').innerText = user.name || "User";
+                document.getElementById('profile-avatar').innerText = (user.name || "U").charAt(0).toUpperCase();
+                document.getElementById('profile-balance').innerText = balance.toFixed(2);
                 document.getElementById('profile-rate').innerText = this.settings.rate || 290;
-                document.getElementById('my-referral-code').innerText = user.referralCode;
+                document.getElementById('my-referral-code').innerText = user.referralCode || "------";
 
                 // Badge
                 const badgeContainer = document.getElementById('profile-badge-container');
@@ -1068,7 +1104,7 @@
                 const method = document.getElementById('deposit-method').value;
                 const nums = this.settings.depositNums;
                 if(nums) {
-                    document.getElementById('deposit-number-display').innerText = nums[method];
+                    document.getElementById('deposit-number-display').innerText = nums[method] || "Not Set";
                 }
             },
 
@@ -1155,11 +1191,9 @@
                 if(!pkr || !account) return this.toast('Missing details', 'error');
                 if(dataService.currentUser.balance < totalDeduction) return this.toast('Insufficient Balance', 'error');
 
-                // --- BUG FIX START ---
                 // Deduct balance immediately
                 dataService.currentUser.balance -= totalDeduction;
                 await dataService.updateUser(dataService.currentUser);
-                // --- BUG FIX END ---
 
                 const req = {
                     type: 'withdraw',
@@ -1300,7 +1334,6 @@
                     date: new Date().toISOString()
                 });
                 input.value = '';
-                // Reload feed to show comment (simplified)
                 this.toast('Comment added', 'success');
             },
 
