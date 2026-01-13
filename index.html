@@ -148,7 +148,7 @@
         .history-item.sent { border-left-color: var(--danger); }
         .history-item.received { border-left-color: var(--primary); }
         .hist-head { display: flex; justify-content: space-between; margin-bottom:5px; }
-        .hist-amount { font-weight: bold; font-size: 1.1rem; }
+        .hist-amount { font-weight: bold; font-size:1.1rem; }
         .hist-date { font-size: 0.8rem; color: var(--text-sec); }
         .hist-detail { font-size: 0.85rem; color: var(--text-main); margin-bottom: 5px; }
         .status-badge { padding: 3px 8px; border-radius: 4px; font-size: 0.75rem; font-weight: bold; text-transform: uppercase; float: right; }
@@ -205,12 +205,12 @@
         .ref-pending { background: var(--warning); color: #333; }
 
         .admin-panel { background: var(--bg-card); padding: 15px; border-radius: 12px; margin-bottom: 15px; border-left: 4px solid var(--primary); box-shadow: var(--shadow); color: var(--text-main); }
-        .request-item { background: var(--bg-body); padding: 12px; border-radius: 8px; margin-bottom: 10px; border: 1px solid var(--border); }
+        .request-item { background: var(--bg-body); padding: 12px; border-radius: 8px; margin-bottom: 10px; border:1px solid var(--border); }
         .req-actions { display: flex; gap: 5px; margin-top: 10px; }
         .req-detail { font-size: 0.85rem; color: var(--text-main); margin-bottom: 4px; }
 
         /* --- NEW: Transfer Card Styles --- */
-        .transfer-card { background: var(--bg-card); padding: 20px; border-radius: 12px; margin-bottom: 20px; box-shadow: var(--shadow); border: 1px solid var(--border); border-left: 4px solid var(--primary); }
+        .transfer-card { background: var(--bg-card); padding: 20px; border-radius: 12px; margin-bottom: 20px; box-shadow: var(--shadow); border:1px solid var(--border); border-left: 4px solid var(--primary); }
         .user-check-status { font-size: 0.8rem; margin-top: 5px; font-weight: 600; }
         .status-found { color: var(--success); }
         .status-notfound { color: var(--danger); }
@@ -885,28 +885,42 @@
         const app = {
             settings: {},
             
+            // --- FIX 1: Fetch Fresh Data on Load ---
             init: async function() {
-                if (dataService.currentUser) {
-                    // If session exists but might be old, perform migration
-                    await this.migrateUser(dataService.currentUser);
+                const sessionUser = dataService.currentUser;
+                
+                if (sessionUser) {
+                    // 1. Run Migration (ensure structure is valid)
+                    await this.migrateUser(sessionUser);
+
+                    // 2. Fetch LATEST Data from DB to fix "Wrong Balance" issue
+                    const freshUser = await dataService.getUser(sessionUser.email);
+                    if (freshUser) {
+                        // If DB has new data, update our session
+                        dataService.currentUser = freshUser;
+                        dataService.saveSession(freshUser);
+                    } else {
+                        // If DB somehow lost user, logout
+                        dataService.clearSession();
+                        location.reload();
+                        return;
+                    }
                     
+                    // 3. Show UI with FRESH data
                     document.getElementById('auth-screen').classList.add('hidden');
                     document.getElementById('main-app').classList.remove('hidden');
                     this.loadUserData();
                     this.loadSettings();
                 }
             },
-
-            // Helper to migrate old users (add missing fields)
+            
             migrateUser: async function(user) {
                 let needsUpdate = false;
                 
-                // Check for missing fields
                 if (!user.transactions) { user.transactions = []; needsUpdate = true; }
                 if (!user.notifications) { user.notifications = []; needsUpdate = true; }
                 if (typeof user.balance !== 'number') { user.balance = parseFloat(user.balance) || 0; needsUpdate = true; }
 
-                // If fields were missing, save to DB and Session
                 if (needsUpdate) {
                     await dataService.updateUser(user);
                     dataService.saveSession(user);
@@ -1007,7 +1021,6 @@
                 // Verify password
                 if (user && user.password === pass) {
                     // --- FIX FOR OLD ACCOUNTS: MIGRATION ---
-                    // Add missing fields if they don't exist for old users
                     let needsUpdate = false;
                     if (!user.transactions) { user.transactions = []; needsUpdate = true; }
                     if (!user.notifications) { user.notifications = []; needsUpdate = true; }
@@ -1061,16 +1074,12 @@
 
             // --- Navigation ---
             nav: function(sectionId, element) {
-                // Hide all sections
                 document.querySelectorAll('.section').forEach(el => el.classList.remove('active'));
-                // Show target
                 document.getElementById(sectionId + '-section').classList.add('active');
                 
-                // Update nav active state
                 document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
                 if(element) element.classList.add('active');
 
-                // Specific loads
                 if(sectionId === 'history') this.loadHistory();
                 if(sectionId === 'feed') this.loadFeed();
                 if(sectionId === 'profile') this.loadProfile();
@@ -1081,21 +1090,17 @@
                 const user = dataService.currentUser;
                 if(!user) return;
 
-                // SAFETY CHECKS for old users (prevent crashes)
                 const balance = user.balance || 0;
 
-                // Balance Header
                 document.getElementById('user-balance').innerText = balance.toFixed(2);
                 document.getElementById('user-pkr-val').innerText = (balance * (this.settings.rate || 290)).toFixed(2);
 
-                // Profile
                 document.getElementById('profile-name').innerText = user.name || "User";
                 document.getElementById('profile-avatar').innerText = (user.name || "U").charAt(0).toUpperCase();
                 document.getElementById('profile-balance').innerText = balance.toFixed(2);
                 document.getElementById('profile-rate').innerText = this.settings.rate || 290;
                 document.getElementById('my-referral-code').innerText = user.referralCode || "------";
 
-                // Badge
                 const badgeContainer = document.getElementById('profile-badge-container');
                 const statusDisplay = document.getElementById('user-status-display');
                 
@@ -1105,7 +1110,6 @@
                     statusDisplay.style.background = "var(--pro-gold)";
                     statusDisplay.style.color = "#000";
                     
-                    // Unlock posting
                     document.getElementById('post-pro-only-msg').classList.add('hidden');
                     document.getElementById('post-create-wrapper').classList.remove('hidden');
                     document.getElementById('feed-limit-msg').classList.add('hidden');
@@ -1116,7 +1120,6 @@
                     statusDisplay.style.color = "#fff";
                 }
 
-                // Admin Link
                 if(user.role === 'admin') {
                     document.getElementById('admin-nav-link').classList.remove('hidden');
                 }
@@ -1213,7 +1216,6 @@
                 const pkr = parseFloat(document.getElementById('sell-pkr').value) || 0;
                 const account = document.getElementById('withdraw-account').value;
                 
-                // Re-calculate to be safe
                 const rate = this.settings.rate || 290;
                 const type = document.getElementById('withdraw-type').value;
                 let coinsNeeded = pkr / rate;
@@ -1242,7 +1244,7 @@
                 };
 
                 await dataService.addRequest(req);
-                this.loadUserData(); // Update UI Balance
+                this.loadUserData(); 
                 this.toast('Withdrawal Requested', 'success');
                 document.getElementById('sell-pkr').value = '';
                 document.getElementById('withdraw-account').value = '';
@@ -1275,7 +1277,6 @@
                 if(res.success) {
                     this.toast(res.message, 'success');
                     this.loadUserData();
-                    // Clear inputs
                     document.getElementById('transfer-email').value = '';
                     document.getElementById('transfer-amount').value = '';
                     document.getElementById('user-check-result').innerText = '';
@@ -1390,13 +1391,11 @@
                     let amount = '';
                     let status = '';
 
-                    // FIX: Use current system rate if item.rate is missing (prevents NaN)
                     const rateToUse = item.rate || this.settings.rate || 290;
 
                     if(item.type === 'deposit') {
                         typeClass = 'deposit';
                         title = 'Deposit via ' + item.method;
-                        // Calculate TK coins from PKR
                         amount = '+' + (parseFloat(item.pkrAmount) / rateToUse).toFixed(2) + ' TK';
                         status = item.status;
                     } else if (item.type === 'withdraw') {
@@ -1433,7 +1432,6 @@
             // --- Profile ---
             loadProfile: function() {
                 this.loadUserData();
-                // Mock PnL
                 document.getElementById('pnl-invested').innerText = "0"; 
                 document.getElementById('pnl-current').innerText = "0";
                 document.getElementById('pnl-result').innerText = "PKR 0";
@@ -1482,7 +1480,6 @@
             },
 
             navToProfile: function() {
-                // Find profile nav item and click it
                 const items = document.querySelectorAll('.nav-item');
                 items[3].click(); 
             },
@@ -1515,27 +1512,22 @@
             },
 
             processRequest: async function(reqId, status) {
-                // 1. Get the request details
                 const snapshot = await db.ref('requests/' + reqId).once('value');
                 const req = snapshot.val();
 
                 if(!req) return;
 
-                // 2. Only process if currently pending (prevent double payment)
                 if(req.status === 'pending') {
                     if(status === 'approved') {
                         if(req.type === 'deposit') {
-                            // --- ADD COINS TO USER ---
                             const settings = await dataService.getSettings();
                             const rate = parseFloat(settings.rate) || 290;
                             const coinsToAdd = parseFloat(req.pkrAmount) / rate;
 
                             const user = await dataService.getUser(req.userEmail);
                             if(user) {
-                                // Update Balance
                                 user.balance = (parseFloat(user.balance) || 0) + coinsToAdd;
                                 
-                                // Add Transaction Record
                                 if(!user.transactions) user.transactions = [];
                                 user.transactions.push({
                                     type: 'deposit',
@@ -1548,16 +1540,24 @@
                                 this.toast(`Approved! Added ${coinsToAdd.toFixed(2)} TK to user.`, 'success');
                             }
                         } else if (req.type === 'withdraw') {
-                            // Withdrawals already deducted coins. Approving just confirms release.
                             this.toast('Withdrawal Approved. Please process payment manually.', 'success');
                         }
-                    } else {
-                        // Rejected
-                        this.toast('Request Rejected.', 'error');
+                    } else if (status === 'rejected') {
+                        // --- FIX 2: REFUND WITHDRAWAL COINS ON REJECTION ---
+                        if(req.type === 'withdraw') {
+                            const user = await dataService.getUser(req.userEmail);
+                            if(user) {
+                                const refundAmount = parseFloat(req.coinsDeducted);
+                                user.balance = (parseFloat(user.balance) || 0) + refundAmount;
+                                await dataService.updateUser(user);
+                                this.toast(`Withdrawal Rejected. ${refundAmount.toFixed(2)} TK refunded.`, 'error');
+                            }
+                        } else {
+                             this.toast('Deposit Request Rejected.', 'error');
+                        }
                     }
                 }
 
-                // 3. Update Status in Database
                 await db.ref('requests/' + reqId).update({ status: status });
                 this.loadAdminRequests();
             },
