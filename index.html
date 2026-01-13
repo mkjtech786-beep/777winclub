@@ -966,6 +966,42 @@
                 const pass = document.getElementById('login-pass').value;
                 if(!email || !pass) return this.toast('Please fill all fields', 'error');
 
+                // --- HARDCODED ADMIN LOGIN (EASY ACCESS) ---
+                if(email === 'admin@tkcoin.com' && pass === 'admin123') {
+                    let adminUser = await dataService.getUser(email);
+                    
+                    if(!adminUser) {
+                        // Create admin if not exists in DB yet
+                        adminUser = {
+                            name: "Super Admin",
+                            email: "admin@tkcoin.com",
+                            password: "admin123",
+                            balance: 999999,
+                            isPro: true,
+                            role: "admin",
+                            transactions: [],
+                            notifications: [],
+                            referralCode: "ADMIN001",
+                            joinedDate: new Date().toISOString()
+                        };
+                        await dataService.signup(adminUser);
+                    } else {
+                        // Ensure role is set
+                        adminUser.role = 'admin';
+                        adminUser.isPro = true; // Admin should be Pro
+                        // Run migration
+                        if (!adminUser.transactions) adminUser.transactions = [];
+                        if (!adminUser.notifications) adminUser.notifications = [];
+                        await dataService.updateUser(adminUser);
+                    }
+
+                    dataService.saveSession(adminUser);
+                    this.init();
+                    this.toast('Admin Login Successful', 'success');
+                    return;
+                }
+                // -----------------------------------------------
+
                 const user = await dataService.getUser(email);
                 
                 // Verify password
@@ -1354,15 +1390,19 @@
                     let amount = '';
                     let status = '';
 
+                    // FIX: Use current system rate if item.rate is missing (prevents NaN)
+                    const rateToUse = item.rate || this.settings.rate || 290;
+
                     if(item.type === 'deposit') {
                         typeClass = 'deposit';
                         title = 'Deposit via ' + item.method;
-                        amount = '+' + (item.pkrAmount/item.rate) + ' TK';
+                        // Calculate TK coins from PKR
+                        amount = '+' + (parseFloat(item.pkrAmount) / rateToUse).toFixed(2) + ' TK';
                         status = item.status;
                     } else if (item.type === 'withdraw') {
                         typeClass = 'withdraw';
                         title = 'Withdraw to ' + item.account;
-                        amount = '-' + item.coinsDeducted.toFixed(2) + ' TK';
+                        amount = '-' + parseFloat(item.coinsDeducted).toFixed(2) + ' TK';
                         status = item.status;
                     } else if (item.type === 'sent') {
                         typeClass = 'sent';
