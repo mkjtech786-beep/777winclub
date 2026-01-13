@@ -1515,9 +1515,51 @@
             },
 
             processRequest: async function(reqId, status) {
+                // 1. Get the request details
+                const snapshot = await db.ref('requests/' + reqId).once('value');
+                const req = snapshot.val();
+
+                if(!req) return;
+
+                // 2. Only process if currently pending (prevent double payment)
+                if(req.status === 'pending') {
+                    if(status === 'approved') {
+                        if(req.type === 'deposit') {
+                            // --- ADD COINS TO USER ---
+                            const settings = await dataService.getSettings();
+                            const rate = parseFloat(settings.rate) || 290;
+                            const coinsToAdd = parseFloat(req.pkrAmount) / rate;
+
+                            const user = await dataService.getUser(req.userEmail);
+                            if(user) {
+                                // Update Balance
+                                user.balance = (parseFloat(user.balance) || 0) + coinsToAdd;
+                                
+                                // Add Transaction Record
+                                if(!user.transactions) user.transactions = [];
+                                user.transactions.push({
+                                    type: 'deposit',
+                                    amount: coinsToAdd,
+                                    date: new Date().toISOString(),
+                                    status: 'completed'
+                                });
+                                
+                                await dataService.updateUser(user);
+                                this.toast(`Approved! Added ${coinsToAdd.toFixed(2)} TK to user.`, 'success');
+                            }
+                        } else if (req.type === 'withdraw') {
+                            // Withdrawals already deducted coins. Approving just confirms release.
+                            this.toast('Withdrawal Approved. Please process payment manually.', 'success');
+                        }
+                    } else {
+                        // Rejected
+                        this.toast('Request Rejected.', 'error');
+                    }
+                }
+
+                // 3. Update Status in Database
                 await db.ref('requests/' + reqId).update({ status: status });
                 this.loadAdminRequests();
-                this.toast('Request ' + status, 'success');
             },
 
             // --- UI Utils ---
