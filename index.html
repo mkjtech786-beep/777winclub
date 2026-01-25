@@ -138,9 +138,6 @@
         }
         .qr-box img{
             width:150px;
-            max-width: 100%;
-            height: auto;
-            display: block;
         }
         .qr-box p{
             margin:6px 0 0;
@@ -355,7 +352,7 @@
                 </div>
                 <div class="checkbox-group">
                     <input type="checkbox" id="login-tc">
-                    <div>I agree to <span class="btn-text" onclick="app.openModal('tc-modal')">Terms & Conditions</span></div>
+                    <div>I agree to the <span class="btn-text" onclick="app.openModal('tc-modal')">Terms & Conditions</span></div>
                 </div>
                 <button class="btn btn-primary" style="margin-top:15px;" onclick="app.login()" data-i18n="login_btn">Login</button>
             </div>
@@ -374,7 +371,7 @@
                 </div>
                 <div class="checkbox-group">
                     <input type="checkbox" id="reg-tc">
-                    <div>I agree to <span class="btn-text" onclick="app.openModal('tc-modal')">Terms & Conditions</span></div>
+                    <div>I agree to the <span class="btn-text" onclick="app.openModal('tc-modal')">Terms & Conditions</span></div>
                 </div>
                 <button class="btn btn-primary" style="margin-top:15px;" onclick="app.signup()" data-i18n="signup_btn">Create Account</button>
             </div>
@@ -428,13 +425,11 @@
                     <button class="copy-btn" id="btn-copy-deposit" onclick="app.copyDepositNumber()" data-i18n="copy">COPY</button>
                 </div>
 
-                <!-- NEW QR DISPLAY (USING ONLINE LINK FOR DEMO) -->
+                <!-- NEW QR DISPLAY (As Requested by User) -->
                 <div id="qr-display-container" class="deposit-card" style="display: none;">
                     <h3>Deposit Number / ID</h3>
                     <div class="qr-box">
-                        <!-- NOTE: Used an online QR generator so it works immediately. -->
-                        <!-- To use your local file, change src to "qr.png" and put qr.png in the folder -->
-                        <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=TK_COIN_DEPOSIT" alt="QR Code">
+                        <img src="qr.png" alt="QR Code">
                         <p>Scan QR to Pay</p>
                     </div>
                 </div>
@@ -446,7 +441,7 @@
                 <div class="form-group">
                     <label>Transaction ID (TRX ID)</label>
                     <input type="text" id="deposit-trx" placeholder="e.g. 83920123">
-                    <p class="text-small" style="margin-top:5px;" data-i18n="enter_trx">Enter reference number from your app.</p>
+                    <p class="text-small" style="margin-top:5px;" data-i18n="enter_trx">Enter the reference number from your app.</p>
                 </div>
                 <div style="background: var(--primary-light); padding: 10px; border-radius: 8px; margin-bottom: 15px;">
                     <span class="text-bold" data-i18n="receive">You will receive:</span> 
@@ -723,7 +718,7 @@
                 login: "Login", signup: "Sign Up", terms: "Terms & Conditions", terms_body: "By using this application, you agree to following terms:",
                 login_btn: "Login", signup_btn: "Create Account", total_bal: "Total Balance", marketplace: "Marketplace",
                 buy_tk: "Buy TK", sell_withdraw: "Sell / Withdraw", select_method: "Select Payment Method", deposit_num: "Deposit Number / ID",
-                copy: "COPY", amount_pkr: "Amount in PKR", enter_trx: "Enter reference number from your app.", receive: "You will receive:",
+                copy: "COPY", amount_pkr: "Amount in PKR", enter_trx: "Enter the reference number from your app.", receive: "You will receive:",
                 submit_deposit: "Submit Deposit Request", withdraw_type: "Withdraw Type", instant_tax: "Instant Withdraw (Tax: 3% for Normal)",
                 hold_tax: "Hold Withdraw (Low/No Tax, Lock Period)", select_hold: "Select Hold Duration", coins_withdraw: "Coins to Withdraw",
                 withdraw_pkr_input: "Amount in PKR to Receive",
