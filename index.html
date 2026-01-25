@@ -117,9 +117,33 @@
         .method-info strong { display: block; color: var(--primary); }
         .copy-btn { background: none; border: none; color: var(--primary); cursor: pointer; font-weight: bold; }
 
-        /* --- QR Code Container Styles --- */
-        #qr-display-container { text-align: center; width: 100%; }
-        #qr-display-container img { max-width: 220px; border: 2px solid var(--primary); border-radius: 8px; }
+        /* --- NEW: ADDED CSS AS REQUESTED --- */
+        .deposit-card{
+            background:#fff1e0;
+            padding:16px;
+            border-radius:14px;
+            margin:15px;
+            text-align: center;
+        }
+        .deposit-card h3{
+            margin:0 0 10px;
+            color:#ff7a00;
+        }
+        .qr-box{
+            border:2px solid #ff7a00;
+            display:inline-block;
+            padding:10px;
+            border-radius:10px;
+            text-align:center;
+        }
+        .qr-box img{
+            width:150px;
+        }
+        .qr-box p{
+            margin:6px 0 0;
+            font-size:14px;
+            color:#555;
+        }
 
         /* --- History List --- */
         .history-item { background: var(--bg-card); padding: 15px; border-radius: 8px; margin-bottom: 10px; box-shadow: var(--shadow); border-left: 4px solid var(--border); color: var(--text-main); }
@@ -391,23 +415,25 @@
                         <option value="futures">Futures (QR Code)</option>
                     </select>
                 </div>
-                <div class="method-card">
+
+                <!-- Text Display (For EasyPaisa, JazzCash, Binance) -->
+                <div class="method-card" id="text-display-container">
                     <div class="method-info">
                         <strong data-i18n="deposit_num">Deposit Number / ID</strong>
-                        
-                        <!-- Text Display (Hidden for Futures) -->
                         <span id="deposit-number-display" style="display: block; margin-top: 5px; font-weight: 600;">Select Method</span>
-                        
-                        <!-- NEW: QR Code Image (Hidden for others) -->
-                        <div id="qr-display-container" style="display: none; margin-top: 10px; text-align: center;">
-                            <img src="qr.png" alt="QR Code" style="width: 220px; border: 2px solid var(--primary); border-radius: 8px;">
-                            <p style="font-size: 0.8rem; color: var(--text-sec); margin-top: 5px;">Scan QR to Pay</p>
-                        </div>
                     </div>
-                    
-                    <!-- Copy Button (Hidden for Futures) -->
                     <button class="copy-btn" id="btn-copy-deposit" onclick="app.copyDepositNumber()" data-i18n="copy">COPY</button>
                 </div>
+
+                <!-- NEW QR DISPLAY (As Requested by User) -->
+                <div id="qr-display-container" class="deposit-card" style="display: none;">
+                    <h3>Deposit Number / ID</h3>
+                    <div class="qr-box">
+                        <img src="qr.png" alt="QR Code">
+                        <p>Scan QR to Pay</p>
+                    </div>
+                </div>
+
                 <div class="form-group">
                     <label data-i18n="amount_pkr">Amount in PKR/& $USDT</label>
                     <input type="number" id="buy-pkr" placeholder="Enter Amount Pkr / USDT" oninput="app.calcBuy()">
@@ -1015,24 +1041,22 @@
                 }
             },
 
-            // THIS IS THE UPDATED FUNCTION FOR FUTURES QR
+            // UPDATED FUNCTION TO HANDLE NEW HTML STRUCTURE
             updateDepositInfo: function() {
                 var method = document.getElementById('deposit-method').value;
-                var display = document.getElementById('deposit-number-display');
+                var textContainer = document.getElementById('text-display-container');
                 var qrContainer = document.getElementById('qr-display-container');
-                var copyBtn = document.getElementById('btn-copy-deposit');
+                var display = document.getElementById('deposit-number-display');
 
                 if (method === 'futures') {
-                    // Hide number and copy button
-                    display.style.display = 'none';
-                    copyBtn.style.display = 'none';
-                    // Show QR Image
+                    // Hide Text Container
+                    textContainer.style.display = 'none';
+                    // Show QR Container
                     qrContainer.style.display = 'block';
                 } else {
-                    // Show number and copy button
-                    display.style.display = 'block';
-                    copyBtn.style.display = 'inline-block';
-                    // Hide QR Image
+                    // Show Text Container
+                    textContainer.style.display = 'flex';
+                    // Hide QR Container
                     qrContainer.style.display = 'none';
 
                     if (this.settings && this.settings.depositNums) {
