@@ -428,7 +428,7 @@
                 <div class="form-group">
                     <label>Transaction ID (TRX ID)</label>
                     <input type="text" id="deposit-trx" placeholder="e.g. 83920123">
-                    <p class="text-small" style="margin-top:5px;" data-i18n="enter_trx">Enter the reference number from your app.</p>
+                    <p class="text-small" style="margin-top:5px;" data-i18n="enter_trx">Enter reference number from your app.</p>
                 </div>
                 <div style="background: var(--primary-light); padding: 10px; border-radius: 8px; margin-bottom: 15px;">
                     <span class="text-bold" data-i18n="receive">You will receive:</span> 
@@ -1307,8 +1307,11 @@
 
             // History & Profile
             loadHistory: async function() {
-                // Combine user transactions and requests
+                // *** CRITICAL FIX: Fetch fresh data from DB ***
+                const latestUser = await dataService.getUser(dataService.currentUser.email);
+                dataService.saveSession(latestUser);
                 const u = dataService.currentUser;
+
                 const reqs = await dataService.getRequests();
                 const myReqs = reqs.filter(r => r.email === u.email);
                 
@@ -1346,9 +1349,15 @@
             },
 
             updateProfileUI: async function() {
+                // *** CRITICAL FIX: Fetch fresh data from DB ***
+                const latestUser = await dataService.getUser(dataService.currentUser.email);
+                dataService.saveSession(latestUser);
                 const u = dataService.currentUser;
+
+                // Update Header as well
                 document.getElementById('user-balance').innerText = u.balance.toFixed(2);
                 document.getElementById('user-pkr-val').innerText = (u.balance * this.settings.rate).toFixed(2);
+                
                 document.getElementById('profile-name').innerText = u.name;
                 document.getElementById('profile-avatar').innerText = u.name.charAt(0).toUpperCase();
                 document.getElementById('profile-balance').innerText = u.balance.toFixed(2);
