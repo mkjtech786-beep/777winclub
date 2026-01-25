@@ -406,7 +406,7 @@
                     </select>
                 </div>
                 
-                <!-- METHOD CARD UPDATED WITH QR CODE -->
+                <!-- METHOD CARD -->
                 <div class="method-card">
                     <div class="method-info">
                         <strong data-i18n="deposit_num">Deposit Number / ID</strong>
@@ -414,13 +414,12 @@
                         <button class="copy-btn" onclick="app.copyDepositNumber()" data-i18n="copy">COPY</button>
                     </div>
                     
-                    <!-- NEW QR CODE CONTAINER -->
+                    <!-- QR CODE CONTAINER -->
                     <div id="qr-code-container">
                         <img id="deposit-qr-img" src="" alt="Scan QR Code">
                         <p style="font-size: 0.8rem; color: var(--text-sec); margin-top: 5px;">Scan to Pay</p>
                     </div>
                 </div>
-                <!-- END QR CODE CONTAINER -->
 
                 <div class="form-group">
                     <label data-i18n="amount_pkr">Amount in PKR/& $USDT</label>
@@ -711,7 +710,7 @@
                 login: "Login", signup: "Sign Up", terms: "Terms & Conditions", terms_body: "By using this application, you agree to following terms:",
                 login_btn: "Login", signup_btn: "Create Account", total_bal: "Total Balance", marketplace: "Marketplace",
                 buy_tk: "Buy TK", sell_withdraw: "Sell / Withdraw", select_method: "Select Payment Method", deposit_num: "Deposit Number / ID",
-                copy: "COPY", amount_pkr: "Amount in PKR", enter_trx: "Enter the reference number from your app.", receive: "You will receive:",
+                copy: "COPY", amount_pkr: "Amount in PKR", enter_trx: "Enter reference number from your app.", receive: "You will receive:",
                 submit_deposit: "Submit Deposit Request", withdraw_type: "Withdraw Type", instant_tax: "Instant Withdraw (Tax: 3% for Normal)",
                 hold_tax: "Hold Withdraw (Low/No Tax, Lock Period)", select_hold: "Select Hold Duration", coins_withdraw: "Coins to Withdraw",
                 withdraw_pkr_input: "Amount in PKR to Receive",
@@ -1040,21 +1039,27 @@
                 const settings = await dataService.getSettings();
                 const nums = settings.depositNums;
                 
-                // Elements
                 const numberDisplay = document.getElementById('deposit-number-display');
                 const copyBtn = document.querySelector('.copy-btn');
                 const qrContainer = document.getElementById('qr-code-container');
                 
-                // QR Logic
-                qrContainer.style.display = 'block';
-                document.getElementById('deposit-qr-img').src = 'qr.png';
-
+                // Logic:
+                // If QR Pay -> Show QR, Hide Number
+                // If others -> Show Number, Hide QR
+                
                 if(method === 'qrpay') {
-                    // Show QR ONLY
+                    // Hide Number & Copy Button
                     numberDisplay.classList.add('hidden');
                     copyBtn.classList.add('hidden');
+                    
+                    // Show QR
+                    qrContainer.style.display = 'block';
+                    document.getElementById('deposit-qr-img').src = 'qr.png';
                 } else {
-                    // Show Number + Copy Button + QR
+                    // Hide QR
+                    qrContainer.style.display = 'none';
+                    
+                    // Show Number & Copy Button
                     numberDisplay.classList.remove('hidden');
                     copyBtn.classList.remove('hidden');
                     
