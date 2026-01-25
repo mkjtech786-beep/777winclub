@@ -138,6 +138,9 @@
         }
         .qr-box img{
             width:150px;
+            max-width: 100%;
+            height: auto;
+            display: block;
         }
         .qr-box p{
             margin:6px 0 0;
@@ -425,7 +428,7 @@
                     <button class="copy-btn" id="btn-copy-deposit" onclick="app.copyDepositNumber()" data-i18n="copy">COPY</button>
                 </div>
 
-                <!-- NEW QR DISPLAY (As Requested by User) -->
+                <!-- NEW QR DISPLAY (AS REQUESTED BY USER) -->
                 <div id="qr-display-container" class="deposit-card" style="display: none;">
                     <h3>Deposit Number / ID</h3>
                     <div class="qr-box">
@@ -441,7 +444,7 @@
                 <div class="form-group">
                     <label>Transaction ID (TRX ID)</label>
                     <input type="text" id="deposit-trx" placeholder="e.g. 83920123">
-                    <p class="text-small" style="margin-top:5px;" data-i18n="enter_trx">Enter the reference number from your app.</p>
+                    <p class="text-small" style="margin-top:5px;" data-i18n="enter_trx">Enter reference number from your app.</p>
                 </div>
                 <div style="background: var(--primary-light); padding: 10px; border-radius: 8px; margin-bottom: 15px;">
                     <span class="text-bold" data-i18n="receive">You will receive:</span> 
@@ -619,7 +622,7 @@
             <button class="btn btn-outline" onclick="app.logout()" data-i18n="logout">Logout</button>
         </section>
 
-        <!-- 5. ADMIN PANEL -->
+        <!-- 5. ADMIN PANEL (UNCHANGED FROM ORIGINAL) -->
         <section id="admin-section" class="section">
             <h3 style="color: var(--primary);" data-i18n="admin_dash">Admin Dashboard</h3>
             
