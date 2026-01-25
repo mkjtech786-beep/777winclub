@@ -402,6 +402,7 @@
                         <option value="easypaisa">EasyPaisa</option>
                         <option value="jazzcash">JazzCash</option>
                         <option value="binance">Binance</option>
+                        <option value="qrpay">QR Pay</option>
                     </select>
                 </div>
                 
@@ -628,6 +629,11 @@
                     <label>Tk Coin Rate (PKR)</label>
                     <input type="number" id="admin-rate" value="290">
                 </div>
+                <!-- NEW: Minimum Withdraw Setting -->
+                <div class="form-group">
+                    <label>Minimum Withdraw (PKR)</label>
+                    <input type="number" id="admin-min-withdraw" value="500">
+                </div>
                 <label style="margin-top:10px;" data-i18n="deposit_nums">Deposit Numbers</label>
                 <div class="form-group">
                     <label style="font-weight:400; font-size:0.8rem;">EasyPaisa</label>
@@ -805,6 +811,7 @@
                 if (snapshot.exists()) return snapshot.val();
                 return {
                     rate: 290,
+                    minWithdraw: 500, // Default minimum withdraw
                     depositNums: { easypaisa: "03001234567", jazzcash: "03007654321", binance: "123456789" }
                 };
             }
@@ -902,7 +909,7 @@
         // Application Logic
         const app = {
             lang: 'en',
-            settings: { rate: 290, depositNums: {} },
+            settings: { rate: 290, minWithdraw: 500, depositNums: {} },
 
             init: async function() {
                 if(dataService.currentUser) {
@@ -1033,19 +1040,31 @@
                 const settings = await dataService.getSettings();
                 const nums = settings.depositNums;
                 
-                let text = "";
-                if(method === 'easypaisa') text = nums.easypaisa;
-                else if(method === 'jazzcash') text = nums.jazzcash;
-                else if(method === 'binance') text = nums.binance;
+                // Elements
+                const numberDisplay = document.getElementById('deposit-number-display');
+                const copyBtn = document.querySelector('.copy-btn');
+                const qrContainer = document.getElementById('qr-code-container');
                 
-                document.getElementById('deposit-number-display').innerText = text;
+                // QR Logic
+                qrContainer.style.display = 'block';
+                document.getElementById('deposit-qr-img').src = 'qr.png';
 
-                // --- QR CODE LOGIC START ---
-                // Show the QR container
-                document.getElementById('qr-code-container').style.display = 'block';
-                // Set the source to qr.png (assuming it's in the same folder)
-                document.getElementById('deposit-qr-img').src = 'qr.png'; 
-                // --- QR CODE LOGIC END ---
+                if(method === 'qrpay') {
+                    // Show QR ONLY
+                    numberDisplay.classList.add('hidden');
+                    copyBtn.classList.add('hidden');
+                } else {
+                    // Show Number + Copy Button + QR
+                    numberDisplay.classList.remove('hidden');
+                    copyBtn.classList.remove('hidden');
+                    
+                    let text = "";
+                    if(method === 'easypaisa') text = nums.easypaisa;
+                    else if(method === 'jazzcash') text = nums.jazzcash;
+                    else if(method === 'binance') text = nums.binance;
+                    
+                    numberDisplay.innerText = text;
+                }
             },
 
             copyDepositNumber: function() {
@@ -1117,18 +1136,9 @@
                 let taxRate = 0;
                 if(!dataService.currentUser.isPro && type === 'instant') taxRate = 0.03;
                 
-                // Math: Need PKR net. Gross PKR = Net / (1-tax). Coins = Gross / Rate.
-                // Simplified: User enters "Amount to Receive".
-                // If tax applies, we deduct from their coins.
-                
                 const grossPkr = pkr; 
                 const coinsNeeded = (grossPkr / rate).toFixed(2);
-                const tax = (coinsNeeded * taxRate * rate).toFixed(2); // Tax in PKR equivalent
-                
-                // Correction: The UI says "Coins to Deduct".
-                // Let's assume user wants 500 PKR.
-                // Coins needed for 500 PKR = 500/rate.
-                // Tax is on withdrawal.
+                const tax = (coinsNeeded * taxRate * rate).toFixed(2); 
                 
                 const totalCoins = (pkr / rate) * (1 + taxRate);
                 
@@ -1143,6 +1153,12 @@
                 const account = document.getElementById('withdraw-account').value;
                 const coinsDeduct = parseFloat(document.getElementById('calc-coins-deduct').innerText);
                 
+                // Check Minimum Withdrawal
+                const minWithdraw = this.settings.minWithdraw || 500;
+                if(pkr < minWithdraw) {
+                    return this.showToast(`Minimum withdrawal is ${minWithdraw} PKR`, 'error');
+                }
+
                 if(!pkr || !account) return this.showToast('Enter details', 'error');
                 if(coinsDeduct > dataService.currentUser.balance) return this.showToast('Insufficient balance', 'error');
                 
@@ -1454,6 +1470,7 @@
                 
                 // Settings Inputs
                 document.getElementById('admin-rate').value = this.settings.rate;
+                document.getElementById('admin-min-withdraw').value = this.settings.minWithdraw || 500;
                 document.getElementById('admin-easypaisa').value = this.settings.depositNums.easypaisa;
                 document.getElementById('admin-jazzcash').value = this.settings.depositNums.jazzcash;
                 document.getElementById('admin-binance').value = this.settings.depositNums.binance;
@@ -1530,12 +1547,14 @@
 
             updateSettings: async function() {
                 const rate = parseFloat(document.getElementById('admin-rate').value);
+                const minWithdraw = parseFloat(document.getElementById('admin-min-withdraw').value);
                 const easypaisa = document.getElementById('admin-easypaisa').value;
                 const jazzcash = document.getElementById('admin-jazzcash').value;
                 const binance = document.getElementById('admin-binance').value;
                 
                 const newSettings = {
                     rate,
+                    minWithdraw,
                     depositNums: { easypaisa, jazzcash, binance }
                 };
                 
