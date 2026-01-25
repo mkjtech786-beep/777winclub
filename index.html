@@ -133,8 +133,8 @@
         .history-item { background: var(--bg-card); padding: 15px; border-radius: 8px; margin-bottom: 10px; box-shadow: var(--shadow); border-left: 4px solid var(--border); color: var(--text-main); }
         .history-item.deposit { border-left-color: var(--success); }
         .history-item.withdraw { border-left-color: var(--primary); }
-        .history-item.sent { border-left-color: var(--danger); } /* Added for Send */
-        .history-item.received { border-left-color: var(--primary); } /* Added for Receive */
+        .history-item.sent { border-left-color: var(--danger); }
+        .history-item.received { border-left-color: var(--primary); }
         .hist-head { display: flex; justify-content: space-between; margin-bottom:5px; }
         .hist-amount { font-weight: bold; font-size: 1.1rem; }
         .hist-date { font-size: 0.8rem; color: var(--text-sec); }
@@ -395,14 +395,14 @@
                         <option value="easypaisa">EasyPaisa</option>
                         <option value="jazzcash">JazzCash</option>
                         <option value="binance">Binance</option>
-                        <option value="qr">QR Code</option> <!-- ADDED QR OPTION -->
+                        <option value="qr">QR Code</option>
                     </select>
                 </div>
                 <div class="method-card">
                     <div class="method-info">
                         <strong data-i18n="deposit_num">Deposit Number / ID</strong>
                         <span id="deposit-number-display">Select Method</span>
-                        <!-- ADDED QR IMAGE TAG -->
+                        <!-- QR Code Image -->
                         <img id="qr-code-display" src="qr.png" alt="Scan QR Code">
                     </div>
                     <button class="copy-btn" onclick="app.copyDepositNumber()" data-i18n="copy">COPY</button>
@@ -747,21 +747,25 @@
         }
         const db = firebase.database();
 
-        // Data Service - Uses Firebase
+        // Data Service - Uses Firebase ONLY
         class DataService {
             constructor() {
-                const storedUser = localStorage.getItem('tk_user_session');
-                this.currentUser = storedUser ? JSON.parse(storedUser) : null;
+                // We store only EMAIL in localStorage to keep session alive
+                const storedEmail = localStorage.getItem('tk_session_email');
+                this.currentUser = null; // Will be loaded from DB
+                this.sessionEmail = storedEmail;
             }
 
-            saveSession(user) {
-                this.currentUser = user;
-                localStorage.setItem('tk_user_session', JSON.stringify(user));
+            saveSession(email) {
+                // Only save email, not the whole object
+                localStorage.setItem('tk_session_email', email);
+                this.sessionEmail = email;
             }
 
             clearSession() {
                 this.currentUser = null;
-                localStorage.removeItem('tk_user_session');
+                this.sessionEmail = null;
+                localStorage.removeItem('tk_session_email');
             }
 
             async getUser(email) {
@@ -774,7 +778,6 @@
                 const snapshot = await db.ref('users/' + cleanEmail).once('value');
                 if (snapshot.exists()) return false;
                 
-                // Initialize empty arrays for new features
                 userObj.transactions = userObj.transactions || [];
                 userObj.notifications = userObj.notifications || [];
                 
@@ -882,13 +885,21 @@
             isAdmin: false,
             
             init: async function() {
-                // Load Settings
+                // Load Settings from DB
                 this.settings = await dataService.getSettings();
                 
-                // Check Auth
-                if (dataService.currentUser) {
-                    this.showApp();
-                    this.loadUserData();
+                // Check Auth Session (Email only)
+                if (dataService.sessionEmail) {
+                    // Fetch User from DB
+                    const user = await dataService.getUser(dataService.sessionEmail);
+                    if (user) {
+                        dataService.currentUser = user;
+                        this.showApp();
+                        this.loadUserData();
+                    } else {
+                        // Email in LS but no user in DB (deleted?), logout
+                        this.logout();
+                    }
                 } else {
                     document.getElementById('auth-screen').style.display = 'flex';
                     document.getElementById('main-app').classList.add('hidden');
@@ -897,6 +908,17 @@
                 // Initial UI Update
                 this.updateDepositInfo();
                 this.updateLanguage();
+            },
+
+            // Helper to Refresh User Data from DB
+            refreshUserData: async function() {
+                if(!dataService.sessionEmail) return;
+                const user = await dataService.getUser(dataService.sessionEmail);
+                if(user) {
+                    dataService.currentUser = user;
+                    this.loadUserData();
+                    this.loadHistory();
+                }
             },
 
             // --- Auth ---
@@ -910,9 +932,11 @@
 
                 const user = await dataService.getUser(email);
                 if (user && user.password === pass) {
-                    dataService.saveSession(user);
+                    // Save ONLY Email to LS
+                    dataService.saveSession(email);
                     this.showApp();
-                    this.loadUserData();
+                    // Load data from DB
+                    this.refreshUserData();
                 } else {
                     this.toast('Invalid Credentials', 'error');
                 }
@@ -934,16 +958,11 @@
                     posts: 0, joined: new Date().toISOString()
                 };
 
-                // Handle Referral
-                if (ref) {
-                    // In a real app, verify ref logic here
-                }
-
                 const success = await dataService.signup(userObj);
                 if (success) {
-                    dataService.saveSession(userObj);
+                    dataService.saveSession(email);
                     this.showApp();
-                    this.loadUserData();
+                    this.refreshUserData();
                 } else {
                     this.toast('Email already registered', 'error');
                 }
@@ -972,7 +991,7 @@
                 document.getElementById('auth-screen').style.display = 'none';
                 document.getElementById('main-app').classList.remove('hidden');
                 
-                // Admin Check (Example: specific email is admin)
+                // Admin Check
                 if (dataService.currentUser.email === 'admin@tkcoin.com') {
                     this.isAdmin = true;
                     document.getElementById('admin-nav-link').classList.remove('hidden');
@@ -999,9 +1018,6 @@
                     document.getElementById('post-pro-only-msg').classList.remove('hidden');
                     document.getElementById('post-create-wrapper').classList.add('hidden');
                 }
-
-                this.loadHistory();
-                this.loadFeed();
             },
 
             // --- Market Logic ---
@@ -1011,15 +1027,13 @@
                 const qrDisplay = document.getElementById('qr-code-display');
                 const copyBtn = document.querySelector('.copy-btn');
                 
-                // Logic for QR Code (NEW)
                 if (method === 'qr') {
-                    numDisplay.style.display = 'none'; // Hide Text Number
-                    qrDisplay.style.display = 'block'; // Show QR Image
-                    copyBtn.style.display = 'none'; // Hide Copy Button
+                    numDisplay.style.display = 'none';
+                    qrDisplay.style.display = 'block';
+                    copyBtn.style.display = 'none';
                     return;
                 } 
 
-                // Existing Logic for EasyPaisa/JazzCash/Binance
                 numDisplay.style.display = 'block';
                 qrDisplay.style.display = 'none';
                 copyBtn.style.display = 'block';
@@ -1080,9 +1094,8 @@
                 let taxRate = 0;
                 
                 const type = document.getElementById('withdraw-type').value;
-                if (type === 'instant' && !user.isPro) taxRate = 0.03; // 3% tax
+                if (type === 'instant' && !user.isPro) taxRate = 0.03; 
                 
-                // Simple logic: If hold, no tax (for demo)
                 if (type === 'hold') taxRate = 0;
 
                 const totalCoinsNeeded = (pkrToReceive / this.settings.rate) / (1 - taxRate);
@@ -1100,25 +1113,19 @@
                 
                 if (!pkr || !account) return this.toast('Enter details', 'error');
 
-                // Re-calc to ensure logic matches
-                let taxRate = 0;
                 const user = dataService.currentUser;
+                let taxRate = 0;
                 if (type === 'instant' && !user.isPro) taxRate = 0.03;
                 const totalCoins = (pkr / this.settings.rate) / (1 - taxRate);
 
                 if (user.balance < totalCoins) return this.toast('Insufficient Balance', 'error');
-
-                // Deduct balance locally (optimistic) or wait for admin? 
-                // Better to wait for admin approval in this simplified app logic, 
-                // but usually deduct requested amount.
-                // For this demo, we create request.
                 
                 const req = {
                     type: 'withdraw',
                     userEmail: user.email,
                     userName: user.name,
                     method: type,
-                    amount: pkr, // Amount to receive
+                    amount: pkr, 
                     coinsDeducted: totalCoins,
                     account: account,
                     status: 'pending',
@@ -1143,12 +1150,8 @@
                 const list = document.getElementById('history-list');
                 const user = dataService.currentUser;
                 
-                // Fetch all requests for this user
                 const allReqs = await dataService.getRequests();
                 const myReqs = allReqs.filter(r => r.userEmail === user.email);
-                
-                // Add internal transfers (Sent/Received) if implemented
-                // Currently just requests
                 
                 let html = '';
                 if (myReqs.length === 0) {
@@ -1238,7 +1241,11 @@
                 document.getElementById('post-content').value = '';
                 this.toast('Posted!', 'success');
                 this.loadFeed();
-                this.loadUserData(); // Update post count
+                // Increment post count locally then refresh to be sure
+                const u = dataService.currentUser;
+                u.posts = (u.posts || 0) + 1;
+                await dataService.updateUser(u);
+                this.refreshUserData();
             },
 
             deletePost: async function(id) {
@@ -1269,7 +1276,6 @@
                 });
                 input.value = '';
                 this.loadFeed();
-                // Keep comments open after reload logic would be complex here, for now it reloads
             },
 
             // --- Transfer / Send ---
@@ -1298,23 +1304,23 @@
                 if (!amt || amt <= 0) return;
                 if (amt > me.balance) return this.toast('Insufficient Balance', 'error');
 
-                // Deduct from sender
-                me.balance -= amt;
-                await dataService.updateUser(me);
+                // 1. Get Fresh Sender Data
+                const sender = await dataService.getUser(me.email);
+                sender.balance -= amt;
+                await dataService.updateUser(sender);
 
-                // Add to receiver
+                // 2. Get Fresh Receiver Data
                 const receiver = await dataService.getUser(email);
                 if(receiver) {
                     receiver.balance += amt;
-                    // Add transaction record for both (simplified)
                     receiver.transactions = receiver.transactions || [];
                     receiver.transactions.push({type: 'received', from: me.email, amount: amt, date: new Date().toISOString()});
                     await dataService.updateUser(receiver);
                     
-                    // Update local session
-                    dataService.saveSession(me);
-                    this.loadUserData();
                     this.toast('Coins Sent!', 'success');
+                    
+                    // 3. Refresh UI from DB
+                    await this.refreshUserData();
                     
                     // Reset fields
                     document.getElementById('transfer-email').value = '';
@@ -1337,7 +1343,7 @@
                 await dataService.updateSettings(this.settings);
                 this.toast('Settings Updated', 'success');
                 this.updateDepositInfo(); // Refresh UI numbers
-                this.loadUserData(); // Refresh rates in UI
+                this.refreshUserData(); // Refresh rates in UI
             },
 
             loadAdminData: async function() {
@@ -1377,7 +1383,6 @@
                 document.getElementById('admin-total-deposit').innerText = 'PKR ' + totalDep;
                 document.getElementById('admin-total-withdraw').innerText = 'PKR ' + totalWith;
 
-                // Load Users
                 const users = await dataService.getAllUsers();
                 let uHtml = '';
                 users.forEach(u => {
@@ -1391,30 +1396,23 @@
                 const req = reqs.find(r => r.id === reqId);
                 if(!req) return;
 
-                // Update Status
                 await dataService.updateRequest(reqId, status);
 
                 if(status === 'approved') {
+                    // FRESH FETCH FROM DB for both sender and receiver context
                     const user = await dataService.getUser(req.userEmail);
+                    
                     if(req.type === 'deposit') {
-                        // Add coins
                         const coins = amount / this.settings.rate;
                         user.balance += coins;
-                        
-                        // Referral Logic Check (First deposit)
-                        // Simplified: if user.balance was approx 0 before, trigger referral
                     } else if (req.type === 'withdraw') {
-                        // Balance already deducted or needs to be confirmed? 
-                        // In this logic we didn't deduct on request, we should deduct now or 
-                        // assume standard logic. Let's deduct now to be safe.
                         user.balance -= req.coinsDeducted;
                     }
                     await dataService.updateUser(user);
                     
-                    // If current user is the one being updated, refresh UI
+                    // Refresh UI if the current user was updated
                     if(req.userEmail === dataService.currentUser.email) {
-                        dataService.saveSession(user);
-                        this.loadUserData();
+                        await this.refreshUserData();
                     }
                 }
                 
@@ -1423,13 +1421,15 @@
             },
 
             buyPro: async function() {
-                const user = dataService.currentUser;
+                // 1. Get Fresh User from DB
+                const user = await dataService.getUser(dataService.currentUser.email);
+                
                 if(user.balance >= 500) {
                     user.balance -= 500;
                     user.isPro = true;
                     await dataService.updateUser(user);
-                    dataService.saveSession(user);
-                    this.loadUserData();
+                    
+                    await this.refreshUserData();
                     this.toast('Upgraded to PRO!', 'success');
                 } else {
                     this.toast('Insufficient Balance', 'error');
@@ -1444,11 +1444,9 @@
 
             // --- Utilities ---
             nav: function(sectionId, el) {
-                // Hide all sections
                 document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
                 document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
                 
-                // Show target
                 document.getElementById(sectionId + '-section').classList.add('active');
                 if(el) el.classList.add('active');
 
@@ -1495,7 +1493,6 @@
                     if(dict[key]) el.innerText = dict[key];
                 });
                 
-                // Toggle Font
                 if(this.lang === 'ur') document.body.classList.add('urdu-mode');
                 else document.body.classList.remove('urdu-mode');
             },
