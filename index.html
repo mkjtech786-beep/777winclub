@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TK Coin - Hot Feed</title>
+    <title>TK Coin - Animated Profile</title>
     <style>
         /* --- CSS VARIABLES --- */
         :root {
@@ -50,17 +50,14 @@
         .btn-primary { 
             background: linear-gradient(135deg, var(--secondary), var(--primary)); 
             color: #000; 
-            box-shadow: 0 0 15px var(--primary-light);
+            box-shadow: 0 4px 15px rgba(255, 140, 0, 0.4);
             width: 100%;
         }
         .btn-outline { 
             border: 2px solid var(--primary); 
             color: var(--primary); 
             background: transparent; 
-        }
-        .btn-danger {
-            background: var(--danger);
-            color: white;
+            width: 100%;
         }
 
         /* --- TOAST --- */
@@ -121,7 +118,7 @@
             top: 0;
             z-index: 100;
         }
-        .logo { font-size: 1.5rem; font-weight: 900; color: var(--secondary); } 
+        .logo { font-size: 1.5rem; font-weight: 900; color: var(--secondary); text-shadow: 0 0 10px rgba(255, 215, 0, 0.3); }
         .nav-links button {
             background: none;
             border: none;
@@ -177,91 +174,144 @@
             color: var(--secondary);
             text-transform: uppercase;
             font-size: 0.9rem;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
         }
 
-        /* --- FEED STYLE --- */
-        .post-item {
-            background: #121212;
-            padding: 20px;
+        /* --- PROFILE ANIMATIONS & UI (NEW) --- */
+        #page-profile {
+            /* Animated Background */
+            background: linear-gradient(-45deg, #121212, #1a1a1a, #121212);
+            background-size: 400% 400%;
+            animation: gradientBG 15s ease infinite;
+            position: relative;
+            overflow: hidden;
+        }
+
+        @keyframes gradientBG {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        /* Glass Effect */
+        .profile-glass-card {
+            background: rgba(30, 30, 30, 0.6);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            animation: fadeInUp 0.5s ease-out forwards;
+        }
+
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Avatar Float */
+        .profile-avatar-container {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 20px;
+            animation: floatAvatar 3s ease-in-out infinite;
+        }
+        
+        .profile-avatar {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--secondary), var(--primary));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            font-weight: bold;
+            color: #000;
+            box-shadow: 0 0 20px rgba(255, 140, 0, 0.4);
+        }
+
+        @keyframes floatAvatar {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+            100% { transform: translateY(0px); }
+        }
+
+        .profile-info-row {
+            text-align: center;
+            margin-bottom: 10px;
+            font-size: 1.1rem;
+        }
+
+        /* Premium Card Shimmer */
+        .premium-card-shimmer {
+            position: relative;
+            overflow: hidden;
+            border: 1px solid var(--secondary);
+        }
+        .premium-card-shimmer::before {
+            content: '';
+            position: absolute;
+            top: 0; left: -100%;
+            width: 50%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            transform: skewX(-20deg);
+            animation: shimmer 3s infinite;
+        }
+
+        @keyframes shimmer {
+            0% { left: -100%; }
+            20% { left: 200%; }
+            100% { left: 200%; }
+        }
+
+        /* List Animation */
+        .history-item-anim {
+            opacity: 0;
+            animation: slideInLeft 0.4s forwards;
+        }
+        
+        @keyframes slideInLeft {
+            from { opacity: 0; transform: translateX(-20px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+
+        /* --- WALLET CARD --- */
+        .balance-container {
+            text-align: center;
+            padding: 20px 0;
+            border: 1px dashed #444;
             border-radius: 12px;
             margin-bottom: 15px;
-            position: relative;
-            border: 1px solid #333;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.3);
         }
-        
-        /* PREMIUM UPGRADE CARD (TRENDING) */
-        .trend-post {
-            background: linear-gradient(135deg, #2a1a1a, #1a1a1a);
-            border: 1px solid var(--primary);
-            animation: borderFlash 2s infinite alternate;
+        .coin-amt {
+            display: block;
+            font-size: 3rem;
+            font-weight: 900;
+            color: var(--secondary);
+            line-height: 1;
         }
-        @keyframes borderFlash {
-            0% { border-color: var(--primary); box-shadow: 0 0 10px var(--primary); }
-            100% { border-color: var(--secondary); box-shadow: 0 0 10px var(--secondary); }
+        .pkr-amt {
+            display: block;
+            font-size: 1.4rem;
+            color: var(--text-gray);
+            margin-top: 5px;
+            font-weight: 700;
+            font-family: 'Courier New', monospace; 
         }
-
-        .trend-content {
+        .today-rates {
             display: flex;
             justify-content: space-between;
-            align-items: center;
-        }
-        .trend-btn {
-            background: var(--primary);
-            color: #000;
-            border: none;
-            padding: 8px 15px;
-            border-radius: 6px;
-            font-weight: bold;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            gap: 5px;
-            transition: transform 0.2s;
-        }
-        .trend-btn:hover {
-            transform: scale(1.05);
-            box-shadow: 0 0 15px var(--primary-light);
-        }
-        
-        /* LIVE TERMINAL (BUS HO) */
-        .terminal-card {
-            background: #000;
-            border: 1px solid #333;
+            background: #121212;
+            padding: 10px;
             border-radius: 8px;
-            font-family: 'Courier New', monospace;
-            padding: 15px;
-            overflow: hidden; /* Hide scrollbar but allow scroll */
-            position: relative;
+            margin-bottom: 20px;
+            font-size: 0.9rem;
+            color: var(--text-gray);
         }
-        .terminal-logs {
-            height: 200px;
-            overflow-y: auto;
-            color: var(--secondary);
-            font-size: 0.85rem;
-            line-height: 1.4;
-        }
-        .log-line {
-            margin-bottom: 5px;
-            display: flex;
-            gap: 10px;
-            animation: slideInLog 0.1s forwards;
-        }
-        .log-line span { color: #888; font-size: 0.8rem; }
-        .log-line.success span { color: var(--success); }
-        .log-line.error span { color: var(--danger); }
-        @keyframes slideInLog { from { opacity: 0; transform: translateX(-10px); } to { opacity: 1; transform: translateX(0); } }
-
-        /* --- PROFILE & UPGRADERS --- */
-        .premium-card-shimmer {
-            background: linear-gradient(135deg, #1a1a1a, #2a2a2a);
-            border: 1px solid var(--primary);
-            box-shadow: 0 0 15px rgba(255, 140, 0, 0.2);
-            text-align: center;
-            padding: 20px;
+        .today-rates strong { color: var(--primary); }
+        .wallet-actions {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
         }
 
         /* --- MARKET CHART --- */
@@ -271,14 +321,16 @@
             background: #000;
             border-radius: 12px;
             border: 1px solid #333;
+            box-shadow: inset 0 0 20px rgba(0,0,0,0.8);
         }
         .market-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
-        .coin-price { font-size: 2.5rem; font-weight: bold; color: var(--secondary); }
+        .coin-price { font-size: 2.5rem; font-weight: bold; color: var(--secondary); text-shadow: 0 0 15px rgba(255, 215, 0, 0.4); }
 
         /* --- MODALS --- */
         .modal-overlay {
             position: fixed;
-            top: 0; left: 0;
+            top: 0;
+            left: 0;
             width: 100%;
             height: 100%;
             background: rgba(0,0,0,0.8);
@@ -336,6 +388,52 @@
         .calc-display span { display: block; font-size: 0.8rem; color: var(--text-gray); }
         .calc-display strong { font-size: 1.5rem; color: var(--secondary); }
 
+        /* --- CHAT STYLES --- */
+        #chat-messages {
+            flex: 1;
+            overflow-y: auto;
+            margin: 10px 0;
+            background: #121212;
+            border-radius: 8px;
+            padding: 10px;
+            min-height: 200px;
+            max-height: 400px;
+            border: 1px solid #333;
+        }
+        .chat-msg {
+            margin-bottom: 10px;
+            padding: 8px 12px;
+            border-radius: 8px;
+            max-width: 80%;
+            font-size: 0.9rem;
+            position: relative;
+            word-wrap: break-word;
+        }
+        .msg-user {
+            background: #333;
+            color: white;
+            align-self: flex-start;
+            margin-right: auto;
+            border-bottom-left-radius: 0;
+        }
+        .msg-admin {
+            background: var(--primary);
+            color: #000;
+            align-self: flex-end;
+            margin-left: auto;
+            border-bottom-right-radius: 0;
+        }
+        .msg-bot {
+            background: var(--bg-panel);
+            border: 1px solid var(--secondary);
+            color: var(--secondary);
+            font-size: 0.8rem;
+            align-self: center;
+            width: 100%;
+            text-align: center;
+            margin: 15px 0;
+        }
+
         /* --- ADMIN SETTINGS --- */
         .admin-control-row {
             display: flex;
@@ -378,6 +476,7 @@
             font-size: 0.8rem;
             cursor: pointer;
         }
+        .text-link:hover { text-decoration: underline; }
 
         /* --- MOBILE NAV --- */
         @media(max-width: 768px) {
@@ -412,7 +511,7 @@
             <div class="auth-box">
                 <div style="text-align: center; margin-bottom: 20px;">
                     <h1 style="color: var(--secondary);">TK Coin</h1>
-                    <p style="color: var(--primary);">Hot Marketplace</p>
+                    <p style="color: var(--primary);">Controlled Marketplace</p>
                 </div>
                 <div class="form-toggle flex" style="background: #000; border-radius: 8px; padding: 5px; margin-bottom: 20px;">
                     <div class="toggle-btn flex center col" style="flex:1; height:40px; cursor:pointer;" onclick="switchAuthMode('login')">Login</div>
@@ -504,55 +603,20 @@
                 </div>
             </div>
 
-            <!-- FEED PAGE (REDIGNED) -->
+            <!-- FEED PAGE -->
             <div id="page-feed" class="page-section hidden">
-                <!-- TRENDING UPGRADE POST -->
-                <div class="card trend-post">
-                    <div class="trend-content">
-                        <div style="text-align: left;">
-                            <div style="display: flex; align-items: center; gap: 10px;">
-                                <span style="font-size: 1.5rem; color: var(--secondary);">Just Upgrade to Premium</span>
-                                <span style="background: var(--primary); color: black; padding: 5px 10px; border-radius: 4px; font-weight: bold;">🔥 Hot</span>
-                            </div>
-                            <button class="trend-btn" onclick="router('profile')">
-                                Upgrade Now
-                            </button>
-                        </div>
-                    </div>
-                    <div style="margin-top: 10px; text-align: center; color: #888;">
-                        <span>🔥 1.2k Likes</span>
-                    </div>
-                </div>
-
-                <!-- LIVE TERMINAL (BUS HO) -->
-                <div class="card terminal-card">
-                    <h3 style="color:var(--secondary); border:none; justify-content: space-between;">
-                        System Terminal
-                        <button class="btn btn-danger" style="padding: 5px 15px; font-size: 0.8rem;" onclick="clearTerminalLogs()">Delete Logs</button>
-                    </h3>
-                    <div id="terminal-logs" class="terminal-logs">
-                        <!-- Logs injected by JS -->
-                    </div>
-                    <div id="terminal-empty" class="hidden" style="text-align: center; padding: 20px; color: #666;">
-                        Kuch na ho (System Ready)
-                    </div>
-                </div>
-
-                <!-- NORMAL POSTS -->
-                <div id="feed-container">
-                    <!-- Populated by JS -->
-                </div>
+                <div class="card"><h3>Latest News</h3><div id="feed-container"></div></div>
             </div>
 
-            <!-- PROFILE PAGE -->
+            <!-- PROFILE PAGE (ANIMATED) -->
             <div id="page-profile" class="page-section hidden">
                 <!-- UPGRADE CARD -->
-                <div class="card premium-card-shimmer" style="text-align: center;">
-                    <h3 style="color:var(--secondary);">Go Premium</h3>
-                    <div class="profile-avatar-container" style="margin-bottom: 20px;">
+                <div class="card premium-card-shimmer profile-glass-card" id="upgrade-card-box" style="text-align: center;">
+                    <h3 style="color:var(--secondary); text-shadow: 0 0 5px var(--primary);">Go Premium</h3>
+                    <div class="profile-avatar-container">
                         <div class="profile-avatar">⭐</div>
                     </div>
-                    <div class="upgrade-price" style="font-size: 2rem; font-weight: bold; color: var(--secondary); margin: 10px 0;">100 TK</div>
+                    <div class="upgrade-price" style="font-size: 2.5rem; font-weight: bold; color: var(--secondary); margin: 10px 0;">100 TK</div>
                     <ul class="upgrade-features" style="text-align: left; font-size: 0.9rem; color: #ccc; margin-bottom: 15px; list-style: none; padding: 0 20px;">
                         <li style="margin-bottom: 8px; display: flex; align-items: center;">
                             <span style="color: var(--success); margin-right: 10px; font-weight: bold;">✓</span> Zero Withdrawal Fees
@@ -567,22 +631,22 @@
                     <button class="btn btn-primary" onclick="upgradeToPro()" style="background:var(--secondary); color:black; box-shadow: 0 0 15px var(--secondary);">Upgrade Now</button>
                 </div>
 
-                <div class="card">
-                    <h3>My Profile</h3>
+                <div class="card profile-glass-card">
+                    <h3 style="color:var(--primary);">My Profile</h3>
                     
                     <div class="profile-avatar-container" style="margin-bottom: 25px;">
                         <div class="profile-avatar" id="profile-avatar-text">U</div>
                     </div>
                     
-                    <div class="profile-info-row" style="text-align: center; margin-bottom: 10px;">
+                    <div class="profile-info-row">
                         <strong style="color: var(--text-gray);">Name: </strong>
                         <span style="color: white; font-weight: bold;" id="profile-name">User</span>
                     </div>
-                    <div class="profile-info-row" style="text-align: center;">
+                    <div class="profile-info-row">
                         <strong style="color: var(--text-gray);">Email: </strong>
                         <span style="color: white;" id="profile-email">user@email.com</span>
                     </div>
-                    <div class="profile-info-row" style="text-align: center;">
+                    <div class="profile-info-row">
                         <strong style="color: var(--text-gray);">Status: </strong>
                         <span style="color: var(--text-gray);" id="profile-status">Normal</span>
                     </div>
@@ -593,7 +657,7 @@
                     </div>
                     <div style="margin-top:20px;"><button class="btn btn-primary" onclick="logout()" style="background:var(--danger);">Logout</button></div>
                 </div>
-                <div class="card">
+                <div class="card profile-glass-card">
                     <h3>History</h3>
                     <div id="history-list" style="max-height: 300px; overflow-y: auto;"></div>
                 </div>
@@ -630,6 +694,27 @@
                     </div>
                     <button class="btn btn-primary" style="margin-top:10px;" onclick="postNews()">Post News</button>
                     <input type="text" id="admin-news-input" placeholder="News text..." style="width:100%; margin-top:10px; padding:10px; background:#121212; border:1px solid #444; color:white;">
+                </div>
+
+                <div class="card">
+                    <h3>Live Support Tickets</h3>
+                    <div style="display:grid; grid-template-columns: 1fr 2fr; gap:10px; height: 400px;">
+                        <div style="background:#121212; border-radius:8px; overflow-y:auto; border:1px solid #333;">
+                            <div id="admin-chat-users-list" style="padding:5px;">
+                                <div style="padding:10px; color:#888; text-align:center;">No Chats Yet</div>
+                            </div>
+                        </div>
+                        <div style="display:flex; flex-direction:column; border:1px solid #333; border-radius:8px; background:#000;">
+                            <div id="admin-selected-chat-header" style="padding:10px; border-bottom:1px solid #333; color:var(--secondary); font-weight:bold;">Select a User</div>
+                            <div id="admin-chat-display" style="flex:1; padding:10px; overflow-y:auto;"></div>
+                            <div style="padding:10px; border-top:1px solid #333;">
+                                <div style="display:flex; gap:10px;">
+                                    <input type="text" id="admin-reply-input" placeholder="Type reply..." style="flex:1; padding:8px; background:#121212; border:1px solid #444; color:white; border-radius:4px;">
+                                    <button class="btn btn-primary" style="width:auto; padding:5px 15px;" onclick="adminSendReply()">Send</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
 
                 <div class="card">
@@ -766,14 +851,13 @@
             },
             news: JSON.parse(localStorage.getItem('tk_news')) || ["Welcome to TK Coin!"],
             history: JSON.parse(localStorage.getItem('tk_history')) || [],
-            chats: JSON.parse(localStorage.getItem('tk_chats')) || [] 
+            chats: JSON.parse(localStorage.getItem('tk_chats')) || []
         };
         let currentUser = null;
         let depositMethod = 'easypaisa';
         let withdrawMethod = 'easypaisa';
         let chartInterval = null;
         let rateInterval = null; 
-        let feedLogInterval = null; 
         let chartPoints = [];
         let lastPkrValue = 0;
         let selectedAdminChatId = null; 
@@ -793,7 +877,7 @@
                 currentUser = JSON.parse(saved);
                 showApp();
             }
-            initChart(); 
+            initChart();
             startChartAnimation(); 
             startRateSimulation(); 
         };
@@ -837,7 +921,6 @@
                 document.getElementById('auth-container').style.display='flex';
                 stopChartAnimation();
                 stopRateSimulation();
-                stopLiveLogs();
             }
         }
         function showApp() {
@@ -867,12 +950,7 @@
                 renderAdmin();
                 renderAdminChats(); 
             }
-            if(p==='feed') {
-                renderNewFeed();
-                startLiveLogs(); 
-            } else {
-                stopLiveLogs();
-            }
+            if(p==='feed') renderFeed();
         }
 
         /* --- LOGIC --- */
@@ -893,7 +971,7 @@
             document.getElementById('news-ticker-content').innerText = DB.news.join(" +++ ");
         }
 
-        /* --- MARKET SIMULATION --- */
+        /* --- MARKET SIMULATION (SLOW WALK) --- */
         function initChart() {
             const c = document.getElementById('marketChart');
             c.width = c.parentElement.offsetWidth;
@@ -955,7 +1033,7 @@
         }
         function stopChartAnimation() { if(chartInterval) clearInterval(chartInterval); }
 
-        /* --- RATE SIMULATION --- */
+        /* --- RATE SIMULATION (SLOW LOGIC) --- */
         function startRateSimulation() {
             if(rateInterval) clearInterval(rateInterval);
             
@@ -976,127 +1054,10 @@
         }
         function stopRateSimulation() { if(rateInterval) clearInterval(rateInterval); }
 
-        /* --- NEW FEED LOGIC --- */
-        function renderNewFeed() {
-            const container = document.getElementById('feed-container');
-            container.innerHTML = '';
-
-            // 1. TRENDING UPGRADE
-            const trendDiv = document.createElement('div');
-            trendDiv.className = 'post-item trend-post';
-            trendDiv.innerHTML = `
-                <div class="trend-content">
-                    <div style="text-align: center;">
-                        <div style="display: flex; justify-content: space-between; align-items: center; gap: 10px;">
-                            <span style="font-size: 1.5rem; color: var(--secondary);">Just Upgrade to Premium</span>
-                            <span style="background: var(--primary); color: black; padding: 5px 10px; border-radius: 4px; font-weight: bold; animation: borderFlash 2s infinite alternate;">🔥 Hot</span>
-                        </div>
-                        <button class="trend-btn" onclick="router('profile')">
-                            Upgrade Now
-                        </button>
-                    </div>
-                    <div style="margin-top: 10px; text-align: center; color: var(--text-gray);">
-                        🔥 1.2k Likes
-                    </div>
-                </div>
-            `;
-            container.appendChild(trendDiv);
-
-            // 2. LIVE LOGS TERMINAL (BUS HO)
-            const terminalDiv = document.createElement('div');
-            terminalDiv.className = 'card terminal-card';
-            terminalDiv.innerHTML = `
-                <h3 style="color:var(--secondary); border:none; justify-content: space-between;">
-                    System Terminal (Live)
-                    <button class="btn btn-danger" style="padding: 5px 15px; font-size: 0.8rem;" onclick="clearTerminalLogs()">Delete Logs</button>
-                </h3>
-                <div id="terminal-logs" class="terminal-logs"></div>
-                <div id="terminal-empty" class="hidden" style="text-align: center; padding: 20px; color: #666;">Kuch na ho (System Ready)</div>
-            `;
-            container.appendChild(terminalDiv);
-        }
-
-        // LOG GENERATOR (Simulated "Bus Ho")
-        const terminalLogs = [
-            "> Connecting to TK Blockchain...",
-            "> Verifying Wallet Connection...",
-            "> Checking Rates PKR...",
-            "> Fetching market data...",
-            "> Encrypted Connection Established.",
-            "> Syncing with API...",
-            "> Processing Deposits...",
-            "> Calculating Hashes...",
-            "> Updating User Balances...",
-            "> Fetching Charts...",
-            "> Sending confirmations...",
-            "> Withdrawal requested by User #882...",
-            "> Order #992 Executed...",
-            "> Market Trend Analysis...",
-            "> System Optimal."
-        ];
-
-        function startLiveLogs() {
-            stopLiveLogs(); // Stop previous if any
-            
-            const logContainer = document.getElementById('terminal-logs');
-            const emptyMsg = document.getElementById('terminal-empty');
-            
-            if (logContainer) {
-                emptyMsg.classList.add('hidden');
-            }
-
-            logInterval = setInterval(() => {
-                // Get a random log line
-                const randomLog = terminalLogs[Math.floor(Math.random() * terminalLogs.length)];
-                const time = new Date().toLocaleTimeString();
-                
-                // Add to terminal
-                const div = document.createElement('div');
-                div.className = 'log-line';
-                
-                // Random color status (Busy feel)
-                let logType = 'info';
-                if(randomLog.includes("Executing") || randomLog.includes("Processing")) logType = 'success';
-                if(randomLogs.includes("Error")) logType = 'error';
-
-                div.innerHTML = `<span>[${time}]</span> <span class="${logType}">${randomLog}</span>`;
-                logContainer.appendChild(div);
-
-                // Auto scroll to bottom
-                logContainer.scrollTop = logContainer.scrollHeight;
-
-                // Keep logs manageable (Max 50 lines)
-                if(logContainer.children.length > 50) {
-                    logContainer.removeChild(logContainer.firstElementChild);
-                logContainer.scrollTop = 1000; // Lock to bottom to simulate activity
-                    logContainer.style.transition = 'none'; // Disable scroll animation for performance while running
-                setTimeout(() => {
-                    logContainer.style.transition = 'scroll';
-                    logContainer.scrollTop = logContainer.scrollHeight;
-                }, 50); 
-                logContainer.scrollTop = logContainer.scrollHeight; // Force scroll at start
-            }, 150); // FAST UPDATE SPEED (0.15s)
-
-        }, 150); 
-        }
-
-        function stopLiveLogs() {
-            if(logInterval) clearInterval(logInterval);
-            const logContainer = document.getElementById('terminal-logs');
-            logContainer.innerHTML = '';
-            document.getElementById('terminal-empty').classList.remove('hidden');
-        }
-
-        function clearTerminalLogs() {
-            if(confirm('Delete all logs?')) {
-                stopLiveLogs();
-            const logContainer = document.getElementById('terminal-logs');
-                logContainer.innerHTML = '';
-                document.getElementById('terminal-empty').classList.remove('hidden');
-                showToast('Logs Deleted');
-            }
-        }
-
+        /* --- MODAL ACTIONS --- */
+        function openModal(t) { document.getElementById(`${t}-modal`).style.display = 'flex'; }
+        function closeModal(t) { document.getElementById(`${t}-modal`).style.display = 'none'; }
+        
         /* --- UPGRADE TO PRO --- */
         function upgradeToPro() {
             const userIndex = DB.users.findIndex(x => x.id === currentUser.id);
@@ -1185,7 +1146,7 @@
             const activeChats = DB.chats.filter(c => c.userId !== currentUser.id); 
             
             if(activeChats.length === 0) {
-                list.innerHTML = '<div style="padding:10px; color:#888; text-align:center;">No Chats</div>';
+                list.innerHTML = '<div style="padding:10px; color:#666; text-align:center;">No Chats</div>';
                 return;
             }
 
@@ -1238,7 +1199,7 @@
             selectAdminChat(selectedAdminChatId); 
             showToast('Reply Sent');
         }
-
+        
         /* --- DEPOSIT/WD LOGIC --- */
         function setDepositMethod(m) {
             depositMethod = m;
@@ -1319,20 +1280,46 @@
             updateDashboard();
         }
 
-        /* --- FEED & LOGIC --- */
+        /* --- FEED/PROFILE/ADMIN --- */
+        function renderFeed() {
+            const c = document.getElementById('feed-container');
+            c.innerHTML = '';
+            DB.news.forEach(n => {
+                const d = document.createElement('div');
+                d.className = 'post-item';
+                d.style.background='#121212';
+                d.style.padding='10px';
+                d.style.marginBottom='10px';
+                d.style.borderRadius='8px';
+                d.innerHTML = `<small style="color:var(--secondary)">News</small><div style="color:white">${n}</div>`;
+                c.appendChild(d);
+            });
+            const p = document.createElement('div');
+            p.className='post-item';
+            p.style.background='#121212';
+            p.style.padding='10px';
+            p.style.borderRadius='8px';
+            p.innerHTML = currentUser.isPro ? `<strong style="color:var(--secondary)">Premium Signal</strong><div style="color:white">Buy TK Now!</div>` : `<strong style="color:var(--secondary)">Premium Signal</strong><div style="color:#ccc">Locked</div>`;
+            c.appendChild(p);
+        }
         function renderProfile() {
             document.getElementById('profile-name').innerText = currentUser.name;
             document.getElementById('profile-email').innerText = currentUser.email;
             
+            // Avatar Initials
+            const initials = currentUser.name.charAt(0).toUpperCase();
+            document.getElementById('profile-avatar-text').innerText = initials;
+
             const statusEl = document.getElementById('profile-status');
             if(currentUser.isPro) {
-                statusEl.innerText = "PRO USER ⭐";
+                statusEl.innerText = "PRO USER";
                 statusEl.style.color = "var(--secondary)";
             } else {
                 statusEl.innerText = "NORMAL";
                 statusEl.style.color = "var(--text-gray)";
             }
             
+            // Hide/Show Upgrade Card
             const upgradeCard = document.getElementById('upgrade-card-box');
             if(currentUser.isPro) {
                 upgradeCard.classList.add('hidden');
@@ -1344,11 +1331,14 @@
             h.innerHTML = '';
             const list = DB.history.filter(x=>x.userId===currentUser.id).reverse();
             
+            // Staggered Animation for history
             list.forEach((x, index) => {
                 const div = document.createElement('div');
+                div.className = 'history-item-anim';
                 div.style.borderBottom='1px solid #333';
                 div.style.padding='5px';
                 div.style.fontSize='0.8rem';
+                div.style.animationDelay = `${index * 0.1}s`; // Stagger effect
                 div.innerHTML = `<span style="color:${x.type.includes('deposit')||x.type.includes('in')?'var(--success)':'var(--danger)'}">${x.type} ${x.amountTK} TK</span>`;
                 h.appendChild(div);
             });
@@ -1372,7 +1362,7 @@
             DB.users.forEach(u => {
                 if(u.role==='admin') return;
                 const tr = document.createElement('tr');
-                tr.innerHTML = `<td>${u.name}</td><td>${u.isPro?'Pro':'Norm'}</td><td>${u.balance.toFixed(2)}</td><td><button class="btn btn-danger" style="padding:2px 5px;" onclick="banUser(${u.id})">Ban</button></td>`;
+                tr.innerHTML = `<td>${u.name}</td><td>${u.isPro?'Pro':'Norm'}</td><td>${u.balance.toFixed(2)}</td><td><button style="background:red; border:none; color:white; padding:2px 5px;" onclick="banUser(${u.id})">Ban</button></td>`;
                 t.appendChild(tr);
             });
         }
