@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TK Coin - Trading & Wallet App</title>
+    <title>TK Coin - Trading & Wallet App (Firebase)</title>
     <style>
         :root {
             --primary: #ff6600; /* Orange */
@@ -115,7 +115,7 @@
             z-index: 100;
         }
         .logo { font-size: 1.2rem; font-weight: bold; color: var(--primary); display: flex; align-items: center; gap: 5px; }
-        .user-info { display: flex; align-items: center; gap: 10px; font-size: 0.9rem; }
+        .user-info { display: flex; align-items: center; gap: 10px; font-size: 0.9rem; cursor: pointer; }
         .avatar { width: 35px; height: 35px; border-radius: 50%; background: #333; object-fit: cover; }
         
         /* --- Navigation --- */
@@ -155,7 +155,7 @@
             height: 200px;
             border: 1px solid #333;
         }
-        #marketChart { width: 100%; height: 100%; }
+        #marketCanvas { width: 100%; height: 100%; }
         .ticker-wrap {
             width: 100%;
             background: #000;
@@ -203,7 +203,7 @@
             border: 1px solid #333;
         }
         .chat-messages { flex: 1; overflow-y: auto; padding: 10px; display: flex; flex-direction: column; gap: 10px; }
-        .message { max-width: 80%; padding: 8px 12px; border-radius: 10px; font-size: 0.9rem; }
+        .message { max-width: 80%; padding: 8px 12px; border-radius: 10px; font-size: 0.9rem; word-wrap: break-word;}
         .msg-admin { align-self: flex-start; background: #333; color: white; }
         .msg-user { align-self: flex-end; background: var(--primary); color: white; }
         .chat-input-area { padding: 10px; display: flex; gap: 10px; border-top: 1px solid #333; }
@@ -220,37 +220,23 @@
         /* Premium Badge */
         .badge-premium { color: var(--blue); margin-left: 5px; }
         .blue-tick { color: #1da1f2; margin-left: 2px; }
+        
+        /* Loader */
+        .loader {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid var(--primary);
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            animation: spin 1s linear infinite;
+            display: inline-block;
+            vertical-align: middle;
+        }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
     </style>
     <!-- Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-
-<!-- FIREBASE CONNECT -->
-<script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-app.js";
-import { getDatabase, ref, set, get, onValue } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-database.js";
-
-const firebaseConfig = {
-  apiKey: "AIzaSyCChxbenpYlcBxTiqPqBDrjOefHkotX7Zg",
-  authDomain: "tkcoinfinel.firebaseapp.com",
-  databaseURL: "https://tkcoinfinel-default-rtdb.asia-southeast1.firebasedatabase.app",
-  projectId: "tkcoinfinel",
-  storageBucket: "tkcoinfinel.firebasestorage.app",
-  messagingSenderId: "131190927556",
-  appId: "1:131190927556:web:4920420b66522722c7d991"
-};
-
-const app = initializeApp(firebaseConfig);
-const dbFirebase = getDatabase(app);
-
-window.fbRef = ref;
-window.fbSet = set;
-window.fbGet = get;
-window.fbOn = onValue;
-window.dbFirebase = dbFirebase;
-</script>
-<!-- END FIREBASE -->
-
 </head>
 <body>
 
@@ -607,7 +593,6 @@ window.dbFirebase = dbFirebase;
                             <tr>
                                 <th>Name</th>
                                 <th>Email</th>
-                                <th>Password</th> <!-- As requested -->
                                 <th>Balance</th>
                                 <th>Role</th>
                             </tr>
@@ -670,138 +655,218 @@ window.dbFirebase = dbFirebase;
     </div>
 
     <!-- Scripts -->
-    <script>
-        // --- DATA SIMULATION (LocalStorage) ---
-        // const DB_KEY removed, using Firebase only
-        const SESSION_KEY = 'tkcoin_session';
+    <script type="module">
+        // Import Firebase SDKs
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-app.js";
+        import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-analytics.js";
+        import { 
+            getAuth, 
+            createUserWithEmailAndPassword, 
+            signInWithEmailAndPassword, 
+            onAuthStateChanged, 
+            signOut 
+        } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-auth.js";
+        import { 
+            getDatabase, 
+            ref, 
+            set, 
+            push, 
+            onValue, 
+            update, 
+            get, 
+            child 
+        } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-database.js";
 
-        let db = {
-            users: [],
-            currentUser: null,
-            market: {
-                tkPrice: 1.50,
-                usdtRate: 280, // 1 USDT = 280 PKR
-                mode: 'auto', // auto or manual
-                history: []
-            },
-            settings: {
-                easypaisa: '0300-1234567',
-                jazzcash: '0321-7654321',
-                usdt: 'TRC20Address...',
-                minWithdraw: 50,
-                withdrawFee: 0.05 // 5%
-            },
-            news: [
-                { title: "Welcome to TK Coin!", date: new Date().toLocaleDateString() },
-                { title: "Market is bullish today.", date: new Date().toLocaleDateString() }
-            ],
-            deposits: [],
-            withdrawals: [],
-            chats: [] // { userId, userEmail, messages: [{text, sender: 'user'|'admin', time}] }
+        // Your Firebase Configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyCBMk5ED0YNL9MqVThgMhoOuWvGwTgCJCg",
+            authDomain: "injector-c964a.firebaseapp.com",
+            databaseURL: "https://injector-c964a-default-rtdb.firebaseio.com",
+            projectId: "injector-c964a",
+            storageBucket: "injector-c964a.firebasestorage.app",
+            messagingSenderId: "746006402839",
+            appId: "1:746006402839:web:26d14a3fee7d6e6cc68952",
+            measurementId: "G-DBMSEZZWW1"
         };
 
-        // --- INIT ---
-        let storedData = null;
-        function initApp() {
-            // Firebase only mode
-            if (storedData) {
-                db = JSON.parse(storedData);
-            } else {
-                // Seed Admin
-                db.users.push({
-                    name: "Admin",
-                    email: "admin@app.com",
-                    pass: "admin123",
-                    role: "admin",
-                    isPremium: true,
-                    balanceTK: 10000,
-                    balancePKR: 0,
-                    avatar: "https://picsum.photos/seed/admin/50/50"
-                   if(cb) cb();
-   });
-                saveDB();
-            }
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const analytics = getAnalytics(app);
+        const auth = getAuth(app);
+        const db = getDatabase(app);
 
-            // Session Check
-            const session = localStorage.getItem(SESSION_KEY);
-            if (session) {
-                const user = db.users.find(u => u.email === session);
-                if (user) {
-                    loginSuccess(user);
-                }
-            }
+        // --- GLOBAL STATE ---
+        let currentUserData = null; // Holds snapshot of current user from DB
+        let allUsers = {};
+        let marketData = { tkPrice: 1.50, usdtRate: 280, mode: 'auto' };
+        let appSettings = {
+            easypaisa: '0300-1234567',
+            jazzcash: '0321-7654321',
+            usdt: 'TRC20Address...',
+            minWithdraw: 50,
+            withdrawFee: 0.05
+        };
+        let adminSelectedChatUser = null; // For admin chat
 
-            // Start Loops
-            setInterval(updateMarket, 2000);
-            setInterval(renderChat, 1000);
-            renderTicker();
+        // --- UTILITIES ---
+        window.showToast = (msg, type = 'success') => {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            toast.className = 'toast';
+            toast.style.borderLeftColor = type === 'error' ? 'var(--danger)' : 'var(--primary)';
+            toast.innerText = msg;
+            container.appendChild(toast);
+            setTimeout(() => toast.remove(), 3000);
         }
 
-        function saveDB(){
-   if(!window.dbFirebase) return;
-   fbSet(fbRef(dbFirebase, "tkcoinDB"), db);
-}
+        function getAdminEmail() {
+            return "admin@app.com";
+        }
 
-        // --- AUTH ---
+        // --- INITIALIZATION ---
+        function initApp() {
+            // Auth Listener
+            onAuthStateChanged(auth, (user) => {
+                if (user) {
+                    // User logged in
+                    checkAndCreateUserInDB(user);
+                } else {
+                    // User logged out
+                    document.getElementById('auth-screen').classList.remove('hidden');
+                    document.getElementById('app-container').classList.add('hidden');
+                    currentUserData = null;
+                }
+            });
+
+            // Market & Settings Listeners (Global)
+            onValue(ref(db, 'market'), (snapshot) => {
+                const data = snapshot.val();
+                if (data) {
+                    marketData = data;
+                    updateMarketUI();
+                }
+            });
+
+            onValue(ref(db, 'settings'), (snapshot) => {
+                const data = snapshot.val();
+                if (data) {
+                    appSettings = data;
+                    updateDepositDetails(); // Refresh if on deposit page
+                }
+            });
+
+            // News Listener
+            onValue(ref(db, 'news'), (snapshot) => {
+                const newsList = document.getElementById('news-feed');
+                const ticker = document.getElementById('news-ticker');
+                newsList.innerHTML = "";
+                ticker.innerHTML = "";
+                
+                const data = snapshot.val();
+                if (data) {
+                    Object.values(data).reverse().forEach((news, index) => {
+                        // News Feed
+                        newsList.innerHTML += `
+                            <div style="background:var(--bg-card); padding:10px; border-radius:6px; border:1px solid #333;">
+                                <div style="font-weight:bold; color:#fff;">${news.title}</div>
+                                <div style="font-size:0.8rem; color:#777;">${news.date}</div>
+                            </div>
+                        `;
+                        // Ticker
+                        ticker.innerHTML += `<span class="ticker-item">${news.title}</span>`;
+                    });
+                }
+            });
+        }
+
+        // --- USER CREATION IN DB ---
+        function checkAndCreateUserInDB(firebaseUser) {
+            const userRef = ref(db, 'users/' + firebaseUser.uid);
+            
+            get(userRef).then((snapshot) => {
+                if (snapshot.exists()) {
+                    currentUserData = snapshot.val();
+                    currentUserData.uid = firebaseUser.uid; // Keep uid handy
+                    loginSuccess(currentUserData);
+                } else {
+                    // Create new user record
+                    const isAdmin = firebaseUser.email === getAdminEmail();
+                    const newUser = {
+                        name: firebaseUser.email.split('@')[0],
+                        email: firebaseUser.email,
+                        role: isAdmin ? "admin" : "user",
+                        isPremium: isAdmin ? true : false,
+                        balanceTK: isAdmin ? 10000 : 0,
+                        balancePKR: 0,
+                        avatar: `https://picsum.photos/seed/${firebaseUser.uid}/50/50`,
+                        createdAt: new Date().toISOString()
+                    };
+                    set(userRef, newUser).then(() => {
+                        currentUserData = newUser;
+                        currentUserData.uid = firebaseUser.uid;
+                        loginSuccess(currentUserData);
+                    });
+                }
+            });
+        }
+
+        // --- AUTH LOGIC ---
         let isSignup = false;
-
-        function toggleAuthMode() {
+        window.toggleAuthMode = () => {
             isSignup = !isSignup;
             document.querySelector('.auth-box h2').innerText = isSignup ? "Create Account" : "TK Coin Login";
             document.getElementById('auth-btn').innerText = isSignup ? "Signup" : "Login";
             document.querySelector('.auth-toggle').innerText = isSignup ? "Already have an account? Login" : "Don't have an account? Signup";
-        }
+        };
 
-        document.getElementById('auth-form').addEventListener('submit', (e) => {
+        document.getElementById('auth-form').addEventListener('submit', async (e) => {
             e.preventDefault();
             const email = document.getElementById('auth-email').value;
             const pass = document.getElementById('auth-pass').value;
+            const btn = document.getElementById('auth-btn');
+            
+            btn.innerText = "Processing...";
+            btn.disabled = true;
 
-            if (isSignup) {
-                if (db.users.find(u => u.email === email)) {
-                    showToast("Email already exists", "error");
-                    return;
-                }
-                const newUser = {
-                    name: email.split('@')[0],
-                    email: email,
-                    pass: pass,
-                    role: "user",
-                    isPremium: false,
-                    balanceTK: 0,
-                    balancePKR: 0,
-                    avatar: `https://picsum.photos/seed/${email}/50/50`,
-                    history: []
-                };
-                db.users.push(newUser);
-                saveDB();
-                showToast("Account created! Please login.");
-                toggleAuthMode();
-            } else {
-                const user = db.users.find(u => u.email === email && u.pass === pass);
-                if (user) {
-                    localStorage.setItem(SESSION_KEY, email);
-                    loginSuccess(user);
+            try {
+                if (isSignup) {
+                    await createUserWithEmailAndPassword(auth, email, pass);
+                    showToast("Account created successfully!");
                 } else {
-                    showToast("Invalid credentials", "error");
+                    await signInWithEmailAndPassword(auth, email, pass);
+                    showToast("Login successful!");
                 }
+            } catch (error) {
+                showToast(error.message, "error");
+            } finally {
+                btn.innerText = isSignup ? "Signup" : "Login";
+                btn.disabled = false;
             }
-           if(cb) cb();
-   });
+        });
 
+        window.logout = () => {
+            signOut(auth).then(() => {
+                showToast("Logged out");
+            });
+        };
+
+        // --- APP NAVIGATION & UI ---
         function loginSuccess(user) {
-            db.currentUser = user;
             document.getElementById('auth-screen').classList.add('hidden');
             document.getElementById('app-container').classList.remove('hidden');
-            
-            updateUI();
+
+            // Listen to THIS user's specific data for real-time updates
+            onValue(ref(db, 'users/' + user.uid), (snapshot) => {
+                currentUserData = snapshot.val();
+                currentUserData.uid = user.uid;
+                updateUI();
+            });
 
             if (user.role === 'admin') {
                 document.getElementById('user-nav').classList.add('hidden');
                 document.getElementById('user-views').classList.add('hidden');
                 document.getElementById('admin-views').classList.remove('hidden');
                 showAdminSection('dashboard');
-                loadAdminData();
             } else {
                 document.getElementById('user-nav').classList.remove('hidden');
                 document.getElementById('user-views').classList.remove('hidden');
@@ -810,30 +875,18 @@ window.dbFirebase = dbFirebase;
             }
         }
 
-        function logout() {
-            localStorage.removeItem(SESSION_KEY);
-            location.reload();
-        }
-
-        // --- NAVIGATION ---
-        function showSection(sectionId) {
-            // Hide all user sections
+        window.showSection = (sectionId) => {
             document.querySelectorAll('#user-views .section').forEach(el => el.classList.add('hidden'));
-            // Show target
             document.getElementById(`view-${sectionId}`).classList.remove('hidden');
             
-            // Update nav active state
             document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
-            // Very simple matching for nav highlight
-            if (sectionId === 'market') document.querySelectorAll('.nav-item')[0].classList.add('active');
-            if (sectionId === 'wallet') document.querySelectorAll('.nav-item')[1].classList.add('active');
-            if (sectionId === 'chat') document.querySelectorAll('.nav-item')[2].classList.add('active');
-            if (sectionId === 'profile') document.querySelectorAll('.nav-item')[3].classList.add('active');
+            const navIndex = ['market', 'wallet', 'chat', 'profile'].indexOf(sectionId);
+            if (navIndex >= 0) document.querySelectorAll('.nav-item')[navIndex].classList.add('active');
 
-            updateUI(); // Refresh data
-        }
+            if (sectionId === 'chat') loadUserChat();
+        };
 
-        function showAdminSection(sectionId) {
+        window.showAdminSection = (sectionId) => {
             document.querySelectorAll('#admin-views .section').forEach(el => el.classList.add('hidden'));
             
             if(sectionId === 'dashboard') {
@@ -841,30 +894,27 @@ window.dbFirebase = dbFirebase;
             } else {
                 document.getElementById(`admin-${sectionId}`).classList.remove('hidden');
             }
-            
+
             if (sectionId === 'deposits') loadAdminDeposits();
             if (sectionId === 'users') loadAdminUsers();
             if (sectionId === 'market') loadAdminMarket();
             if (sectionId === 'chat') loadAdminChatList();
-        }
+        };
 
-        // --- UI UPDATE ---
         function updateUI() {
-            if (!db.currentUser) return;
-            const u = db.currentUser; // Reference to object in db array would be better but this works for display
+            if (!currentUserData) return;
 
-            // Reload user from DB to get fresh data
-            const freshUser = db.users.find(x => x.email === u.email);
-            db.currentUser = freshUser;
-
-            document.getElementById('header-name').innerText = freshUser.name;
-            document.getElementById('header-balance').innerText = freshUser.balanceTK + " TK";
-            document.getElementById('header-avatar').src = freshUser.avatar;
+            // Header
+            document.getElementById('header-name').innerText = currentUserData.name;
+            document.getElementById('header-balance').innerText = currentUserData.balanceTK.toFixed(2) + " TK";
+            document.getElementById('header-avatar').src = currentUserData.avatar;
 
             // Profile
-            document.getElementById('profile-name').innerText = freshUser.name;
-            document.getElementById('profile-email').innerText = freshUser.email;
-            if (freshUser.isPremium) {
+            document.getElementById('profile-name').innerText = currentUserData.name;
+            document.getElementById('profile-email').innerText = currentUserData.email;
+            document.getElementById('profile-avatar').src = currentUserData.avatar;
+
+            if (currentUserData.isPremium) {
                 document.getElementById('profile-status').innerHTML = `<span class="text-blue"><i class="fas fa-check-circle blue-tick"></i> Premium User</span>`;
                 document.getElementById('header-premium-badge').classList.remove('hidden');
             } else {
@@ -873,67 +923,49 @@ window.dbFirebase = dbFirebase;
             }
 
             // Wallet
-            document.getElementById('wallet-tk').innerText = freshUser.balanceTK.toFixed(2);
-            document.getElementById('wallet-pkr').innerText = (freshUser.balanceTK * db.market.usdtRate).toFixed(2); // Assuming 1 TK = 1 USDT for simplicity in conversion logic, or market logic
-            
-            // Withdraw Page logic
-            const fee = freshUser.isPremium ? 0 : db.settings.withdrawFee * 100;
-            document.getElementById('fee-display').innerText = `Fee: ${fee}%`;
-            document.getElementById('withdraw-bal-display').innerText = freshUser.balanceTK.toFixed(2) + " TK";
+            const pkrValue = currentUserData.balanceTK * marketData.usdtRate;
+            document.getElementById('wallet-tk').innerText = currentUserData.balanceTK.toFixed(2);
+            document.getElementById('wallet-pkr').innerText = pkrValue.toFixed(2);
 
-            // History
+            // Withdraw Fee
+            const fee = currentUserData.isPremium ? 0 : appSettings.withdrawFee * 100;
+            document.getElementById('fee-display').innerText = `Fee: ${fee}%`;
+            document.getElementById('withdraw-bal-display').innerText = currentUserData.balanceTK.toFixed(2) + " TK";
+
+            // History (Deposits for this user)
             renderHistory();
         }
 
-        function renderHistory() {
-            const list = document.getElementById('transaction-list');
-            list.innerHTML = "";
-            // Combine deposits and withdrawals for history view logic (mocking history for now)
-            const myDeposits = db.deposits.filter(d => d.userEmail === db.currentUser.email).reverse();
+        // --- MARKET LOGIC ---
+        function updateMarketUI() {
+            document.getElementById('market-price').innerText = marketData.tkPrice.toFixed(2);
+            document.getElementById('rate-usdt').innerText = marketData.usdtRate + " PKR";
+            document.getElementById('rate-pkr').innerText = (marketData.tkPrice * marketData.usdtRate).toFixed(2) + " PKR";
             
-            if(myDeposits.length === 0) list.innerHTML = "<div style='text-align:center; color:#555;'>No transactions yet.</div>";
-
-            myDeposits.forEach(tx => {
-                let color = tx.status === 'approved' ? 'text-green' : (tx.status === 'rejected' ? 'text-danger' : 'text-orange');
-                let icon = tx.method === 'usdt' ? 'fa-dollar-sign' : 'fa-mobile-alt';
-                
-                list.innerHTML += `
-                <div style="background:var(--bg-card); padding:10px; border-radius:6px; border:1px solid #333; display:flex; justify-content:space-between; align-items:center;">
-                    <div style="display:flex; align-items:center; gap:10px;">
-                        <div style="background:#333; width:40px; height:40px; border-radius:50%; display:flex; align-items:center; justify-content:center;"><i class="fas ${icon} text-orange"></i></div>
-                        <div>
-                            <div style="font-weight:bold;">Deposit (${tx.method})</div>
-                            <div style="font-size:0.8rem; color:#aaa;">${tx.date}</div>
-                        </div>
-                    </div>
-                    <div style="text-align:right;">
-                        <div class="${color}">+${tx.amount} TK</div>
-                        <div class="status-badge status-${tx.status}">${tx.status.toUpperCase()}</div>
-                    </div>
-                </div>`;
-               if(cb) cb();
-   });
-        }
-
-        // --- MARKET ---
-        function updateMarket() {
-            if (db.market.mode === 'auto') {
-                // Random fluctuation
-                const change = (Math.random() - 0.5) * 0.1;
-                db.market.tkPrice = Math.max(0.1, db.market.tkPrice + change);
-            }
-            
-            // Update DOM
-            document.getElementById('market-price').innerText = db.market.tkPrice.toFixed(2);
-            document.getElementById('rate-usdt').innerText = db.market.usdtRate + " PKR";
-            // Just a mock calc for PKR rate of TK based on USDT rate
-            document.getElementById('rate-pkr').innerText = (db.market.tkPrice * db.market.usdtRate).toFixed(2) + " PKR";
-
             drawChart();
-            if(db.currentUser && db.currentUser.role === 'admin') {
-                 // Update admin inputs if in manual mode (optional sync)
-            }
+
+            // Auto update Admin inputs if they are open
+            const adminPriceInput = document.getElementById('admin-tk-price');
+            if(adminPriceInput) adminPriceInput.value = marketData.tkPrice;
+            const adminRateInput = document.getElementById('admin-usdt-rate');
+            if(adminRateInput) adminRateInput.value = marketData.usdtRate;
+            const adminModeSelect = document.getElementById('admin-market-mode');
+            if(adminModeSelect) adminModeSelect.value = marketData.mode;
         }
+
+        // Simulated Loop for Market Auto Mode (Only admin writes, but we simulate locally for visual)
+        setInterval(() => {
+            if (marketData.mode === 'auto') {
+                const change = (Math.random() - 0.5) * 0.05;
+                let newPrice = Math.max(0.1, marketData.tkPrice + change);
+                // Write to DB so everyone sees it
+                update(ref(db, 'market'), {
+                    tkPrice: newPrice,
+                    usdtRate: marketData.usdtRate,
+                    mode: 'auto'
+                });
+            }
+        }, 3000);
 
         function drawChart() {
             const canvas = document.getElementById('marketCanvas');
@@ -941,14 +973,13 @@ window.dbFirebase = dbFirebase;
             canvas.width = canvas.parentElement.offsetWidth;
             canvas.height = canvas.parentElement.offsetHeight;
 
-            // Generate pseudo history based on current price
             const points = [];
-            let price = db.market.tkPrice;
+            let price = marketData.tkPrice;
             for(let i=0; i<20; i++) {
                 points.unshift(price);
                 price = price * (1 + (Math.random() - 0.5) * 0.05);
             }
-            points.push(db.market.tkPrice); // current
+            points.push(marketData.tkPrice);
 
             const max = Math.max(...points) * 1.05;
             const min = Math.min(...points) * 0.95;
@@ -965,405 +996,379 @@ window.dbFirebase = dbFirebase;
                 const y = canvas.height - ((p - min) / range) * canvas.height;
                 if(i===0) ctx.moveTo(x, y);
                 else ctx.lineTo(x, y);
-               if(cb) cb();
-   });
+            });
             ctx.stroke();
         }
 
-        // --- DEPOSIT ---
-        function updateDepositDetails() {
+        // --- WALLET FUNCTIONS ---
+        window.updateDepositDetails = () => {
             const method = document.getElementById('deposit-method').value;
             const displayNum = document.getElementById('deposit-number');
             const displayName = document.getElementById('deposit-name');
             
-            if (method === 'easypaisa') { displayNum.innerText = db.settings.easypaisa; displayName.innerText = "Ali Khan - Easypaisa"; }
-            else if (method === 'jazzcash') { displayNum.innerText = db.settings.jazzcash; displayName.innerText = "Ali Khan - JazzCash"; }
-            else { displayNum.innerText = db.settings.usdt; displayName.innerText = "USDT (TRC20)"; }
+            if (method === 'easypaisa') { displayNum.innerText = appSettings.easypaisa; displayName.innerText = "Ali Khan - Easypaisa"; }
+            else if (method === 'jazzcash') { displayNum.innerText = appSettings.jazzcash; displayName.innerText = "Ali Khan - JazzCash"; }
+            else { displayNum.innerText = appSettings.usdt; displayName.innerText = "USDT (TRC20)"; }
             calculateDeposit();
-        }
+        };
 
-        function calculateDeposit() {
+        window.calculateDeposit = () => {
             const pkr = parseFloat(document.getElementById('deposit-amount').value) || 0;
-            const tk = pkr / db.market.usdtRate; // Assuming 1 USDT = 280 PKR, and we are buying TK with PKR. Wait.
-            // Logic: User sends PKR -> buys USDT -> buys TK?
-            // Simplified: 1 TK = 1 USDT (internal value).
-            // User sends 280 PKR -> Receives 1 TK.
-            const receive = pkr / db.market.usdtRate;
+            const receive = pkr / marketData.usdtRate;
             document.getElementById('deposit-calc-receive').innerText = receive.toFixed(2);
-        }
+        };
 
-        function copyDepositNumber() {
-            const num = document.getElementById('deposit-number').innerText;
-            navigator.clipboard.writeText(num);
-            showToast("Number Copied!");
-        }
+        window.copyDepositNumber = () => {
+            navigator.clipboard.writeText(document.getElementById('deposit-number').innerText);
+            showToast("Copied!");
+        };
 
-        function submitDeposit() {
+        window.submitDeposit = () => {
             const amount = parseFloat(document.getElementById('deposit-amount').value);
-            const ref = document.getElementById('deposit-ref').value;
+            const refId = document.getElementById('deposit-ref').value;
             const method = document.getElementById('deposit-method').value;
 
-            if (!amount || amount < 100) return showToast("Minimum deposit 100 PKR", "error");
-            if (!ref) return showToast("Enter Transaction ID", "error");
+            if (!amount || amount < 100) return showToast("Min deposit 100 PKR", "error");
+            if (!refId) return showToast("Enter Transaction ID", "error");
 
-            const receiveTk = amount / db.market.usdtRate;
-            
-            db.deposits.push({
-                id: Date.now(),
-                userEmail: db.currentUser.email,
+            const receiveTk = amount / marketData.usdtRate;
+
+            const depositData = {
+                userId: currentUserData.uid,
+                userEmail: currentUserData.email,
                 method: method,
-                amount: receiveTk.toFixed(2),
-                ref: ref,
+                amount: receiveTk,
+                ref: refId,
                 date: new Date().toLocaleString(),
                 status: 'pending'
-               if(cb) cb();
-   });
+            };
 
-            saveDB();
-            showToast("Deposit Request Submitted!");
-            showSection('wallet');
-        }
+            push(ref(db, 'deposits'), depositData).then(() => {
+                showToast("Request Submitted!");
+                document.getElementById('deposit-amount').value = '';
+                document.getElementById('deposit-ref').value = '';
+                showSection('wallet');
+            });
+        };
 
-        // --- WITHDRAW ---
-        function submitWithdraw() {
+        window.submitWithdraw = () => {
             const amount = parseFloat(document.getElementById('withdraw-amount').value);
             const method = document.getElementById('withdraw-method').value;
             const account = document.getElementById('withdraw-account').value;
 
-            if (!amount || amount < db.settings.minWithdraw) return showToast(`Min withdraw ${db.settings.minWithdraw} TK`, "error");
-            if (!account) return showToast("Enter account details", "error");
+            if (!amount || amount < appSettings.minWithdraw) return showToast("Min withdraw " + appSettings.minWithdraw, "error");
+            if (!account) return showToast("Enter details", "error");
 
-            const feeRate = db.currentUser.isPremium ? 0 : db.settings.withdrawFee;
+            const feeRate = currentUserData.isPremium ? 0 : appSettings.withdrawFee;
             const fee = amount * feeRate;
             const total = amount + fee;
 
-            if (total > db.currentUser.balanceTK) return showToast("Insufficient balance including fee", "error");
+            if (total > currentUserData.balanceTK) return showToast("Insufficient balance", "error");
 
-            // Deduct balance
-            const u = db.users.find(u => u.email === db.currentUser.email);
-            u.balanceTK -= total;
-
-            db.withdrawals.push({
-                id: Date.now(),
-                userEmail: db.currentUser.email,
+            // Deduct Balance Locally (Optimistic UI) + DB Transaction
+            const updates = {};
+            updates['users/' + currentUserData.uid + '/balanceTK'] = currentUserData.balanceTK - total;
+            
+            const withdrawData = {
+                userId: currentUserData.uid,
+                userEmail: currentUserData.email,
                 method: method,
                 account: account,
                 amount: amount,
                 fee: fee,
                 date: new Date().toLocaleString(),
                 status: 'pending'
-               if(cb) cb();
-   });
+            };
 
-            saveDB();
-            showToast("Withdrawal Requested!");
-            updateUI();
-            showSection('wallet');
-        }
+            const newWithdrawKey = push(child(ref(db), 'withdrawals')).key;
+            updates['withdrawals/' + newWithdrawKey] = withdrawData;
 
-        // --- TRANSFER ---
-        function submitTransfer() {
+            update(ref(db), updates).then(() => {
+                showToast("Withdrawal Requested!");
+                document.getElementById('withdraw-amount').value = '';
+                document.getElementById('withdraw-account').value = '';
+                showSection('wallet');
+            });
+        };
+
+        window.submitTransfer = () => {
             const email = document.getElementById('transfer-email').value;
             const amount = parseFloat(document.getElementById('transfer-amount').value);
 
-            if (!email || email === db.currentUser.email) return showToast("Invalid email", "error");
+            if (!email || email === currentUserData.email) return showToast("Invalid email", "error");
             if (!amount || amount <= 0) return showToast("Invalid amount", "error");
-            if (amount > db.currentUser.balanceTK) return showToast("Insufficient balance", "error");
+            if (amount > currentUserData.balanceTK) return showToast("Insufficient balance", "error");
 
-            const receiver = db.users.find(u => u.email === email);
-            if (!receiver) return showToast("User not found", "error");
+            // Find receiver UID by Email (Requires loading all users, simplified here by logic)
+            // In a real app, index emails. Here we iterate cached users if available or query.
+            // For simplicity in this structure, we assume we iterate.
+            
+            get(ref(db, 'users')).then((snapshot) => {
+                let receiverUid = null;
+                if (snapshot.exists()) {
+                    snapshot.forEach((childSnapshot) => {
+                        if (childSnapshot.val().email === email) {
+                            receiverUid = childSnapshot.key;
+                        }
+                    });
+                }
 
-            // Execute Transfer
-            const sender = db.users.find(u => u.email === db.currentUser.email);
-            sender.balanceTK -= amount;
-            receiver.balanceTK += amount;
+                if (receiverUid) {
+                    const updates = {};
+                    updates['users/' + currentUserData.uid + '/balanceTK'] = currentUserData.balanceTK - amount;
+                    updates['users/' + receiverUid + '/balanceTK'] = (snapshot.val()[receiverUid].balanceTK || 0) + amount;
 
-            saveDB();
-            showToast("Transfer Successful!");
-            updateUI();
-            showSection('wallet');
-        }
+                    update(ref(db), updates).then(() => {
+                        showToast("Transfer Successful!");
+                        document.getElementById('transfer-amount').value = '';
+                        document.getElementById('transfer-email').value = '';
+                        showSection('wallet');
+                    });
+                } else {
+                    showToast("User not found", "error");
+                }
+            });
+        };
 
-        // --- PREMIUM ---
-        function upgradePremium() {
-            const u = db.users.find(u => u.email === db.currentUser.email);
-            if (u.balanceTK >= 100) {
-                u.balanceTK -= 100;
-                u.isPremium = true;
-                saveDB();
-                showToast("Upgraded to Premium!");
-                updateUI();
+        window.upgradePremium = () => {
+            if (currentUserData.balanceTK >= 100) {
+                update(ref(db, 'users/' + currentUserData.uid), {
+                    balanceTK: currentUserData.balanceTK - 100,
+                    isPremium: true
+                }).then(() => showToast("Upgraded!"));
             } else {
-                showToast("Not enough balance (Need 100 TK)", "error");
+                showToast("Need 100 TK", "error");
             }
-        }
+        };
 
-        // --- CHAT ---
-        function renderChat() {
-            if (db.currentUser && db.currentUser.role !== 'admin' && document.getElementById('view-chat').classList.contains('hidden') === false) {
+        // --- CHAT SYSTEM ---
+        function loadUserChat() {
+            const chatRef = ref(db, 'chats/' + currentUserData.uid);
+            onValue(chatRef, (snapshot) => {
                 const container = document.getElementById('chat-messages');
-                const userChat = db.chats.find(c => c.userEmail === db.currentUser.email);
+                container.innerHTML = "";
+                const data = snapshot.val();
                 
-                if (!userChat) {
-                    container.innerHTML = `<div style="text-align:center; color:#777; margin-top:20px;">Start a conversation with support.</div>`;
+                if (!data) {
+                    container.innerHTML = `<div style="text-align:center; color:#777; margin-top:20px;">Start conversation.</div>`;
                     return;
                 }
 
-                container.innerHTML = "";
-                userChat.messages.forEach(msg => {
+                Object.values(data).forEach(msg => {
                     const cls = msg.sender === 'admin' ? 'msg-admin' : 'msg-user';
                     container.innerHTML += `<div class="message ${cls}">${msg.text}</div>`;
-                   if(cb) cb();
-   });
+                });
                 container.scrollTop = container.scrollHeight;
-            }
+            });
         }
 
-        function sendChatMessage() {
+        window.sendChatMessage = () => {
             const input = document.getElementById('chat-input');
             const text = input.value;
             if (!text) return;
 
-            let chat = db.chats.find(c => c.userEmail === db.currentUser.email);
-            if (!chat) {
-                chat = { userEmail: db.currentUser.email, messages: [] };
-                db.chats.push(chat);
-            }
-
-            chat.messages.push({ sender: 'user', text: text, time: new Date() });
-            saveDB();
-            input.value = "";
-            renderChat();
-
-            // Auto Reply Simulation
-            setTimeout(() => {
-                chat.messages.push({ sender: 'admin', text: "Thanks for your message! Admin will reply soon.", time: new Date() });
-                saveDB();
-                renderChat();
-                showToast("New Admin Message");
-            }, 2000);
-        }
+            push(ref(db, 'chats/' + currentUserData.uid), {
+                sender: 'user',
+                text: text,
+                time: Date.now()
+            }).then(() => {
+                input.value = "";
+            });
+        };
 
         // --- ADMIN FUNCTIONS ---
-        function loadAdminData() {
-            document.getElementById('admin-dep-pending-count').innerText = db.deposits.filter(d => d.status === 'pending').length;
-        }
+        window.adminUpdateMarket = () => {
+            const newPrice = parseFloat(document.getElementById('admin-tk-price').value);
+            const newRate = parseFloat(document.getElementById('admin-usdt-rate').value);
+            const newMode = document.getElementById('admin-market-mode').value;
+
+            update(ref(db, 'market'), {
+                tkPrice: newPrice,
+                usdtRate: newRate,
+                mode: newMode
+            }).then(() => showToast("Market Updated"));
+        };
+
+        window.postNews = () => {
+            const headline = document.getElementById('admin-news-headline').value;
+            if(headline) {
+                push(ref(db, 'news'), {
+                    title: headline,
+                    date: new Date().toLocaleDateString()
+                });
+                document.getElementById('admin-news-headline').value = '';
+                showToast("News Posted");
+            }
+        };
 
         function loadAdminDeposits() {
             const tbody = document.getElementById('admin-deposit-list');
-            tbody.innerHTML = "";
-            const pending = db.deposits.filter(d => d.status === 'pending');
-
-            if (pending.length === 0) tbody.innerHTML = "<tr><td colspan='5'>No pending deposits</td></tr>";
-
-            pending.forEach((d, index) => {
-                tbody.innerHTML += `
-                <tr>
-                    <td>${d.userEmail}</td>
-                    <td>${d.method}</td>
-                    <td>${d.amount}</td>
-                    <td>${d.ref}</td>
-                    <td>
-                        <button class="btn btn-sm" style="background:green; padding:2px 5px;" onclick="adminApproveDeposit(${d.id})"><i class="fas fa-check"></i></button>
-                        <button class="btn btn-sm" style="background:red; padding:2px 5px;" onclick="adminRejectDeposit(${d.id})"><i class="fas fa-times"></i></button>
-                    </td>
-                </tr>`;
-               if(cb) cb();
-   });
+            onValue(ref(db, 'deposits'), (snapshot) => {
+                tbody.innerHTML = "";
+                let count = 0;
+                const data = snapshot.val();
+                
+                if(data) {
+                    Object.entries(data).reverse().forEach(([key, d]) => {
+                        if (d.status === 'pending') {
+                            count++;
+                            tbody.innerHTML += `
+                            <tr>
+                                <td>${d.userEmail}</td>
+                                <td>${d.method}</td>
+                                <td>${d.amount.toFixed(2)}</td>
+                                <td>${d.ref}</td>
+                                <td>
+                                    <button class="btn-sm" style="background:green; color:white;" onclick="handleDeposit('${key}', 'approved')">✔</button>
+                                    <button class="btn-sm" style="background:red; color:white;" onclick="handleDeposit('${key}', 'rejected')">✖</button>
+                                </td>
+                            </tr>`;
+                        }
+                    });
+                }
+                if (count === 0) tbody.innerHTML = "<tr><td colspan='5'>No pending deposits</td></tr>";
+                document.getElementById('admin-dep-pending-count').innerText = count;
+            });
         }
 
-        function adminApproveDeposit(id) {
-            const dep = db.deposits.find(d => d.id === id);
-            if (dep) {
-                dep.status = 'approved';
-                const u = db.users.find(u => u.email === dep.userEmail);
-                if (u) u.balanceTK += parseFloat(dep.amount);
-                saveDB();
-                loadAdminDeposits();
-                loadAdminData();
-                showToast("Deposit Approved");
-            }
-        }
-
-        function adminRejectDeposit(id) {
-            const dep = db.deposits.find(d => d.id === id);
-            if (dep) {
-                dep.status = 'rejected';
-                saveDB();
-                loadAdminDeposits();
-                loadAdminData();
-                showToast("Deposit Rejected");
-            }
-        }
+        window.handleDeposit = (key, status) => {
+            const depositRef = ref(db, 'deposits/' + key);
+            get(depositRef).then((snap) => {
+                const d = snap.val();
+                if(d && d.status === 'pending') {
+                    // Update status
+                    update(depositRef, { status: status });
+                    
+                    // If approved, add balance to user
+                    if (status === 'approved') {
+                        const userRef = ref(db, 'users/' + d.userId + '/balanceTK');
+                        // Transactional update needed ideally, but simple run for now
+                        get(userRef).then(uSnap => {
+                            const currentBal = uSnap.val() || 0;
+                            set(userRef, currentBal + parseFloat(d.amount));
+                        });
+                    }
+                    showToast(`Deposit ${status}`);
+                }
+            });
+        };
 
         function loadAdminUsers() {
             const tbody = document.getElementById('admin-user-list');
-            tbody.innerHTML = "";
-            db.users.forEach(u => {
-                if (u.role === 'admin') return;
-                tbody.innerHTML += `
-                <tr>
-                    <td>${u.name}</td>
-                    <td>${u.email}</td>
-                    <td style="color:#aaa;">${u.pass}</td>
-                    <td>${u.balanceTK.toFixed(2)}</td>
-                    <td>${u.isPremium ? '<span class="text-blue">Pro</span>' : 'User'}</td>
-                </tr>`;
-               if(cb) cb();
-   });
+            onValue(ref(db, 'users'), (snapshot) => {
+                tbody.innerHTML = "";
+                const data = snapshot.val();
+                if(data) {
+                    Object.values(data).forEach(u => {
+                        tbody.innerHTML += `
+                        <tr>
+                            <td>${u.name}</td>
+                            <td>${u.email}</td>
+                            <td>${u.balanceTK.toFixed(2)}</td>
+                            <td>${u.role}</td>
+                        </tr>`;
+                    });
+                }
+            });
         }
 
-        function loadAdminMarket() {
-            document.getElementById('admin-tk-price').value = db.market.tkPrice;
-            document.getElementById('admin-usdt-rate').value = db.market.usdtRate;
-            document.getElementById('admin-market-mode').value = db.market.mode;
-        }
-
-        function adminUpdateMarket() {
-            db.market.tkPrice = parseFloat(document.getElementById('admin-tk-price').value);
-            db.market.usdtRate = parseFloat(document.getElementById('admin-usdt-rate').value);
-            db.market.mode = document.getElementById('admin-market-mode').value;
-            saveDB();
-            showToast("Market Settings Updated");
-        }
-
-        function postNews() {
-            const title = document.getElementById('admin-news-headline').value;
-            if (title) {
-                db.news.unshift({ title: title, date: new Date().toLocaleDateString() });
-                saveDB();
-                renderTicker();
-                document.getElementById('admin-news-headline').value = "";
-                showToast("News Posted");
-            }
-        }
-
-        function renderTicker() {
-            const ticker = document.getElementById('news-ticker');
-            const feed = document.getElementById('news-feed');
-            
-            let html = "";
-            let feedHtml = "";
-            
-            db.news.forEach(n => {
-                html += `<span class="ticker-item">📢 ${n.title}</span>`;
-                feedHtml += `
-                <div style="background:var(--bg-card); padding:10px; border-radius:6px; font-size:0.9rem;">
-                    <div>${n.title}</div>
-                    <small style="color:#777;">${n.date}</small>
-                </div>`;
-               if(cb) cb();
-   });
-
-            ticker.innerHTML = html;
-            if(feed) feed.innerHTML = feedHtml;
-        }
-
-        // Admin Chat
-        let currentAdminChatUser = null;
-
+        // Admin Chat Logic
         function loadAdminChatList() {
-            const list = document.getElementById('admin-chat-list');
-            list.innerHTML = "";
-            if(db.chats.length === 0) list.innerHTML = "No chats yet";
+            const listDiv = document.getElementById('admin-chat-list');
+            listDiv.innerHTML = "Loading chats...";
             
-            db.chats.forEach(c => {
-                list.innerHTML += `<div onclick="openAdminChat('${c.userEmail}')" style="background:#333; padding:10px; margin-bottom:5px; cursor:pointer; border-radius:4px;">
-                    ${c.userEmail} (${c.messages.length} msgs)
-                </div>`;
-               if(cb) cb();
-   });
-            document.getElementById('admin-chat-window').classList.add('hidden');
+            onValue(ref(db, 'chats'), (snapshot) => {
+                listDiv.innerHTML = "";
+                const data = snapshot.val();
+                if(!data) { listDiv.innerHTML = "No chats yet."; return; }
+
+                Object.keys(data).forEach(uid => {
+                    // We need to fetch user email to show in list. 
+                    // Since we are already listening to all users or might need to fetch specific.
+                    // Simplified: Show UID or fetch specific.
+                    get(ref(db, 'users/' + uid)).then(uSnap => {
+                        const uEmail = uSnap.exists() ? uSnap.val().email : uid;
+                        const btn = document.createElement('button');
+                        btn.className = "btn btn-outline";
+                        btn.style.marginBottom = "5px";
+                        btn.style.textAlign = "left";
+                        btn.innerHTML = `<i class="fas fa-user"></i> ${uEmail}`;
+                        btn.onclick = () => openAdminChat(uid);
+                        listDiv.appendChild(btn);
+                    });
+                });
+            });
         }
 
-        function openAdminChat(email) {
-            currentAdminChatUser = email;
+        function openAdminChat(uid) {
+            adminSelectedChatUser = uid;
             document.getElementById('admin-chat-window').classList.remove('hidden');
-            renderAdminChatMessages();
+            const msgsDiv = document.getElementById('admin-chat-messages');
+            
+            onValue(ref(db, 'chats/' + uid), (snap) => {
+                msgsDiv.innerHTML = "";
+                const data = snap.val();
+                if(data) {
+                    Object.values(data).forEach(msg => {
+                         const cls = msg.sender === 'admin' ? 'msg-admin' : 'msg-user';
+                         // Align admin right in admin view for clarity
+                         const align = msg.sender === 'admin' ? 'align-self: flex-end; background:var(--blue);' : 'align-self: flex-start; background:#333;';
+                         msgsDiv.innerHTML += `<div class="message" style="${align}">${msg.text}</div>`;
+                    });
+                    msgsDiv.scrollTop = msgsDiv.scrollHeight;
+                }
+            });
         }
 
-        function renderAdminChatMessages() {
-            const container = document.getElementById('admin-chat-messages');
-            const chat = db.chats.find(c => c.userEmail === currentAdminChatUser);
-            if (!chat) return;
-
-            container.innerHTML = "";
-            chat.messages.forEach(msg => {
-                const cls = msg.sender === 'admin' ? 'msg-admin' : 'msg-user';
-                container.innerHTML += `<div class="message ${cls}">${msg.text}</div>`;
-               if(cb) cb();
-   });
-            container.scrollTop = container.scrollHeight;
-        }
-
-        function adminSendReply() {
+        window.adminSendReply = () => {
+            if(!adminSelectedChatUser) return;
             const input = document.getElementById('admin-chat-input');
             const text = input.value;
-            if(!text || !currentAdminChatUser) return;
+            if(text) {
+                push(ref(db, 'chats/' + adminSelectedChatUser), {
+                    sender: 'admin',
+                    text: text,
+                    time: Date.now()
+                });
+                input.value = "";
+            }
+        };
 
-            const chat = db.chats.find(c => c.userEmail === currentAdminChatUser);
-            chat.messages.push({ sender: 'admin', text: text, time: new Date() });
-            saveDB();
-            input.value = "";
-            renderAdminChatMessages();
+        function renderHistory() {
+            const list = document.getElementById('transaction-list');
+            list.innerHTML = "";
+            // Listen to deposits for this user
+            onValue(ref(db, 'deposits'), (snapshot) => {
+                list.innerHTML = "";
+                const data = snapshot.val();
+                if(data) {
+                    Object.values(data).reverse().forEach(d => {
+                        if(d.userId === currentUserData.uid) {
+                            let color = d.status === 'approved' ? 'text-green' : (d.status === 'rejected' ? 'text-danger' : 'text-orange');
+                            let icon = d.method === 'usdt' ? 'fa-dollar-sign' : 'fa-mobile-alt';
+                            list.innerHTML += `
+                            <div style="background:var(--bg-card); padding:10px; border-radius:6px; border:1px solid #333; display:flex; justify-content:space-between; align-items:center;">
+                                <div style="display:flex; align-items:center; gap:10px;">
+                                    <div style="background:#333; width:40px; height:40px; border-radius:50%; display:flex; align-items:center; justify-content:center;"><i class="fas ${icon} text-orange"></i></div>
+                                    <div>
+                                        <div style="font-weight:bold;">Deposit (${d.method})</div>
+                                        <div style="font-size:0.8rem; color:#aaa;">${d.date}</div>
+                                    </div>
+                                </div>
+                                <div style="text-align:right;">
+                                    <div class="${color}">+${d.amount.toFixed(2)} TK</div>
+                                    <div class="status-badge status-${d.status}">${d.status.toUpperCase()}</div>
+                                </div>
+                            </div>`;
+                        }
+                    });
+                }
+                if(list.innerHTML === "") list.innerHTML = "<div style='text-align:center; color:#555;'>No transactions yet.</div>";
+            }, {onlyOnce: true});
         }
 
-        // --- UTILS ---
-        function showToast(msg, type="success") {
-            const container = document.getElementById('toast-container');
-            const toast = document.createElement('div');
-            toast.className = 'toast';
-            if(type==='error') toast.style.borderLeftColor = 'red';
-            toast.innerText = msg;
-            container.appendChild(toast);
-            setTimeout(() => toast.remove(), 3000);
-        }
-
-        function showAboutModal() {
-            // Simple modal implementation using native confirm for now or simple alert substitute
-            const modalHtml = `
-            <div style="position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); z-index:10000; display:flex; justify-content:center; align-items:center;">
-                <div style="background:var(--bg-card); padding:20px; border-radius:10px; max-width:90%; width:300px; border:1px solid var(--primary);">
-                    <h3 class="text-orange">About App</h3>
-                    <p style="margin:10px 0; color:#ccc;">Version 1.0<br>Tk Coin Wallet & Trading Simulator.</p>
-                    <button class="btn" onclick="this.parentElement.parentElement.remove()">Close</button>
-                </div>
-            </div>`;
-            document.body.insertAdjacentHTML('beforeend', modalHtml);
-        }
-
-        // Start
-        
-loadDBFirebase(()=>{ initApp(); });
-
-
+        // --- START ---
+        initApp();
     </script>
-
-<script>
-// ===== FIREBASE OVERRIDE =====
-function saveDB(){
-   if(!window.dbFirebase) return;
-   fbSet(fbRef(dbFirebase, "tkcoinDB"), db);
-}
-
-function loadDBFirebase(cb){
-   fbGet(fbRef(dbFirebase, "tkcoinDB")).then(snap=>{
-      if(snap.exists()){
-         db = snap.val();
-         if(typeof updateUI==="function") updateUI();
-      }
-      if(cb) cb();
-   });
-}
-
-fbOn(fbRef(dbFirebase, "tkcoinDB"), snap=>{
-   if(snap.exists()){
-      db = snap.val();
-      if(typeof updateUI==="function") updateUI();
-   }
-});
-// ============================
-</script>
-
 </body>
 </html>
