@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TK Coin - Trading & Wallet App (Firebase v3)</title>
+    <title>TK Coin - Trading & Wallet App (Final)</title>
     <style>
         :root {
             --primary: #ff6600; /* Orange */
@@ -283,8 +283,9 @@
             <section id="view-market" class="section">
                 <div class="balance-card">
                     <div class="balance-title">Current TK Price</div>
-                    <div class="balance-amount"><span id="market-price">0.00</span> USDT</div>
-                    <small style="opacity: 0.8;">+2.4% (24h)</small>
+                    <!-- CHANGED: Now shows PKR -->
+                    <div class="balance-amount"><span id="market-price">0.00</span> PKR</div>
+                    <small style="opacity: 0.8;">Live Market</small>
                 </div>
 
                 <div style="display: flex; justify-content: space-between; align-items: center;">
@@ -298,15 +299,11 @@
 
                 <div style="margin-top: 20px;">
                     <h3>Live Rates</h3>
-                    <!-- Restored to show both USDT and PKR -->
-                    <div style="display: flex; justify-content: space-between; background: var(--bg-card); padding: 15px; margin-top: 10px; border-radius: 8px;">
+                    <!-- CHANGED: Removed USDT row, kept only PKR -->
+                    <div style="display: flex; justify-content: center; background: var(--bg-card); padding: 20px; margin-top: 10px; border-radius: 8px;">
                         <div>
-                            <div style="font-size: 0.8rem; color: #aaa;">1 TK</div>
-                            <div style="font-weight: bold;" id="rate-usdt">Loading...</div>
-                        </div>
-                        <div>
-                            <div style="font-size: 0.8rem; color: #aaa;">1 TK</div>
-                            <div style="font-weight: bold;" id="rate-pkr">Loading...</div>
+                            <div style="font-size: 0.9rem; color: #aaa; text-align: center;">1 TK</div>
+                            <div style="font-weight: bold; font-size: 1.2rem; text-align: center; color: var(--primary);" id="rate-pkr">Loading... PKR</div>
                         </div>
                     </div>
                 </div>
@@ -324,7 +321,6 @@
                 <div class="balance-card">
                     <div class="balance-title">Total Balance</div>
                     <div class="balance-amount"><span id="wallet-tk">0</span> TK</div>
-                    <!-- Restored PKR display -->
                     <div style="font-size: 1rem; opacity: 0.9;"><span id="wallet-pkr">0</span> PKR</div>
                 </div>
 
@@ -378,6 +374,7 @@
                     </div>
                 </div>
 
+                <!-- USDT Label here -->
                 <div class="input-group">
                     <label>Amount Sent (USDT)</label>
                     <input type="number" id="deposit-amount" oninput="calculateDeposit()" placeholder="e.g. 10 USDT">
@@ -424,6 +421,7 @@
                     <input type="number" id="withdraw-amount" placeholder="Min 50 TK" oninput="calculateWithdraw()">
                 </div>
                 
+                <!-- USDT Label here -->
                 <div style="background: #222; padding: 10px; border-radius: 6px; margin-bottom: 20px; color: #aaa;">
                     <small>Estimated Receive: <strong style="color: white; font-size: 1.1rem;"><span id="withdraw-calc-usdt">0.00</span> USDT</strong></small>
                 </div>
@@ -545,13 +543,7 @@
                     <label>USDT to PKR Rate (For Local Payments)</label>
                     <input type="number" id="admin-usdt-rate" onchange="adminUpdateMarket()">
                 </div>
-                <div class="input-group">
-                    <label>Market Mode</label>
-                    <select id="admin-market-mode" onchange="adminUpdateMarket()">
-                        <option value="auto">Auto (Random)</option>
-                        <option value="manual">Manual</option>
-                    </select>
-                </div>
+                <!-- REMOVED: Market Mode Dropdown -->
             </section>
 
             <!-- Admin: Deposits -->
@@ -690,7 +682,7 @@
 
         // --- GLOBAL STATE ---
         let currentUserData = null; 
-        let marketData = { tkPrice: 1.50, usdtRate: 280, mode: 'auto' };
+        let marketData = { tkPrice: 1.50, usdtRate: 280 }; // Removed 'mode'
         let appSettings = {
             easypaisa: '0300-1234567',
             jazzcash: '0321-7654321',
@@ -734,7 +726,6 @@
                 if (data) {
                     marketData = data;
                     updateMarketUI();
-                    // Also update UI if wallet is open
                     if (currentUserData) updateUI();
                 }
             });
@@ -897,46 +888,49 @@
 
         // --- MARKET LOGIC ---
         function updateMarketUI() {
-            document.getElementById('market-price').innerText = marketData.tkPrice.toFixed(2);
-            document.getElementById('rate-usdt').innerText = marketData.tkPrice.toFixed(2) + " USDT";
-            
-            // Calculate and Show PKR in Market
+            // Calculate TK Price in PKR
             const tkPricePKR = marketData.tkPrice * marketData.usdtRate;
+            
+            // Update Main Price Display to PKR
+            document.getElementById('market-price').innerText = tkPricePKR.toFixed(2);
+            
+            // Update Live Rates to show only PKR
             document.getElementById('rate-pkr').innerText = tkPricePKR.toFixed(2) + " PKR";
 
             drawChart();
+            
+            // Sync Admin Inputs
             const adminPriceInput = document.getElementById('admin-tk-price');
             if(adminPriceInput) adminPriceInput.value = marketData.tkPrice;
             const adminRateInput = document.getElementById('admin-usdt-rate');
             if(adminRateInput) adminRateInput.value = marketData.usdtRate;
-            const adminModeSelect = document.getElementById('admin-market-mode');
-            if(adminModeSelect) adminModeSelect.value = marketData.mode;
         }
 
-        setInterval(() => {
-            if (marketData.mode === 'auto') {
-                const change = (Math.random() - 0.5) * 0.05;
-                let newPrice = Math.max(0.1, marketData.tkPrice + change);
-                update(ref(db, 'market'), { tkPrice: newPrice, usdtRate: marketData.usdtRate, mode: 'auto' });
-            }
-        }, 3000);
-
+        // REMOVED Auto Update Interval (setInterval) as requested
+        
         function drawChart() {
             const canvas = document.getElementById('marketCanvas');
             const ctx = canvas.getContext('2d');
             canvas.width = canvas.parentElement.offsetWidth;
             canvas.height = canvas.parentElement.offsetHeight;
+            
+            // Generate static history points based on current price
             const points = [];
-            let price = marketData.tkPrice;
+            let price = marketData.tkPrice * marketData.usdtRate; // Base price in PKR
+            
+            // Create pseudo-history
             for(let i=0; i<20; i++) {
                 points.unshift(price);
-                price = price * (1 + (Math.random() - 0.5) * 0.05);
+                // Small visual variation for chart look (simulated history)
+                price = price * (1 + (Math.random() - 0.5) * 0.02); 
             }
-            points.push(marketData.tkPrice);
+            points.push(marketData.tkPrice * marketData.usdtRate); // Current price at end
+
             const max = Math.max(...points) * 1.05;
             const min = Math.min(...points) * 0.95;
             const range = max - min;
             const stepX = canvas.width / (points.length - 1);
+
             ctx.clearRect(0, 0, canvas.width, canvas.height);
             ctx.beginPath();
             ctx.strokeStyle = '#ff6600';
@@ -1141,12 +1135,11 @@
         window.adminUpdateMarket = () => {
             const newPrice = parseFloat(document.getElementById('admin-tk-price').value);
             const newRate = parseFloat(document.getElementById('admin-usdt-rate').value);
-            const newMode = document.getElementById('admin-market-mode').value;
 
+            // REMOVED 'mode' from update
             update(ref(db, 'market'), {
                 tkPrice: newPrice,
-                usdtRate: newRate,
-                mode: newMode
+                usdtRate: newRate
             }).then(() => showToast("Market Updated"));
         };
 
@@ -1290,41 +1283,25 @@
         function loadUserHistory() {
             const list = document.getElementById('transaction-list');
             list.innerHTML = "";
-            
-            // Fetch both deposits and withdrawals
             const depositsPromise = get(ref(db, 'deposits'));
             const withdrawalsPromise = get(ref(db, 'withdrawals'));
 
             Promise.all([depositsPromise, withdrawalsPromise]).then(([depSnap, withSnap]) => {
                 let allTx = [];
-
-                // Process Deposits
                 if (depSnap.exists()) {
                     Object.entries(depSnap.val()).forEach(([key, d]) => {
                         if(d.userId === currentUserData.uid) {
-                            allTx.push({
-                                type: 'deposit',
-                                data: d,
-                                date: new Date(d.date).getTime() // Use timestamp for sorting
-                            });
+                            allTx.push({ type: 'deposit', data: d, date: new Date(d.date).getTime() });
                         }
                     });
                 }
-
-                // Process Withdrawals
                 if (withSnap.exists()) {
                     Object.entries(withSnap.val()).forEach(([key, w]) => {
                         if(w.userId === currentUserData.uid) {
-                            allTx.push({
-                                type: 'withdraw',
-                                data: w,
-                                date: new Date(w.date).getTime()
-                            });
+                            allTx.push({ type: 'withdraw', data: w, date: new Date(w.date).getTime() });
                         }
                     });
                 }
-
-                // Sort by date descending
                 allTx.sort((a, b) => b.date - a.date);
 
                 if (allTx.length === 0) {
@@ -1336,9 +1313,7 @@
                     const d = tx.data;
                     const isDep = tx.type === 'deposit';
                     let color = d.status === 'approved' ? 'text-green' : (d.status === 'rejected' ? 'text-danger' : 'text-orange');
-                    let icon = isDep ? 'fa-arrow-down' : 'fa-arrow-up'; // Simpler icons
-                    
-                    // Formatting amount display
+                    let icon = isDep ? 'fa-arrow-down' : 'fa-arrow-up'; 
                     let amountStr = "";
                     if(isDep) {
                         amountStr = `+${d.amount.toFixed(2)} TK`;
@@ -1361,7 +1336,6 @@
                         </div>
                     </div>`;
                 });
-
             });
         }
 
