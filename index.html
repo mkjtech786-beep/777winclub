@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TK Coin - Trading & Wallet App (Firebase)</title>
+    <title>TK Coin - Trading & Wallet App (Firebase v3)</title>
     <style>
         :root {
             --primary: #ff6600; /* Orange */
@@ -28,7 +28,7 @@
             background-color: var(--bg-dark);
             color: var(--text-light);
             overflow-x: hidden;
-            padding-bottom: 70px; /* Space for bottom nav */
+            padding-bottom: 70px;
         }
 
         /* --- Utility & Components --- */
@@ -220,19 +220,6 @@
         /* Premium Badge */
         .badge-premium { color: var(--blue); margin-left: 5px; }
         .blue-tick { color: #1da1f2; margin-left: 2px; }
-        
-        /* Loader */
-        .loader {
-            border: 4px solid #f3f3f3;
-            border-top: 4px solid var(--primary);
-            border-radius: 50%;
-            width: 20px;
-            height: 20px;
-            animation: spin 1s linear infinite;
-            display: inline-block;
-            vertical-align: middle;
-        }
-        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
     </style>
     <!-- Icons -->
@@ -296,7 +283,7 @@
             <section id="view-market" class="section">
                 <div class="balance-card">
                     <div class="balance-title">Current TK Price</div>
-                    <div class="balance-amount"><span id="market-price">0.00</span> USD</div>
+                    <div class="balance-amount"><span id="market-price">0.00</span> USDT</div>
                     <small style="opacity: 0.8;">+2.4% (24h)</small>
                 </div>
 
@@ -311,9 +298,10 @@
 
                 <div style="margin-top: 20px;">
                     <h3>Live Rates</h3>
+                    <!-- Restored to show both USDT and PKR -->
                     <div style="display: flex; justify-content: space-between; background: var(--bg-card); padding: 15px; margin-top: 10px; border-radius: 8px;">
                         <div>
-                            <div style="font-size: 0.8rem; color: #aaa;">1 USDT</div>
+                            <div style="font-size: 0.8rem; color: #aaa;">1 TK</div>
                             <div style="font-weight: bold;" id="rate-usdt">Loading...</div>
                         </div>
                         <div>
@@ -336,6 +324,7 @@
                 <div class="balance-card">
                     <div class="balance-title">Total Balance</div>
                     <div class="balance-amount"><span id="wallet-tk">0</span> TK</div>
+                    <!-- Restored PKR display -->
                     <div style="font-size: 1rem; opacity: 0.9;"><span id="wallet-pkr">0</span> PKR</div>
                 </div>
 
@@ -360,21 +349,21 @@
 
                 <h3>Transaction History</h3>
                 <div id="transaction-list" style="margin-top: 10px; display: flex; flex-direction: column; gap: 10px;">
-                    <!-- History -->
+                    <div style="text-align:center; color:#555;">Loading history...</div>
                 </div>
             </section>
 
             <!-- Deposit -->
             <section id="view-deposit" class="section hidden">
                 <h2 class="text-orange">Deposit Funds</h2>
-                <p style="color: #aaa; margin-bottom: 20px;">Select method to add balance.</p>
+                <p style="color: #aaa; margin-bottom: 20px;">Add USDT to get TK Coins.</p>
                 
                 <div class="input-group">
                     <label>Method</label>
                     <select id="deposit-method" onchange="updateDepositDetails()">
-                        <option value="easypaisa">Easypaisa</option>
-                        <option value="jazzcash">JazzCash</option>
                         <option value="usdt">USDT (TRC20)</option>
+                        <option value="easypaisa">Easypaisa (Local)</option>
+                        <option value="jazzcash">JazzCash (Local)</option>
                     </select>
                 </div>
 
@@ -382,16 +371,16 @@
                     <div style="display: flex; justify-content: space-between; align-items: center;">
                         <div>
                             <div style="font-size: 0.8rem; color: #aaa;">Deposit To:</div>
-                            <div style="font-weight: bold; font-size: 1.1rem;" id="deposit-number">0300-1234567</div>
-                            <div style="font-size: 0.8rem; color: var(--primary);" id="deposit-name">Ali Khan - Easypaisa</div>
+                            <div style="font-weight: bold; font-size: 1.1rem;" id="deposit-number">TRC20Address...</div>
+                            <div style="font-size: 0.8rem; color: var(--primary);" id="deposit-name">USDT (TRC20)</div>
                         </div>
                         <button class="btn btn-sm btn-outline" onclick="copyDepositNumber()"><i class="fas fa-copy"></i></button>
                     </div>
                 </div>
 
                 <div class="input-group">
-                    <label>Amount Sent (PKR)</label>
-                    <input type="number" id="deposit-amount" oninput="calculateDeposit()" placeholder="e.g. 1000">
+                    <label>Amount Sent (USDT)</label>
+                    <input type="number" id="deposit-amount" oninput="calculateDeposit()" placeholder="e.g. 10 USDT">
                 </div>
                 <div class="input-group">
                     <label>Reference No / Transaction ID</label>
@@ -409,7 +398,7 @@
             <!-- Withdraw -->
             <section id="view-withdraw" class="section hidden">
                 <h2 class="text-orange">Withdraw Funds</h2>
-                <p style="color: #aaa; margin-bottom: 20px;">Withdraw TK to Easypaisa, JazzCash or USDT.</p>
+                <p style="color: #aaa; margin-bottom: 20px;">Withdraw TK to USDT.</p>
 
                 <div style="background: var(--bg-card); padding: 15px; border-radius: 8px; margin-bottom: 20px;">
                     <div>Available Balance: <strong id="withdraw-bal-display">0 TK</strong></div>
@@ -419,20 +408,24 @@
                 <div class="input-group">
                     <label>Method</label>
                     <select id="withdraw-method">
+                        <option value="usdt">USDT (TRC20)</option>
                         <option value="easypaisa">Easypaisa</option>
                         <option value="jazzcash">JazzCash</option>
-                        <option value="usdt">USDT</option>
                     </select>
                 </div>
 
                 <div class="input-group">
                     <label>Account Number / Address</label>
-                    <input type="text" id="withdraw-account" placeholder="0300...">
+                    <input type="text" id="withdraw-account" placeholder="0300... or TRC20">
                 </div>
 
                 <div class="input-group">
                     <label>Amount (TK)</label>
-                    <input type="number" id="withdraw-amount" placeholder="Min 50 TK">
+                    <input type="number" id="withdraw-amount" placeholder="Min 50 TK" oninput="calculateWithdraw()">
+                </div>
+                
+                <div style="background: #222; padding: 10px; border-radius: 6px; margin-bottom: 20px; color: #aaa;">
+                    <small>Estimated Receive: <strong style="color: white; font-size: 1.1rem;"><span id="withdraw-calc-usdt">0.00</span> USDT</strong></small>
                 </div>
 
                 <button class="btn" onclick="submitWithdraw()">Request Withdrawal</button>
@@ -545,11 +538,11 @@
                 <button class="btn btn-sm btn-outline" onclick="showAdminSection('dashboard')">Back</button>
                 <h3 class="text-orange" style="margin-top: 15px;">Market Control</h3>
                 <div class="input-group">
-                    <label>TK Price (USD)</label>
+                    <label>TK Price (USDT)</label>
                     <input type="number" id="admin-tk-price" onchange="adminUpdateMarket()">
                 </div>
                 <div class="input-group">
-                    <label>USDT to PKR Rate</label>
+                    <label>USDT to PKR Rate (For Local Payments)</label>
                     <input type="number" id="admin-usdt-rate" onchange="adminUpdateMarket()">
                 </div>
                 <div class="input-group">
@@ -696,8 +689,7 @@
         const db = getDatabase(app);
 
         // --- GLOBAL STATE ---
-        let currentUserData = null; // Holds snapshot of current user from DB
-        let allUsers = {};
+        let currentUserData = null; 
         let marketData = { tkPrice: 1.50, usdtRate: 280, mode: 'auto' };
         let appSettings = {
             easypaisa: '0300-1234567',
@@ -706,7 +698,7 @@
             minWithdraw: 50,
             withdrawFee: 0.05
         };
-        let adminSelectedChatUser = null; // For admin chat
+        let adminSelectedChatUser = null; 
 
         // --- UTILITIES ---
         window.showToast = (msg, type = 'success') => {
@@ -728,22 +720,22 @@
             // Auth Listener
             onAuthStateChanged(auth, (user) => {
                 if (user) {
-                    // User logged in
                     checkAndCreateUserInDB(user);
                 } else {
-                    // User logged out
                     document.getElementById('auth-screen').classList.remove('hidden');
                     document.getElementById('app-container').classList.add('hidden');
                     currentUserData = null;
                 }
             });
 
-            // Market & Settings Listeners (Global)
+            // Market & Settings Listeners
             onValue(ref(db, 'market'), (snapshot) => {
                 const data = snapshot.val();
                 if (data) {
                     marketData = data;
                     updateMarketUI();
+                    // Also update UI if wallet is open
+                    if (currentUserData) updateUI();
                 }
             });
 
@@ -751,28 +743,24 @@
                 const data = snapshot.val();
                 if (data) {
                     appSettings = data;
-                    updateDepositDetails(); // Refresh if on deposit page
+                    updateDepositDetails(); 
                 }
             });
 
-            // News Listener
             onValue(ref(db, 'news'), (snapshot) => {
                 const newsList = document.getElementById('news-feed');
                 const ticker = document.getElementById('news-ticker');
                 newsList.innerHTML = "";
                 ticker.innerHTML = "";
-                
                 const data = snapshot.val();
                 if (data) {
-                    Object.values(data).reverse().forEach((news, index) => {
-                        // News Feed
+                    Object.values(data).reverse().forEach((news) => {
                         newsList.innerHTML += `
                             <div style="background:var(--bg-card); padding:10px; border-radius:6px; border:1px solid #333;">
                                 <div style="font-weight:bold; color:#fff;">${news.title}</div>
                                 <div style="font-size:0.8rem; color:#777;">${news.date}</div>
                             </div>
                         `;
-                        // Ticker
                         ticker.innerHTML += `<span class="ticker-item">${news.title}</span>`;
                     });
                 }
@@ -782,14 +770,12 @@
         // --- USER CREATION IN DB ---
         function checkAndCreateUserInDB(firebaseUser) {
             const userRef = ref(db, 'users/' + firebaseUser.uid);
-            
             get(userRef).then((snapshot) => {
                 if (snapshot.exists()) {
                     currentUserData = snapshot.val();
-                    currentUserData.uid = firebaseUser.uid; // Keep uid handy
+                    currentUserData.uid = firebaseUser.uid;
                     loginSuccess(currentUserData);
                 } else {
-                    // Create new user record
                     const isAdmin = firebaseUser.email === getAdminEmail();
                     const newUser = {
                         name: firebaseUser.email.split('@')[0],
@@ -797,7 +783,6 @@
                         role: isAdmin ? "admin" : "user",
                         isPremium: isAdmin ? true : false,
                         balanceTK: isAdmin ? 10000 : 0,
-                        balancePKR: 0,
                         avatar: `https://picsum.photos/seed/${firebaseUser.uid}/50/50`,
                         createdAt: new Date().toISOString()
                     };
@@ -824,18 +809,11 @@
             const email = document.getElementById('auth-email').value;
             const pass = document.getElementById('auth-pass').value;
             const btn = document.getElementById('auth-btn');
-            
             btn.innerText = "Processing...";
             btn.disabled = true;
-
             try {
-                if (isSignup) {
-                    await createUserWithEmailAndPassword(auth, email, pass);
-                    showToast("Account created successfully!");
-                } else {
-                    await signInWithEmailAndPassword(auth, email, pass);
-                    showToast("Login successful!");
-                }
+                if (isSignup) await createUserWithEmailAndPassword(auth, email, pass);
+                else await signInWithEmailAndPassword(auth, email, pass);
             } catch (error) {
                 showToast(error.message, "error");
             } finally {
@@ -845,23 +823,18 @@
         });
 
         window.logout = () => {
-            signOut(auth).then(() => {
-                showToast("Logged out");
-            });
+            signOut(auth).then(() => showToast("Logged out"));
         };
 
         // --- APP NAVIGATION & UI ---
         function loginSuccess(user) {
             document.getElementById('auth-screen').classList.add('hidden');
             document.getElementById('app-container').classList.remove('hidden');
-
-            // Listen to THIS user's specific data for real-time updates
             onValue(ref(db, 'users/' + user.uid), (snapshot) => {
                 currentUserData = snapshot.val();
                 currentUserData.uid = user.uid;
                 updateUI();
             });
-
             if (user.role === 'admin') {
                 document.getElementById('user-nav').classList.add('hidden');
                 document.getElementById('user-views').classList.add('hidden');
@@ -878,23 +851,17 @@
         window.showSection = (sectionId) => {
             document.querySelectorAll('#user-views .section').forEach(el => el.classList.add('hidden'));
             document.getElementById(`view-${sectionId}`).classList.remove('hidden');
-            
             document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
             const navIndex = ['market', 'wallet', 'chat', 'profile'].indexOf(sectionId);
             if (navIndex >= 0) document.querySelectorAll('.nav-item')[navIndex].classList.add('active');
-
+            if (sectionId === 'wallet') loadUserHistory(); 
             if (sectionId === 'chat') loadUserChat();
         };
 
         window.showAdminSection = (sectionId) => {
             document.querySelectorAll('#admin-views .section').forEach(el => el.classList.add('hidden'));
-            
-            if(sectionId === 'dashboard') {
-                document.getElementById('view-admin-dashboard').classList.remove('hidden');
-            } else {
-                document.getElementById(`admin-${sectionId}`).classList.remove('hidden');
-            }
-
+            if(sectionId === 'dashboard') document.getElementById('view-admin-dashboard').classList.remove('hidden');
+            else document.getElementById(`admin-${sectionId}`).classList.remove('hidden');
             if (sectionId === 'deposits') loadAdminDeposits();
             if (sectionId === 'users') loadAdminUsers();
             if (sectionId === 'market') loadAdminMarket();
@@ -903,16 +870,17 @@
 
         function updateUI() {
             if (!currentUserData) return;
-
-            // Header
             document.getElementById('header-name').innerText = currentUserData.name;
             document.getElementById('header-balance').innerText = currentUserData.balanceTK.toFixed(2) + " TK";
             document.getElementById('header-avatar').src = currentUserData.avatar;
-
-            // Profile
             document.getElementById('profile-name').innerText = currentUserData.name;
             document.getElementById('profile-email').innerText = currentUserData.email;
             document.getElementById('profile-avatar').src = currentUserData.avatar;
+            document.getElementById('wallet-tk').innerText = currentUserData.balanceTK.toFixed(2);
+
+            // Calculate and Show PKR in Wallet
+            const pkrValue = currentUserData.balanceTK * marketData.tkPrice * marketData.usdtRate;
+            document.getElementById('wallet-pkr').innerText = pkrValue.toFixed(2);
 
             if (currentUserData.isPremium) {
                 document.getElementById('profile-status').innerHTML = `<span class="text-blue"><i class="fas fa-check-circle blue-tick"></i> Premium User</span>`;
@@ -922,29 +890,21 @@
                 document.getElementById('header-premium-badge').classList.add('hidden');
             }
 
-            // Wallet
-            const pkrValue = currentUserData.balanceTK * marketData.usdtRate;
-            document.getElementById('wallet-tk').innerText = currentUserData.balanceTK.toFixed(2);
-            document.getElementById('wallet-pkr').innerText = pkrValue.toFixed(2);
-
-            // Withdraw Fee
             const fee = currentUserData.isPremium ? 0 : appSettings.withdrawFee * 100;
             document.getElementById('fee-display').innerText = `Fee: ${fee}%`;
             document.getElementById('withdraw-bal-display').innerText = currentUserData.balanceTK.toFixed(2) + " TK";
-
-            // History (Deposits for this user)
-            renderHistory();
         }
 
         // --- MARKET LOGIC ---
         function updateMarketUI() {
             document.getElementById('market-price').innerText = marketData.tkPrice.toFixed(2);
-            document.getElementById('rate-usdt').innerText = marketData.usdtRate + " PKR";
-            document.getElementById('rate-pkr').innerText = (marketData.tkPrice * marketData.usdtRate).toFixed(2) + " PKR";
+            document.getElementById('rate-usdt').innerText = marketData.tkPrice.toFixed(2) + " USDT";
             
-            drawChart();
+            // Calculate and Show PKR in Market
+            const tkPricePKR = marketData.tkPrice * marketData.usdtRate;
+            document.getElementById('rate-pkr').innerText = tkPricePKR.toFixed(2) + " PKR";
 
-            // Auto update Admin inputs if they are open
+            drawChart();
             const adminPriceInput = document.getElementById('admin-tk-price');
             if(adminPriceInput) adminPriceInput.value = marketData.tkPrice;
             const adminRateInput = document.getElementById('admin-usdt-rate');
@@ -953,17 +913,11 @@
             if(adminModeSelect) adminModeSelect.value = marketData.mode;
         }
 
-        // Simulated Loop for Market Auto Mode (Only admin writes, but we simulate locally for visual)
         setInterval(() => {
             if (marketData.mode === 'auto') {
                 const change = (Math.random() - 0.5) * 0.05;
                 let newPrice = Math.max(0.1, marketData.tkPrice + change);
-                // Write to DB so everyone sees it
-                update(ref(db, 'market'), {
-                    tkPrice: newPrice,
-                    usdtRate: marketData.usdtRate,
-                    mode: 'auto'
-                });
+                update(ref(db, 'market'), { tkPrice: newPrice, usdtRate: marketData.usdtRate, mode: 'auto' });
             }
         }, 3000);
 
@@ -972,7 +926,6 @@
             const ctx = canvas.getContext('2d');
             canvas.width = canvas.parentElement.offsetWidth;
             canvas.height = canvas.parentElement.offsetHeight;
-
             const points = [];
             let price = marketData.tkPrice;
             for(let i=0; i<20; i++) {
@@ -980,17 +933,14 @@
                 price = price * (1 + (Math.random() - 0.5) * 0.05);
             }
             points.push(marketData.tkPrice);
-
             const max = Math.max(...points) * 1.05;
             const min = Math.min(...points) * 0.95;
             const range = max - min;
             const stepX = canvas.width / (points.length - 1);
-
             ctx.clearRect(0, 0, canvas.width, canvas.height);
             ctx.beginPath();
             ctx.strokeStyle = '#ff6600';
             ctx.lineWidth = 2;
-
             points.forEach((p, i) => {
                 const x = i * stepX;
                 const y = canvas.height - ((p - min) / range) * canvas.height;
@@ -1005,18 +955,23 @@
             const method = document.getElementById('deposit-method').value;
             const displayNum = document.getElementById('deposit-number');
             const displayName = document.getElementById('deposit-name');
-            
-            if (method === 'easypaisa') { displayNum.innerText = appSettings.easypaisa; displayName.innerText = "Ali Khan - Easypaisa"; }
-            else if (method === 'jazzcash') { displayNum.innerText = appSettings.jazzcash; displayName.innerText = "Ali Khan - JazzCash"; }
+            if (method === 'easypaisa') { displayNum.innerText = appSettings.easypaisa; displayName.innerText = "Easypaisa"; }
+            else if (method === 'jazzcash') { displayNum.innerText = appSettings.jazzcash; displayName.innerText = "JazzCash"; }
             else { displayNum.innerText = appSettings.usdt; displayName.innerText = "USDT (TRC20)"; }
             calculateDeposit();
         };
 
         window.calculateDeposit = () => {
-            const pkr = parseFloat(document.getElementById('deposit-amount').value) || 0;
-            const receive = pkr / marketData.usdtRate;
+            const usdt = parseFloat(document.getElementById('deposit-amount').value) || 0;
+            const receive = usdt / marketData.tkPrice;
             document.getElementById('deposit-calc-receive').innerText = receive.toFixed(2);
         };
+
+        window.calculateWithdraw = () => {
+            const tk = parseFloat(document.getElementById('withdraw-amount').value) || 0;
+            const receive = tk * marketData.tkPrice;
+            document.getElementById('withdraw-calc-usdt').innerText = receive.toFixed(2);
+        }
 
         window.copyDepositNumber = () => {
             navigator.clipboard.writeText(document.getElementById('deposit-number').innerText);
@@ -1024,20 +979,31 @@
         };
 
         window.submitDeposit = () => {
-            const amount = parseFloat(document.getElementById('deposit-amount').value);
+            const amountInput = parseFloat(document.getElementById('deposit-amount').value);
             const refId = document.getElementById('deposit-ref').value;
             const method = document.getElementById('deposit-method').value;
-
-            if (!amount || amount < 100) return showToast("Min deposit 100 PKR", "error");
+            
+            if (!amountInput || amountInput <= 0) return showToast("Enter valid amount", "error");
             if (!refId) return showToast("Enter Transaction ID", "error");
 
-            const receiveTk = amount / marketData.usdtRate;
+            let receiveTk = 0;
+            let rawAmount = 0;
+
+            if (method === 'usdt') {
+                rawAmount = amountInput;
+                receiveTk = rawAmount / marketData.tkPrice;
+            } else {
+                const usdtValue = amountInput / marketData.usdtRate;
+                rawAmount = usdtValue;
+                receiveTk = usdtValue / marketData.tkPrice;
+            }
 
             const depositData = {
                 userId: currentUserData.uid,
                 userEmail: currentUserData.email,
                 method: method,
                 amount: receiveTk,
+                rawAmount: rawAmount,
                 ref: refId,
                 date: new Date().toLocaleString(),
                 status: 'pending'
@@ -1065,7 +1031,6 @@
 
             if (total > currentUserData.balanceTK) return showToast("Insufficient balance", "error");
 
-            // Deduct Balance Locally (Optimistic UI) + DB Transaction
             const updates = {};
             updates['users/' + currentUserData.uid + '/balanceTK'] = currentUserData.balanceTK - total;
             
@@ -1099,10 +1064,6 @@
             if (!amount || amount <= 0) return showToast("Invalid amount", "error");
             if (amount > currentUserData.balanceTK) return showToast("Insufficient balance", "error");
 
-            // Find receiver UID by Email (Requires loading all users, simplified here by logic)
-            // In a real app, index emails. Here we iterate cached users if available or query.
-            // For simplicity in this structure, we assume we iterate.
-            
             get(ref(db, 'users')).then((snapshot) => {
                 let receiverUid = null;
                 if (snapshot.exists()) {
@@ -1216,7 +1177,7 @@
                             <tr>
                                 <td>${d.userEmail}</td>
                                 <td>${d.method}</td>
-                                <td>${d.amount.toFixed(2)}</td>
+                                <td>${d.amount.toFixed(2)} TK</td>
                                 <td>${d.ref}</td>
                                 <td>
                                     <button class="btn-sm" style="background:green; color:white;" onclick="handleDeposit('${key}', 'approved')">✔</button>
@@ -1236,13 +1197,10 @@
             get(depositRef).then((snap) => {
                 const d = snap.val();
                 if(d && d.status === 'pending') {
-                    // Update status
                     update(depositRef, { status: status });
                     
-                    // If approved, add balance to user
                     if (status === 'approved') {
                         const userRef = ref(db, 'users/' + d.userId + '/balanceTK');
-                        // Transactional update needed ideally, but simple run for now
                         get(userRef).then(uSnap => {
                             const currentBal = uSnap.val() || 0;
                             set(userRef, currentBal + parseFloat(d.amount));
@@ -1283,9 +1241,6 @@
                 if(!data) { listDiv.innerHTML = "No chats yet."; return; }
 
                 Object.keys(data).forEach(uid => {
-                    // We need to fetch user email to show in list. 
-                    // Since we are already listening to all users or might need to fetch specific.
-                    // Simplified: Show UID or fetch specific.
                     get(ref(db, 'users/' + uid)).then(uSnap => {
                         const uEmail = uSnap.exists() ? uSnap.val().email : uid;
                         const btn = document.createElement('button');
@@ -1310,8 +1265,6 @@
                 const data = snap.val();
                 if(data) {
                     Object.values(data).forEach(msg => {
-                         const cls = msg.sender === 'admin' ? 'msg-admin' : 'msg-user';
-                         // Align admin right in admin view for clarity
                          const align = msg.sender === 'admin' ? 'align-self: flex-end; background:var(--blue);' : 'align-self: flex-start; background:#333;';
                          msgsDiv.innerHTML += `<div class="message" style="${align}">${msg.text}</div>`;
                     });
@@ -1334,37 +1287,82 @@
             }
         };
 
-        function renderHistory() {
+        function loadUserHistory() {
             const list = document.getElementById('transaction-list');
             list.innerHTML = "";
-            // Listen to deposits for this user
-            onValue(ref(db, 'deposits'), (snapshot) => {
-                list.innerHTML = "";
-                const data = snapshot.val();
-                if(data) {
-                    Object.values(data).reverse().forEach(d => {
+            
+            // Fetch both deposits and withdrawals
+            const depositsPromise = get(ref(db, 'deposits'));
+            const withdrawalsPromise = get(ref(db, 'withdrawals'));
+
+            Promise.all([depositsPromise, withdrawalsPromise]).then(([depSnap, withSnap]) => {
+                let allTx = [];
+
+                // Process Deposits
+                if (depSnap.exists()) {
+                    Object.entries(depSnap.val()).forEach(([key, d]) => {
                         if(d.userId === currentUserData.uid) {
-                            let color = d.status === 'approved' ? 'text-green' : (d.status === 'rejected' ? 'text-danger' : 'text-orange');
-                            let icon = d.method === 'usdt' ? 'fa-dollar-sign' : 'fa-mobile-alt';
-                            list.innerHTML += `
-                            <div style="background:var(--bg-card); padding:10px; border-radius:6px; border:1px solid #333; display:flex; justify-content:space-between; align-items:center;">
-                                <div style="display:flex; align-items:center; gap:10px;">
-                                    <div style="background:#333; width:40px; height:40px; border-radius:50%; display:flex; align-items:center; justify-content:center;"><i class="fas ${icon} text-orange"></i></div>
-                                    <div>
-                                        <div style="font-weight:bold;">Deposit (${d.method})</div>
-                                        <div style="font-size:0.8rem; color:#aaa;">${d.date}</div>
-                                    </div>
-                                </div>
-                                <div style="text-align:right;">
-                                    <div class="${color}">+${d.amount.toFixed(2)} TK</div>
-                                    <div class="status-badge status-${d.status}">${d.status.toUpperCase()}</div>
-                                </div>
-                            </div>`;
+                            allTx.push({
+                                type: 'deposit',
+                                data: d,
+                                date: new Date(d.date).getTime() // Use timestamp for sorting
+                            });
                         }
                     });
                 }
-                if(list.innerHTML === "") list.innerHTML = "<div style='text-align:center; color:#555;'>No transactions yet.</div>";
-            }, {onlyOnce: true});
+
+                // Process Withdrawals
+                if (withSnap.exists()) {
+                    Object.entries(withSnap.val()).forEach(([key, w]) => {
+                        if(w.userId === currentUserData.uid) {
+                            allTx.push({
+                                type: 'withdraw',
+                                data: w,
+                                date: new Date(w.date).getTime()
+                            });
+                        }
+                    });
+                }
+
+                // Sort by date descending
+                allTx.sort((a, b) => b.date - a.date);
+
+                if (allTx.length === 0) {
+                    list.innerHTML = "<div style='text-align:center; color:#555;'>No transactions yet.</div>";
+                    return;
+                }
+
+                allTx.forEach(tx => {
+                    const d = tx.data;
+                    const isDep = tx.type === 'deposit';
+                    let color = d.status === 'approved' ? 'text-green' : (d.status === 'rejected' ? 'text-danger' : 'text-orange');
+                    let icon = isDep ? 'fa-arrow-down' : 'fa-arrow-up'; // Simpler icons
+                    
+                    // Formatting amount display
+                    let amountStr = "";
+                    if(isDep) {
+                        amountStr = `+${d.amount.toFixed(2)} TK`;
+                    } else {
+                        amountStr = `-${d.amount.toFixed(2)} TK`;
+                    }
+
+                    list.innerHTML += `
+                    <div style="background:var(--bg-card); padding:10px; border-radius:6px; border:1px solid #333; display:flex; justify-content:space-between; align-items:center;">
+                        <div style="display:flex; align-items:center; gap:10px;">
+                            <div style="background:#333; width:40px; height:40px; border-radius:50%; display:flex; align-items:center; justify-content:center;"><i class="fas ${icon} text-orange"></i></div>
+                            <div>
+                                <div style="font-weight:bold;">${isDep ? 'Deposit' : 'Withdrawal'} (${d.method})</div>
+                                <div style="font-size:0.8rem; color:#aaa;">${d.date}</div>
+                            </div>
+                        </div>
+                        <div style="text-align:right;">
+                            <div class="${color}">${amountStr}</div>
+                            <div class="status-badge status-${d.status}">${d.status.toUpperCase()}</div>
+                        </div>
+                    </div>`;
+                });
+
+            });
         }
 
         // --- START ---
