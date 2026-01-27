@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TK Coin - Trading & Wallet App (Fixed)</title>
+    <title>TK Coin - PKR Trading App</title>
     <style>
         :root {
             --primary: #ff6600;
@@ -273,6 +273,7 @@
             <section id="view-market" class="section">
                 <div class="balance-card">
                     <div class="balance-title">Current TK Price</div>
+                    <!-- Display only PKR -->
                     <div class="balance-amount"><span id="market-price">0.00</span> PKR</div>
                 </div>
                 
@@ -291,6 +292,7 @@
                 <div class="balance-card">
                     <div class="balance-title">Total Balance</div>
                     <div class="balance-amount"><span id="wallet-tk">0</span> TK</div>
+                    <!-- PKR Display -->
                     <div style="font-size: 1rem; opacity: 0.9;"><span id="wallet-pkr">0</span> PKR</div>
                 </div>
 
@@ -319,13 +321,13 @@
 
             <!-- Deposit -->
             <section id="view-deposit" class="section hidden">
-                <h2 class="text-orange">Deposit</h2>
-                <p style="color: #aaa; margin-bottom: 20px;">Add USDT to get TK.</p>
+                <h2 class="text-orange">Deposit Funds</h2>
+                <p style="color: #aaa; margin-bottom: 20px;">Add funds using local methods.</p>
                 
                 <div class="input-group">
                     <label>Method</label>
                     <select id="deposit-method" onchange="updateDepositDetails()">
-                        <option value="usdt">USDT (TRC20)</option>
+                        <!-- Removed USDT Option -->
                         <option value="easypaisa">Easypaisa</option>
                         <option value="jazzcash">JazzCash</option>
                     </select>
@@ -335,15 +337,16 @@
                     <div style="display: flex; justify-content: space-between; align-items: center;">
                         <div>
                             <div style="font-size: 0.8rem; color: #aaa;">Deposit To:</div>
-                            <div style="font-weight: bold; font-size: 1.1rem;" id="deposit-number">TRC20...</div>
-                            <div style="font-size: 0.8rem; color: var(--primary);" id="deposit-name">USDT</div>
+                            <div style="font-weight: bold; font-size: 1.1rem;" id="deposit-number">0300-1234567</div>
+                            <div style="font-size: 0.8rem; color: var(--primary);" id="deposit-name">Easypaisa</div>
                         </div>
                         <button class="btn btn-sm btn-outline" onclick="copyDepositNumber()"><i class="fas fa-copy"></i></button>
                     </div>
                 </div>
 
+                <!-- Changed label to PKR -->
                 <div class="input-group">
-                    <label>Amount (USDT)</label>
+                    <label>Amount Sent (PKR)</label>
                     <input type="number" id="deposit-amount" oninput="calculateDeposit()" placeholder="0.00">
                 </div>
                 <div class="input-group">
@@ -352,7 +355,7 @@
                 </div>
 
                 <div style="background: #222; padding: 10px; border-radius: 6px; margin-bottom: 20px;">
-                    <small>Receive: <strong><span id="deposit-calc-receive">0</span> TK</strong></small>
+                    <small>You will receive: <strong><span id="deposit-calc-receive">0</span> TK</strong></small>
                 </div>
 
                 <button class="btn" onclick="submitDeposit()">Submit</button>
@@ -361,8 +364,8 @@
 
             <!-- Withdraw -->
             <section id="view-withdraw" class="section hidden">
-                <h2 class="text-orange">Withdraw</h2>
-                <p style="color: #aaa; margin-bottom: 20px;">Withdraw TK to USDT.</p>
+                <h2 class="text-orange">Withdraw Funds</h2>
+                <p style="color: #aaa; margin-bottom: 20px;">Withdraw TK to local accounts.</p>
 
                 <div style="background: var(--bg-card); padding: 15px; border-radius: 8px; margin-bottom: 20px;">
                     <div>Available: <strong id="withdraw-bal-display">0 TK</strong></div>
@@ -372,22 +375,23 @@
                 <div class="input-group">
                     <label>Method</label>
                     <select id="withdraw-method">
-                        <option value="usdt">USDT</option>
+                        <!-- Removed USDT Option -->
                         <option value="easypaisa">Easypaisa</option>
                         <option value="jazzcash">JazzCash</option>
                     </select>
                 </div>
                 <div class="input-group">
-                    <label>Account / Address</label>
-                    <input type="text" id="withdraw-account" placeholder="Details...">
+                    <label>Account Number</label>
+                    <input type="text" id="withdraw-account" placeholder="0300...">
                 </div>
                 <div class="input-group">
                     <label>Amount (TK)</label>
                     <input type="number" id="withdraw-amount" placeholder="Min 50" oninput="calculateWithdraw()">
                 </div>
                 
+                <!-- Changed ID to PKR and Label -->
                 <div style="background: #222; padding: 10px; border-radius: 6px; margin-bottom: 20px; color: #aaa;">
-                    <small>Receive: <strong style="color: white;"><span id="withdraw-calc-usdt">0.00</span> USDT</strong></small>
+                    <small>Estimated Receive: <strong style="color: white; font-size: 1.1rem;"><span id="withdraw-calc-pkr">0.00</span> PKR</strong></small>
                 </div>
 
                 <button class="btn" onclick="submitWithdraw()">Request</button>
@@ -481,14 +485,12 @@
                 <h3 class="text-orange" style="margin-top: 15px;">Market Control</h3>
                 
                 <div class="input-group">
-                    <label>TK Price (USDT) - Internal</label>
-                    <input type="number" id="admin-tk-price" step="0.01">
+                    <!-- Updated Label: Price is now direct PKR -->
+                    <label>TK Price (PKR)</label>
+                    <input type="number" id="admin-tk-price" step="1">
                 </div>
-                
-                <div class="input-group">
-                    <label>USDT to PKR Rate</label>
-                    <input type="number" id="admin-usdt-rate" step="1">
-                </div>
+
+                <!-- REMOVED: usdtRate input -->
 
                 <button class="btn" onclick="adminUpdateMarket()">Update Price</button>
             </section>
@@ -499,7 +501,7 @@
                 <h3 class="text-orange" style="margin-top: 15px;">Deposits</h3>
                 <table class="admin-table">
                     <thead>
-                        <tr><th>User</th><th>Amount</th><th>Action</th></tr>
+                        <tr><th>User</th><th>Method</th><th>Amount</th><th>Action</th></tr>
                     </thead>
                     <tbody id="admin-deposit-list"></tbody>
                 </table>
@@ -511,7 +513,7 @@
                 <h3 class="text-orange" style="margin-top: 15px;">Users</h3>
                 <table class="admin-table">
                     <thead>
-                        <tr><th>Name</th><th>Email</th><th>Balance</th></tr>
+                        <tr><th>Name</th><th>Email</th><th>Balance (TK)</th></tr>
                     </thead>
                     <tbody id="admin-user-list"></tbody>
                 </table>
@@ -574,10 +576,10 @@
 
         // --- GLOBALS ---
         let currentUserData = null;
-        let marketData = { tkPrice: 1.50, usdtRate: 280 };
-        let appSettings = { easypaisa: '0300-1234567', jazzcash: '0321-7654321', usdt: 'TRC20...', minWithdraw: 50, withdrawFee: 0.05 };
+        // tkPrice is now in PKR directly
+        let marketData = { tkPrice: 300, usdtRate: 1 }; // usdtRate kept for legacy but ignored in logic
+        let appSettings = { easypaisa: '0300-1234567', jazzcash: '0321-7654321', minWithdraw: 50, withdrawFee: 0.05 };
         let adminSelectedChatUser = null;
-        let chartAnimId = null; // For visual animation
 
         // --- UTILS ---
         window.showToast = (msg, type = 'success') => {
@@ -717,7 +719,11 @@
             document.getElementById('header-name').innerText = currentUserData.name;
             document.getElementById('header-balance').innerText = currentUserData.balanceTK.toFixed(2) + " TK";
             document.getElementById('wallet-tk').innerText = currentUserData.balanceTK.toFixed(2);
-            document.getElementById('wallet-pkr').innerText = (currentUserData.balanceTK * marketData.tkPrice * marketData.usdtRate).toFixed(2);
+            
+            // PKR Calculation: TK * Price (PKR)
+            const pkrValue = currentUserData.balanceTK * marketData.tkPrice;
+            document.getElementById('wallet-pkr').innerText = pkrValue.toFixed(2);
+
             document.getElementById('profile-name').innerText = currentUserData.name;
             document.getElementById('profile-email').innerText = currentUserData.email;
             
@@ -727,26 +733,57 @@
         }
 
         function updateMarketUI() {
-            const pkr = marketData.tkPrice * marketData.usdtRate;
-            document.getElementById('market-price').innerText = pkr.toFixed(2);
+            // tkPrice is now directly PKR
+            document.getElementById('market-price').innerText = marketData.tkPrice.toFixed(2);
 
-            // FIX: Only update input if user is NOT typing in it
             const priceInput = document.getElementById('admin-tk-price');
-            const rateInput = document.getElementById('admin-usdt-rate');
-            
             if (priceInput && document.activeElement !== priceInput) priceInput.value = marketData.tkPrice;
-            if (rateInput && document.activeElement !== rateInput) rateInput.value = marketData.usdtRate;
         }
+
+        // --- CHART ANIMATION ---
+        function startVisualChart() {
+            const canvas = document.getElementById('marketCanvas');
+            if(!canvas) return;
+            const ctx = canvas.getContext('2d');
+            let offset = 0;
+
+            function draw() {
+                canvas.width = canvas.parentElement.offsetWidth;
+                canvas.height = canvas.parentElement.offsetHeight;
+                
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                ctx.beginPath();
+                ctx.strokeStyle = '#ff6600';
+                ctx.lineWidth = 2;
+
+                const centerY = canvas.height / 2;
+                const amplitude = 20;
+
+                for (let x = 0; x < canvas.width; x+=5) {
+                    const y = centerY + Math.sin((x + offset) * 0.05) * amplitude + (Math.random()-0.5)*5;
+                    if(x===0) ctx.moveTo(x, y);
+                    else ctx.lineTo(x, y);
+                }
+                ctx.stroke();
+                offset += 2;
+                requestAnimationFrame(draw);
+            }
+            draw();
+        }
+
+        const marketObserver = new MutationObserver(() => {
+            if (!document.getElementById('view-market').classList.contains('hidden')) startVisualChart();
+        });
+        marketObserver.observe(document.getElementById('view-market'), { attributes: true });
+
 
         // --- ADMIN FUNCTIONS ---
         window.adminUpdateMarket = () => {
             const p = parseFloat(document.getElementById('admin-tk-price').value);
-            const r = parseFloat(document.getElementById('admin-usdt-rate').value);
-            if (isNaN(p) || isNaN(r)) return showToast("Invalid inputs", "error");
+            if (isNaN(p)) return showToast("Invalid price", "error");
 
             update(ref(db, 'market'), {
-                tkPrice: p,
-                usdtRate: r,
+                tkPrice: p, // Direct PKR price
                 mode: 'manual'
             }).then(() => showToast("Price Updated!"));
         };
@@ -764,10 +801,10 @@
                 if(d) {
                     Object.entries(d).reverse().forEach(([k, v]) => {
                         if (v.status === 'pending') {
-                            tbody.innerHTML += `<tr><td>${v.userEmail}</td><td>${v.amount.toFixed(2)} TK</td><td><button class="btn-sm" style="background:green; color:white;" onclick="handleDep('${k}', 'approved')">✔</button></td></tr>`;
+                            tbody.innerHTML += `<tr><td>${v.userEmail}</td><td>${v.method}</td><td>${v.amount.toFixed(2)} TK</td><td><button class="btn-sm" style="background:green; color:white;" onclick="handleDep('${k}', 'approved')">✔</button></td></tr>`;
                         }
                     });
-                } else tbody.innerHTML = "<tr><td colspan='3'>No pending</td></tr>";
+                } else tbody.innerHTML = "<tr><td colspan='4'>No pending</td></tr>";
             });
         }
 
@@ -795,69 +832,23 @@
             });
         }
 
-        // --- CHART ANIMATION (VISUAL ONLY) ---
-        // This function runs purely in the browser to create the zigzag effect
-        // without changing the database price.
-        function startVisualChart() {
-            const canvas = document.getElementById('marketCanvas');
-            if(!canvas) return;
-            const ctx = canvas.getContext('2d');
-            let offset = 0;
-
-            function draw() {
-                // Resize if needed
-                canvas.width = canvas.parentElement.offsetWidth;
-                canvas.height = canvas.parentElement.offsetHeight;
-                
-                ctx.clearRect(0, 0, canvas.width, canvas.height);
-                ctx.beginPath();
-                ctx.strokeStyle = '#ff6600';
-                ctx.lineWidth = 2;
-
-                const centerY = canvas.height / 2;
-                const amplitude = 20; // Height of zigzag
-
-                for (let x = 0; x < canvas.width; x+=5) {
-                    // Create a sine wave + random noise
-                    // Time-based offset creates movement
-                    const y = centerY + Math.sin((x + offset) * 0.05) * amplitude + (Math.random()-0.5)*5;
-                    if(x===0) ctx.moveTo(x, y);
-                    else ctx.lineTo(x, y);
-                }
-                ctx.stroke();
-
-                offset += 2; // Move the wave
-                requestAnimationFrame(draw);
-            }
-            draw();
-        }
-
-        // Start animation when market view is visible
-        const marketObserver = new MutationObserver((mutations) => {
-            mutations.forEach((mutation) => {
-                if (!document.getElementById('view-market').classList.contains('hidden')) {
-                    startVisualChart();
-                }
-            });
-        });
-        marketObserver.observe(document.getElementById('view-market'), { attributes: true });
-
 
         // --- USER WALLET FUNCTIONS ---
         window.updateDepositDetails = () => {
             const m = document.getElementById('deposit-method').value;
             const num = document.getElementById('deposit-number');
             const name = document.getElementById('deposit-name');
-            if(m==='usdt') { num.innerText=appSettings.usdt; name.innerText='USDT'; }
-            else if(m==='easypaisa') { num.innerText=appSettings.easypaisa; name.innerText='Easypaisa'; }
+            if(m==='easypaisa') { num.innerText=appSettings.easypaisa; name.innerText='Easypaisa'; }
             else { num.innerText=appSettings.jazzcash; name.innerText='JazzCash'; }
             calculateDeposit();
         };
 
+        // Logic updated: Input is PKR
         window.calculateDeposit = () => {
-            const val = parseFloat(document.getElementById('deposit-amount').value) || 0;
-            const rec = val / marketData.tkPrice;
-            document.getElementById('deposit-calc-receive').innerText = rec.toFixed(2);
+            const pkr = parseFloat(document.getElementById('deposit-amount').value) || 0;
+            // TK = PKR / Price
+            const rec = pkr / marketData.tkPrice;
+            document.getElementById('deposit-calc-receive').innerText = rec.toFixed(4);
         };
 
         window.copyDepositNumber = () => {
@@ -871,19 +862,21 @@
             const m = document.getElementById('deposit-method').value;
             if(!amt || amt<=0 || !ref) return showToast("Invalid details", "error");
             
-            let rAmt = 0, raw = 0;
-            if(m==='usdt') { raw=amt; rAmt=raw/marketData.tkPrice; }
-            else { const usd = amt/marketData.usdtRate; raw=usd; rAmt=usd/marketData.tkPrice; }
+            // Calculate TK received from PKR amount
+            const receiveTk = amt / marketData.tkPrice;
 
             push(ref(db, 'deposits'), {
                 userId: currentUserData.uid, userEmail: currentUserData.email, method: m,
-                amount: rAmt, rawAmount: raw, ref: ref, date: new Date().toLocaleString(), status: 'pending'
+                amount: receiveTk, rawAmount: amt, ref: ref, date: new Date().toLocaleString(), status: 'pending'
             }).then(() => { showToast("Submitted"); showSection('wallet'); });
         };
 
+        // Logic updated: Output is PKR
         window.calculateWithdraw = () => {
             const amt = parseFloat(document.getElementById('withdraw-amount').value) || 0;
-            document.getElementById('withdraw-calc-usdt').innerText = (amt * marketData.tkPrice).toFixed(2);
+            // PKR = TK * Price
+            const pkr = amt * marketData.tkPrice;
+            document.getElementById('withdraw-calc-pkr').innerText = pkr.toFixed(2);
         };
 
         window.submitWithdraw = () => {
@@ -1006,7 +999,7 @@
                     <div style="background:var(--bg-card); padding:10px; border-radius:6px; border:1px solid #333; display:flex; justify-content:space-between; margin-bottom:5px;">
                         <div><b>${isD?'Deposit':'Withdrawal'}</b><br><small>${d.date}</small></div>
                         <div style="text-align:right;">
-                            <div class="${d.status==='approved'?'text-green':(d.status==='rejected'?'text-danger':'text-orange')}">${isD?'+':'-'}${d.amount.toFixed(2)} TK</div>
+                            <div class="${d.status==='approved'?'text-green':(d.status==='rejected'?'text-danger':'text-orange')}">${isD?'+':'-'}${d.amount.toFixed(4)} TK</div>
                             <small>${d.status.toUpperCase()}</small>
                         </div>
                     </div>`;
