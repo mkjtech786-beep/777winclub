@@ -283,9 +283,9 @@
             <section id="view-market" class="section">
                 <div class="balance-card">
                     <div class="balance-title">Current TK Price</div>
-                    <!-- CHANGED: Now shows PKR -->
+                    <!-- Changed: Now showing PKR instead of USDT -->
                     <div class="balance-amount"><span id="market-price">0.00</span> PKR</div>
-                    <small style="opacity: 0.8;">Live Market</small>
+                    <small style="opacity: 0.8;">+2.4% (24h)</small>
                 </div>
 
                 <div style="display: flex; justify-content: space-between; align-items: center;">
@@ -298,14 +298,7 @@
                 </div>
 
                 <div style="margin-top: 20px;">
-                    <h3>Live Rates</h3>
-                    <!-- CHANGED: Removed USDT row, kept only PKR -->
-                    <div style="display: flex; justify-content: center; background: var(--bg-card); padding: 20px; margin-top: 10px; border-radius: 8px;">
-                        <div>
-                            <div style="font-size: 0.9rem; color: #aaa; text-align: center;">1 TK</div>
-                            <div style="font-weight: bold; font-size: 1.2rem; text-align: center; color: var(--primary);" id="rate-pkr">Loading... PKR</div>
-                        </div>
-                    </div>
+                    <!-- Changed: Removed USDT from display, showing only clean view -->
                 </div>
 
                 <div style="margin-top: 20px;">
@@ -374,7 +367,6 @@
                     </div>
                 </div>
 
-                <!-- USDT Label here -->
                 <div class="input-group">
                     <label>Amount Sent (USDT)</label>
                     <input type="number" id="deposit-amount" oninput="calculateDeposit()" placeholder="e.g. 10 USDT">
@@ -421,7 +413,6 @@
                     <input type="number" id="withdraw-amount" placeholder="Min 50 TK" oninput="calculateWithdraw()">
                 </div>
                 
-                <!-- USDT Label here -->
                 <div style="background: #222; padding: 10px; border-radius: 6px; margin-bottom: 20px; color: #aaa;">
                     <small>Estimated Receive: <strong style="color: white; font-size: 1.1rem;"><span id="withdraw-calc-usdt">0.00</span> USDT</strong></small>
                 </div>
@@ -536,14 +527,14 @@
                 <button class="btn btn-sm btn-outline" onclick="showAdminSection('dashboard')">Back</button>
                 <h3 class="text-orange" style="margin-top: 15px;">Market Control</h3>
                 <div class="input-group">
-                    <label>TK Price (USDT)</label>
+                    <label>TK Price (USDT) - Internal Rate</label>
                     <input type="number" id="admin-tk-price" onchange="adminUpdateMarket()">
                 </div>
                 <div class="input-group">
-                    <label>USDT to PKR Rate (For Local Payments)</label>
+                    <label>USDT to PKR Rate (For Display)</label>
                     <input type="number" id="admin-usdt-rate" onchange="adminUpdateMarket()">
                 </div>
-                <!-- REMOVED: Market Mode Dropdown -->
+                <!-- REMOVED: Auto/Manual Select option -->
             </section>
 
             <!-- Admin: Deposits -->
@@ -682,7 +673,7 @@
 
         // --- GLOBAL STATE ---
         let currentUserData = null; 
-        let marketData = { tkPrice: 1.50, usdtRate: 280 }; // Removed 'mode'
+        let marketData = { tkPrice: 1.50, usdtRate: 280, mode: 'manual' }; // Default Manual
         let appSettings = {
             easypaisa: '0300-1234567',
             jazzcash: '0321-7654321',
@@ -726,6 +717,7 @@
                 if (data) {
                     marketData = data;
                     updateMarketUI();
+                    // Also update UI if wallet is open
                     if (currentUserData) updateUI();
                 }
             });
@@ -888,53 +880,51 @@
 
         // --- MARKET LOGIC ---
         function updateMarketUI() {
-            // Calculate TK Price in PKR
-            const tkPricePKR = marketData.tkPrice * marketData.usdtRate;
+            // Calculate PKR price for display
+            const priceInPKR = marketData.tkPrice * marketData.usdtRate;
             
-            // Update Main Price Display to PKR
-            document.getElementById('market-price').innerText = tkPricePKR.toFixed(2);
+            document.getElementById('market-price').innerText = priceInPKR.toFixed(2);
             
-            // Update Live Rates to show only PKR
-            document.getElementById('rate-pkr').innerText = tkPricePKR.toFixed(2) + " PKR";
-
+            // Removed USDT display from Live Rates section
             drawChart();
-            
-            // Sync Admin Inputs
             const adminPriceInput = document.getElementById('admin-tk-price');
             if(adminPriceInput) adminPriceInput.value = marketData.tkPrice;
             const adminRateInput = document.getElementById('admin-usdt-rate');
             if(adminRateInput) adminRateInput.value = marketData.usdtRate;
         }
 
-        // REMOVED Auto Update Interval (setInterval) as requested
-        
+        // REMOVED: The setInterval loop that caused random fluctuation ("zigzag")
+
         function drawChart() {
             const canvas = document.getElementById('marketCanvas');
             const ctx = canvas.getContext('2d');
             canvas.width = canvas.parentElement.offsetWidth;
             canvas.height = canvas.parentElement.offsetHeight;
             
-            // Generate static history points based on current price
+            // Chart will now be static unless admin changes price, 
+            // showing a flat line or slight historical variations if we had history.
+            // For this static version, let's draw a simple straight line or current price flat.
             const points = [];
-            let price = marketData.tkPrice * marketData.usdtRate; // Base price in PKR
+            const price = marketData.tkPrice; 
             
-            // Create pseudo-history
+            // Create a flat-ish line to represent stability or manual control
             for(let i=0; i<20; i++) {
                 points.unshift(price);
-                // Small visual variation for chart look (simulated history)
-                price = price * (1 + (Math.random() - 0.5) * 0.02); 
+                // Tiny variation just for visual texture, not real fluctuation
+                // price = price * (1 + (Math.random() - 0.5) * 0.001); 
             }
-            points.push(marketData.tkPrice * marketData.usdtRate); // Current price at end
+            points.push(marketData.tkPrice);
 
             const max = Math.max(...points) * 1.05;
             const min = Math.min(...points) * 0.95;
             const range = max - min;
             const stepX = canvas.width / (points.length - 1);
-
+            
             ctx.clearRect(0, 0, canvas.width, canvas.height);
             ctx.beginPath();
             ctx.strokeStyle = '#ff6600';
             ctx.lineWidth = 2;
+            
             points.forEach((p, i) => {
                 const x = i * stepX;
                 const y = canvas.height - ((p - min) / range) * canvas.height;
@@ -1136,10 +1126,11 @@
             const newPrice = parseFloat(document.getElementById('admin-tk-price').value);
             const newRate = parseFloat(document.getElementById('admin-usdt-rate').value);
 
-            // REMOVED 'mode' from update
+            // Removed 'mode' update since Auto is removed
             update(ref(db, 'market'), {
                 tkPrice: newPrice,
-                usdtRate: newRate
+                usdtRate: newRate,
+                mode: 'manual' // Forced manual
             }).then(() => showToast("Market Updated"));
         };
 
@@ -1283,25 +1274,37 @@
         function loadUserHistory() {
             const list = document.getElementById('transaction-list');
             list.innerHTML = "";
+            
             const depositsPromise = get(ref(db, 'deposits'));
             const withdrawalsPromise = get(ref(db, 'withdrawals'));
 
             Promise.all([depositsPromise, withdrawalsPromise]).then(([depSnap, withSnap]) => {
                 let allTx = [];
+
                 if (depSnap.exists()) {
                     Object.entries(depSnap.val()).forEach(([key, d]) => {
                         if(d.userId === currentUserData.uid) {
-                            allTx.push({ type: 'deposit', data: d, date: new Date(d.date).getTime() });
+                            allTx.push({
+                                type: 'deposit',
+                                data: d,
+                                date: new Date(d.date).getTime() 
+                            });
                         }
                     });
                 }
+
                 if (withSnap.exists()) {
                     Object.entries(withSnap.val()).forEach(([key, w]) => {
                         if(w.userId === currentUserData.uid) {
-                            allTx.push({ type: 'withdraw', data: w, date: new Date(w.date).getTime() });
+                            allTx.push({
+                                type: 'withdraw',
+                                data: w,
+                                date: new Date(w.date).getTime()
+                            });
                         }
                     });
                 }
+
                 allTx.sort((a, b) => b.date - a.date);
 
                 if (allTx.length === 0) {
@@ -1314,6 +1317,7 @@
                     const isDep = tx.type === 'deposit';
                     let color = d.status === 'approved' ? 'text-green' : (d.status === 'rejected' ? 'text-danger' : 'text-orange');
                     let icon = isDep ? 'fa-arrow-down' : 'fa-arrow-up'; 
+                    
                     let amountStr = "";
                     if(isDep) {
                         amountStr = `+${d.amount.toFixed(2)} TK`;
@@ -1336,6 +1340,7 @@
                         </div>
                     </div>`;
                 });
+
             });
         }
 
