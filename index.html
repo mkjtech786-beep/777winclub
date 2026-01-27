@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TK Coin - Pro Firebase App</title>
+    <title>TK Coin - Trading & Wallet App</title>
     <style>
         :root {
             --primary: #ff6600; /* Orange */
@@ -17,125 +17,240 @@
             --blue: #2979ff;
         }
 
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
-        body { background-color: var(--bg-dark); color: var(--text-light); padding-bottom: 70px; }
-        
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-dark);
+            color: var(--text-light);
+            overflow-x: hidden;
+            padding-bottom: 70px; /* Space for bottom nav */
+        }
+
+        /* --- Utility & Components --- */
         .hidden { display: none !important; }
         .text-orange { color: var(--primary); }
         .text-blue { color: var(--blue); }
         .text-green { color: var(--success); }
         .btn {
-            background: var(--primary); color: white; border: none; padding: 10px 20px;
-            border-radius: 8px; cursor: pointer; font-weight: bold; width: 100%; transition: 0.2s;
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            width: 100%;
+            transition: 0.2s;
         }
         .btn:hover { background: var(--primary-dark); }
+        .btn:disabled { background: #555; cursor: not-allowed; }
         .btn-outline { background: transparent; border: 1px solid var(--primary); color: var(--primary); }
         .btn-sm { padding: 5px 10px; font-size: 0.8rem; width: auto; }
+        
         .input-group { margin-bottom: 15px; }
         .input-group label { display: block; margin-bottom: 5px; color: var(--text-muted); font-size: 0.9rem; }
         .input-group input, .input-group select {
-            width: 100%; padding: 12px; background: #2a2a2a; border: 1px solid #333;
-            color: white; border-radius: 6px; outline: none;
+            width: 100%;
+            padding: 12px;
+            background: #2a2a2a;
+            border: 1px solid #333;
+            color: white;
+            border-radius: 6px;
+            outline: none;
         }
         .input-group input:focus { border-color: var(--primary); }
 
         /* --- Toast Notification --- */
-        #toast-container { position: fixed; top: 20px; right: 20px; z-index: 9999; }
+        #toast-container {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 9999;
+        }
         .toast {
-            background: var(--bg-card); border-left: 4px solid var(--primary); color: white;
-            padding: 15px 20px; margin-bottom: 10px; border-radius: 4px; animation: slideIn 0.3s ease;
+            background: var(--bg-card);
+            border-left: 4px solid var(--primary);
+            color: white;
+            padding: 15px 20px;
+            margin-bottom: 10px;
+            border-radius: 4px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+            animation: slideIn 0.3s ease;
         }
         @keyframes slideIn { from { transform: translateX(100%); } to { transform: translateX(0); } }
 
         /* --- Auth Screen --- */
         #auth-screen {
-            display: flex; justify-content: center; align-items: center; height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
             background: linear-gradient(135deg, #121212, #2a1b0d);
         }
         .auth-box {
-            background: var(--bg-card); padding: 30px; border-radius: 12px; width: 90%; max-width: 400px;
+            background: var(--bg-card);
+            padding: 30px;
+            border-radius: 12px;
+            width: 90%;
+            max-width: 400px;
             border-top: 3px solid var(--primary);
         }
         .auth-toggle { text-align: center; margin-top: 15px; font-size: 0.9rem; cursor: pointer; color: var(--primary); }
 
-        /* --- Layout --- */
+        /* --- Main Layout --- */
         header {
-            background: var(--bg-card); padding: 15px; display: flex; justify-content: space-between;
-            align-items: center; border-bottom: 1px solid #333; position: sticky; top: 0; z-index: 100;
+            background: var(--bg-card);
+            padding: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #333;
+            position: sticky;
+            top: 0;
+            z-index: 100;
         }
         .logo { font-size: 1.2rem; font-weight: bold; color: var(--primary); display: flex; align-items: center; gap: 5px; }
-        .user-info { display: flex; align-items: center; gap: 10px; font-size: 0.9rem; cursor: pointer; }
+        .user-info { display: flex; align-items: center; gap: 10px; font-size: 0.9rem; }
+        .avatar { width: 35px; height: 35px; border-radius: 50%; background: #333; object-fit: cover; }
         
-        /* Avatar Styles */
-        .avatar {
-            width: 40px; height: 40px; border-radius: 50%; object-fit: cover; border: 2px solid var(--primary);
-            transition: transform 0.2s;
-        }
-        .avatar:hover { transform: scale(1.1); }
-        
-        .avatar-lg {
-            width: 120px; height: 120px; border-radius: 50%; object-fit: cover; border: 4px solid var(--primary);
-            display: block; margin: 0 auto 15px auto; cursor: pointer; box-shadow: 0 0 15px rgba(255,102,0,0.5);
-        }
-
-        /* Nav */
+        /* --- Navigation --- */
         .bottom-nav {
-            position: fixed; bottom: 0; width: 100%; background: var(--bg-card);
-            display: flex; justify-content: space-around; padding: 10px 0; border-top: 1px solid #333; z-index: 100;
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+            background: var(--bg-card);
+            display: flex;
+            justify-content: space-around;
+            padding: 10px 0;
+            border-top: 1px solid #333;
+            z-index: 100;
         }
-        .nav-item { color: var(--text-muted); text-decoration: none; font-size: 0.8rem; display: flex; flex-direction: column; align-items: center; cursor: pointer; }
+        .nav-item {
+            color: var(--text-muted);
+            text-decoration: none;
+            font-size: 0.8rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            cursor: pointer;
+        }
         .nav-item.active { color: var(--primary); }
         .nav-item i { font-size: 1.2rem; margin-bottom: 2px; }
 
+        /* --- Sections --- */
         .section { padding: 15px; max-width: 600px; margin: 0 auto; }
         
-        /* Ticker & Chart */
-        .ticker-wrap { width: 100%; background: #000; overflow: hidden; padding: 8px 0; white-space: nowrap; border-bottom: 1px solid var(--primary); }
-        .ticker { display: inline-block; animation: ticker 20s linear infinite; }
-        @keyframes ticker { 0% { transform: translateX(100%); } 100% { transform: translateX(-100%); } }
-        
+        /* Market Chart */
         .chart-container {
-            background: var(--bg-card); padding: 15px; border-radius: 10px; margin-top: 15px;
-            height: 200px; border: 1px solid #333; position: relative;
+            background: var(--bg-card);
+            padding: 15px;
+            border-radius: 10px;
+            margin-top: 15px;
+            position: relative;
+            height: 200px;
+            border: 1px solid #333;
         }
-        canvas { width: 100%; height: 100%; }
+        #marketChart { width: 100%; height: 100%; }
+        .ticker-wrap {
+            width: 100%;
+            background: #000;
+            overflow: hidden;
+            padding: 8px 0;
+            white-space: nowrap;
+            border-bottom: 1px solid var(--primary);
+        }
+        .ticker { display: inline-block; animation: ticker 20s linear infinite; }
+        .ticker-item { display: inline-block; padding: 0 20px; font-size: 0.9rem; }
+        @keyframes ticker { 0% { transform: translateX(100%); } 100% { transform: translateX(-100%); } }
 
         /* Wallet Cards */
         .balance-card {
-            background: linear-gradient(135deg, var(--primary), #ff9100); color: #fff;
-            padding: 20px; border-radius: 15px; margin-bottom: 20px;
+            background: linear-gradient(135deg, var(--primary), #ff9100);
+            color: #fff;
+            padding: 20px;
+            border-radius: 15px;
+            margin-bottom: 20px;
             box-shadow: 0 4px 10px rgba(255, 102, 0, 0.3);
         }
+        .balance-title { font-size: 0.9rem; opacity: 0.9; }
         .balance-amount { font-size: 2rem; font-weight: bold; margin: 5px 0; }
+        
         .menu-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 20px; }
         .menu-card {
-            background: var(--bg-card); padding: 20px; border-radius: 12px; text-align: center;
-            cursor: pointer; transition: 0.2s; border: 1px solid #333;
+            background: var(--bg-card);
+            padding: 20px;
+            border-radius: 12px;
+            text-align: center;
+            cursor: pointer;
+            transition: 0.2s;
+            border: 1px solid #333;
         }
         .menu-card:hover { border-color: var(--primary); transform: translateY(-3px); }
         .menu-icon { font-size: 1.5rem; margin-bottom: 10px; display: block; }
 
         /* Chat */
-        .chat-box { background: var(--bg-card); height: 60vh; border-radius: 10px; display: flex; flex-direction: column; border: 1px solid #333; }
+        .chat-box {
+            background: var(--bg-card);
+            height: 60vh;
+            border-radius: 10px;
+            display: flex;
+            flex-direction: column;
+            border: 1px solid #333;
+        }
         .chat-messages { flex: 1; overflow-y: auto; padding: 10px; display: flex; flex-direction: column; gap: 10px; }
         .message { max-width: 80%; padding: 8px 12px; border-radius: 10px; font-size: 0.9rem; }
         .msg-admin { align-self: flex-start; background: #333; color: white; }
         .msg-user { align-self: flex-end; background: var(--primary); color: white; }
         .chat-input-area { padding: 10px; display: flex; gap: 10px; border-top: 1px solid #333; }
 
-        /* Admin Table */
+        /* Admin Styles */
         .admin-table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 0.85rem; }
         .admin-table th, .admin-table td { text-align: left; padding: 8px; border-bottom: 1px solid #333; }
+        .admin-table th { color: var(--primary); }
         .status-badge { padding: 2px 6px; border-radius: 4px; font-size: 0.7rem; }
         .status-pending { background: #ff9800; color: black; }
         .status-approved { background: #00c853; color: white; }
+        .status-rejected { background: #ff3d00; color: white; }
 
         /* Premium Badge */
+        .badge-premium { color: var(--blue); margin-left: 5px; }
         .blue-tick { color: #1da1f2; margin-left: 2px; }
-        .pro-badge { background: var(--primary); font-size: 0.6rem; padding: 2px 5px; border-radius: 4px; margin-left: 5px; vertical-align: top;}
 
     </style>
+    <!-- Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+
+<!-- FIREBASE REALTIME DATABASE CONNECT -->
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+import { getDatabase, ref, set, get, onValue } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyCChxbenpYlcBxTiqPqBDrjOefHkotX7Zg",
+  authDomain: "tkcoinfinel.firebaseapp.com",
+  databaseURL: "https://tkcoinfinel-default-rtdb.firebaseio.com",
+  projectId: "tkcoinfinel",
+  storageBucket: "tkcoinfinel.appspot.com",
+  messagingSenderId: "131190927556",
+  appId: "1:131190927556:web:4920420b66522722c7d991"
+};
+
+const app = initializeApp(firebaseConfig);
+const database = getDatabase(app);
+
+window.firebaseDB = database;
+window.firebaseRef = ref;
+window.firebaseSet = set;
+window.firebaseGet = get;
+window.firebaseOn = onValue;
+</script>
+<!-- END FIREBASE -->
+
 </head>
 <body>
 
@@ -153,46 +268,55 @@
                 </div>
                 <div class="input-group">
                     <label>Password</label>
-                    <input type="password" id="auth-pass" required placeholder="******">
+                    <input type="password" id="auth-pass" required placeholder="password">
                 </div>
                 <button type="submit" class="btn" id="auth-btn">Login</button>
             </form>
-            <div class="auth-toggle" onclick="window.toggleAuthMode()">Don't have an account? Signup</div>
+            <div class="auth-toggle" onclick="toggleAuthMode()">Don't have an account? Signup</div>
             <div style="margin-top: 15px; font-size: 0.8rem; color: #666; text-align: center;">
-                <strong>Admin:</strong> admin@app.com<br>
-                <strong>Password:</strong> admin123
+                Hint: Admin: admin@app.com / admin123
             </div>
         </div>
     </div>
 
     <!-- Main App Container -->
     <div id="app-container" class="hidden">
-        <!-- News Ticker -->
-        <div class="ticker-wrap"><div class="ticker" id="news-ticker">Loading News...</div></div>
         
+        <!-- News Ticker -->
+        <div class="ticker-wrap">
+            <div class="ticker" id="news-ticker">
+                <!-- News injected by JS -->
+            </div>
+        </div>
+
         <header>
             <div class="logo">
                 <i class="fas fa-coins"></i> TK Coin
                 <span id="header-premium-badge" class="hidden blue-tick"><i class="fas fa-check-circle"></i></span>
             </div>
-            <div class="user-info" onclick="window.showSection('profile')">
+            <div class="user-info" onclick="showSection('profile')">
                 <div style="text-align: right;">
-                    <div id="header-name">Loading...</div>
+                    <div id="header-name">User</div>
                     <div id="header-balance" style="color: var(--primary);">0 TK</div>
                 </div>
-                <img src="" class="avatar" id="header-avatar" alt="User">
+                <img src="https://picsum.photos/seed/user/50/50" class="avatar" id="header-avatar" alt="User">
             </div>
         </header>
 
         <!-- User Views -->
         <main id="user-views">
             
-            <!-- Market -->
+            <!-- Dashboard / Market -->
             <section id="view-market" class="section">
                 <div class="balance-card">
                     <div class="balance-title">Current TK Price</div>
-                    <div class="balance-amount">$<span id="market-price">0.00</span></div>
+                    <div class="balance-amount"><span id="market-price">0.00</span> USD</div>
                     <small style="opacity: 0.8;">+2.4% (24h)</small>
+                </div>
+
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <h3>Live Market</h3>
+                    <span style="font-size: 0.8rem; color: var(--success);">● Live</span>
                 </div>
                 
                 <div class="chart-container">
@@ -215,7 +339,9 @@
 
                 <div style="margin-top: 20px;">
                     <h3>News Feed</h3>
-                    <div id="news-feed" style="display: flex; flex-direction: column; gap: 10px; margin-top: 10px;"></div>
+                    <div id="news-feed" style="display: flex; flex-direction: column; gap: 10px; margin-top: 10px;">
+                        <!-- News items -->
+                    </div>
                 </div>
             </section>
 
@@ -228,40 +354,44 @@
                 </div>
 
                 <div class="menu-grid">
-                    <div class="menu-card" onclick="window.showSection('deposit')">
+                    <div class="menu-card" onclick="showSection('deposit')">
                         <span class="menu-icon text-orange"><i class="fas fa-wallet"></i></span>
                         <div>Deposit</div>
                     </div>
-                    <div class="menu-card" onclick="window.showSection('withdraw')">
+                    <div class="menu-card" onclick="showSection('withdraw')">
                         <span class="menu-icon text-green"><i class="fas fa-money-bill-wave"></i></span>
                         <div>Withdraw</div>
                     </div>
-                    <div class="menu-card" onclick="window.showSection('transfer')">
+                    <div class="menu-card" onclick="showSection('transfer')">
                         <span class="menu-icon text-blue"><i class="fas fa-exchange-alt"></i></span>
                         <div>Transfer</div>
                     </div>
-                    <div class="menu-card" onclick="window.showSection('premium')">
+                    <div class="menu-card" onclick="showSection('premium')">
                         <span class="menu-icon" style="color: gold;"><i class="fas fa-crown"></i></span>
                         <div>Pro</div>
                     </div>
                 </div>
 
                 <h3>Transaction History</h3>
-                <div id="transaction-list" style="margin-top: 10px;"></div>
+                <div id="transaction-list" style="margin-top: 10px; display: flex; flex-direction: column; gap: 10px;">
+                    <!-- History -->
+                </div>
             </section>
 
             <!-- Deposit -->
             <section id="view-deposit" class="section hidden">
                 <h2 class="text-orange">Deposit Funds</h2>
+                <p style="color: #aaa; margin-bottom: 20px;">Select method to add balance.</p>
+                
                 <div class="input-group">
                     <label>Method</label>
-                    <select id="deposit-method" onchange="window.updateDepositDetails()">
+                    <select id="deposit-method" onchange="updateDepositDetails()">
                         <option value="easypaisa">Easypaisa</option>
                         <option value="jazzcash">JazzCash</option>
                         <option value="usdt">USDT (TRC20)</option>
                     </select>
                 </div>
-                
+
                 <div style="background: var(--bg-card); padding: 15px; border-radius: 8px; margin-bottom: 20px; border: 1px solid #333;">
                     <div style="display: flex; justify-content: space-between; align-items: center;">
                         <div>
@@ -269,13 +399,13 @@
                             <div style="font-weight: bold; font-size: 1.1rem;" id="deposit-number">0300-1234567</div>
                             <div style="font-size: 0.8rem; color: var(--primary);" id="deposit-name">Ali Khan - Easypaisa</div>
                         </div>
-                        <button class="btn btn-sm btn-outline" onclick="window.copyDepositNumber()"><i class="fas fa-copy"></i></button>
+                        <button class="btn btn-sm btn-outline" onclick="copyDepositNumber()"><i class="fas fa-copy"></i></button>
                     </div>
                 </div>
 
                 <div class="input-group">
                     <label>Amount Sent (PKR)</label>
-                    <input type="number" id="deposit-amount" oninput="window.calculateDeposit()" placeholder="1000">
+                    <input type="number" id="deposit-amount" oninput="calculateDeposit()" placeholder="e.g. 1000">
                 </div>
                 <div class="input-group">
                     <label>Reference No / Transaction ID</label>
@@ -286,13 +416,15 @@
                     <small>You will receive: <strong><span id="deposit-calc-receive">0</span> TK</strong></small>
                 </div>
 
-                <button class="btn" onclick="window.submitDeposit()">Submit Deposit Request</button>
-                <button class="btn btn-outline" style="margin-top: 10px;" onclick="window.showSection('wallet')">Back</button>
+                <button class="btn" onclick="submitDeposit()">Submit Deposit Request</button>
+                <button class="btn btn-outline" style="margin-top: 10px;" onclick="showSection('wallet')">Back</button>
             </section>
 
             <!-- Withdraw -->
             <section id="view-withdraw" class="section hidden">
                 <h2 class="text-orange">Withdraw Funds</h2>
+                <p style="color: #aaa; margin-bottom: 20px;">Withdraw TK to Easypaisa, JazzCash or USDT.</p>
+
                 <div style="background: var(--bg-card); padding: 15px; border-radius: 8px; margin-bottom: 20px;">
                     <div>Available Balance: <strong id="withdraw-bal-display">0 TK</strong></div>
                     <div style="font-size: 0.8rem; color: var(--primary);" id="fee-display">Fee: 5%</div>
@@ -317,13 +449,15 @@
                     <input type="number" id="withdraw-amount" placeholder="Min 50 TK">
                 </div>
 
-                <button class="btn" onclick="window.submitWithdraw()">Request Withdrawal</button>
-                <button class="btn btn-outline" style="margin-top: 10px;" onclick="window.showSection('wallet')">Back</button>
+                <button class="btn" onclick="submitWithdraw()">Request Withdrawal</button>
+                <button class="btn btn-outline" style="margin-top: 10px;" onclick="showSection('wallet')">Back</button>
             </section>
 
             <!-- Transfer -->
             <section id="view-transfer" class="section hidden">
                 <h2 class="text-orange">Transfer Coins</h2>
+                <p style="color: #aaa; margin-bottom: 20px;">Send TK to another user instantly.</p>
+
                 <div class="input-group">
                     <label>Receiver Email</label>
                     <input type="email" id="transfer-email" placeholder="user@example.com">
@@ -333,8 +467,8 @@
                     <input type="number" id="transfer-amount" placeholder="Amount">
                 </div>
 
-                <button class="btn" onclick="window.submitTransfer()">Send Now</button>
-                <button class="btn btn-outline" style="margin-top: 10px;" onclick="window.showSection('wallet')">Back</button>
+                <button class="btn" onclick="submitTransfer()">Send Now</button>
+                <button class="btn btn-outline" style="margin-top: 10px;" onclick="showSection('wallet')">Back</button>
             </section>
 
             <!-- Premium -->
@@ -355,8 +489,8 @@
                     </div>
                 </div>
 
-                <button class="btn" id="btn-upgrade" onclick="window.upgradePremium()">Upgrade Now</button>
-                <button class="btn btn-outline" style="margin-top: 10px;" onclick="window.showSection('wallet')">Back</button>
+                <button class="btn" id="btn-upgrade" onclick="upgradePremium()">Upgrade Now</button>
+                <button class="btn btn-outline" style="margin-top: 10px;" onclick="showSection('wallet')">Back</button>
             </section>
 
             <!-- Chat -->
@@ -368,28 +502,25 @@
                     </div>
                     <div class="chat-input-area">
                         <input type="text" id="chat-input" placeholder="Type a message..." style="flex: 1; padding: 8px; border-radius: 4px; border: none; background: #333; color: white;">
-                        <button class="btn btn-sm" onclick="window.sendChatMessage()"><i class="fas fa-paper-plane"></i></button>
+                        <button class="btn btn-sm" onclick="sendChatMessage()"><i class="fas fa-paper-plane"></i></button>
                     </div>
                 </div>
             </section>
 
             <!-- Profile -->
             <section id="view-profile" class="section hidden">
-                <div style="text-align: center;">
-                    <!-- Avatar: Click to Change -->
-                    <img src="" class="avatar-lg" id="profile-avatar" title="Click to change avatar" onclick="window.changeAvatar()">
-                    <small style="color: var(--primary); cursor: pointer;" onclick="window.changeAvatar()"><i class="fas fa-sync"></i> Change Avatar</small>
-                    
+                <div style="text-align: center; margin-bottom: 20px;">
+                    <img src="https://picsum.photos/seed/user/100/100" class="avatar" style="width: 100px; height: 100px; margin-bottom: 10px;" id="profile-avatar">
                     <h2 id="profile-name">User Name</h2>
                     <p id="profile-email" style="color: #aaa;">user@email.com</p>
                     <div id="profile-status" style="margin-top: 5px; font-size: 0.9rem; color: var(--primary);">Standard User</div>
                 </div>
 
                 <h3>Settings</h3>
-                <div class="menu-card" onclick="window.showAboutModal()" style="text-align: left; margin-bottom: 10px;">
+                <div class="menu-card" onclick="showAboutModal()" style="text-align: left; margin-bottom: 10px;">
                     <i class="fas fa-info-circle"></i> About App
                 </div>
-                <button class="btn" style="background: #333;" onclick="window.logout()">Logout</button>
+                <button class="btn" style="background: #333;" onclick="logout()">Logout</button>
             </section>
         </main>
 
@@ -399,25 +530,25 @@
                 <h2 class="text-orange">Admin Dashboard</h2>
                 
                 <div class="menu-grid" style="margin-top: 20px;">
-                    <div class="menu-card" onclick="window.showAdminSection('market')">
+                    <div class="menu-card" onclick="showAdminSection('market')">
                         <span class="menu-icon text-orange"><i class="fas fa-chart-line"></i></span>
                         <div>Market</div>
                     </div>
-                    <div class="menu-card" onclick="window.showAdminSection('deposits')">
+                    <div class="menu-card" onclick="showAdminSection('deposits')">
                         <span class="menu-icon text-green"><i class="fas fa-check-double"></i></span>
                         <div>Deposits <span id="admin-dep-pending-count" class="badge" style="background:red; padding:2px 5px; border-radius:50%; font-size:0.7rem; color:white;">0</span></div>
                     </div>
-                    <div class="menu-card" onclick="window.showAdminSection('users')">
+                    <div class="menu-card" onclick="showAdminSection('users')">
                         <span class="menu-icon text-blue"><i class="fas fa-users"></i></span>
                         <div>Users</div>
                     </div>
-                    <div class="menu-card" onclick="window.showAdminSection('news')">
+                    <div class="menu-card" onclick="showAdminSection('news')">
                         <span class="menu-icon"><i class="fas fa-newspaper"></i></span>
                         <div>News</div>
                     </div>
                 </div>
 
-                <div class="menu-card" onclick="window.showAdminSection('chat')" style="text-align: left; margin-bottom: 20px;">
+                <div class="menu-card" onclick="showAdminSection('chat')" style="text-align: left; margin-bottom: 20px;">
                     <span class="menu-icon"><i class="fas fa-comments"></i></span>
                     <div>Live Support Chats</div>
                 </div>
@@ -425,46 +556,83 @@
 
             <!-- Admin: Market Control -->
             <section id="admin-market" class="section hidden">
-                <button class="btn btn-sm btn-outline" onclick="window.showAdminSection('dashboard')">Back</button>
+                <button class="btn btn-sm btn-outline" onclick="showAdminSection('dashboard')">Back</button>
                 <h3 class="text-orange" style="margin-top: 15px;">Market Control</h3>
                 <div class="input-group">
                     <label>TK Price (USD)</label>
-                    <input type="number" id="admin-tk-price" onchange="window.adminUpdateMarket()">
+                    <input type="number" id="admin-tk-price" onchange="adminUpdateMarket()">
                 </div>
                 <div class="input-group">
                     <label>USDT to PKR Rate</label>
-                    <input type="number" id="admin-usdt-rate" onchange="window.adminUpdateMarket()">
+                    <input type="number" id="admin-usdt-rate" onchange="adminUpdateMarket()">
+                </div>
+                <div class="input-group">
+                    <label>Market Mode</label>
+                    <select id="admin-market-mode" onchange="adminUpdateMarket()">
+                        <option value="auto">Auto (Random)</option>
+                        <option value="manual">Manual</option>
+                    </select>
                 </div>
             </section>
 
             <!-- Admin: Deposits -->
             <section id="admin-deposits" class="section hidden">
-                <button class="btn btn-sm btn-outline" onclick="window.showAdminSection('dashboard')">Back</button>
-                <h3 class="text-orange" style="margin-top: 15px;">Deposit & Withdraw Requests</h3>
-                <div id="admin-deposit-list" style="margin-top:10px;"></div>
+                <button class="btn btn-sm btn-outline" onclick="showAdminSection('dashboard')">Back</button>
+                <h3 class="text-orange" style="margin-top: 15px;">Deposit Approvals</h3>
+                <div style="overflow-x: auto;">
+                    <table class="admin-table">
+                        <thead>
+                            <tr>
+                                <th>User</th>
+                                <th>Method</th>
+                                <th>Amount</th>
+                                <th>Ref</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="admin-deposit-list">
+                            <!-- Rows -->
+                        </tbody>
+                    </table>
+                </div>
             </section>
 
             <!-- Admin: Users -->
             <section id="admin-users" class="section hidden">
-                <button class="btn btn-sm btn-outline" onclick="window.showAdminSection('dashboard')">Back</button>
+                <button class="btn btn-sm btn-outline" onclick="showAdminSection('dashboard')">Back</button>
                 <h3 class="text-orange" style="margin-top: 15px;">User Management</h3>
-                <div id="admin-user-list" style="margin-top:10px;"></div>
+                <div style="overflow-x: auto;">
+                    <table class="admin-table">
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Email</th>
+                                <th>Password</th> <!-- As requested -->
+                                <th>Balance</th>
+                                <th>Role</th>
+                            </tr>
+                        </thead>
+                        <tbody id="admin-user-list">
+                            <!-- Rows -->
+                        </tbody>
+                    </table>
+                </div>
             </section>
 
             <!-- Admin: News -->
             <section id="admin-news" class="section hidden">
-                <button class="btn btn-sm btn-outline" onclick="window.showAdminSection('dashboard')">Back</button>
+                <button class="btn btn-sm btn-outline" onclick="showAdminSection('dashboard')">Back</button>
                 <h3 class="text-orange" style="margin-top: 15px;">Post News</h3>
                 <div class="input-group">
                     <label>Headline</label>
                     <input type="text" id="admin-news-headline">
                 </div>
-                <button class="btn" onclick="window.postNews()">Post Update</button>
+                <button class="btn" onclick="postNews()">Post Update</button>
             </section>
 
              <!-- Admin: Chat -->
              <section id="admin-chat" class="section hidden">
-                <button class="btn btn-sm btn-outline" onclick="window.showAdminSection('dashboard')">Back</button>
+                <button class="btn btn-sm btn-outline" onclick="showAdminSection('dashboard')">Back</button>
                 <h3 class="text-orange" style="margin-top: 15px;">User Chats</h3>
                 <div id="admin-chat-list">
                     <!-- List of users to chat with -->
@@ -473,7 +641,7 @@
                      <div class="chat-messages" id="admin-chat-messages"></div>
                      <div class="chat-input-area">
                          <input type="text" id="admin-chat-input" placeholder="Reply...">
-                         <button class="btn btn-sm" onclick="window.adminSendReply()">Reply</button>
+                         <button class="btn btn-sm" onclick="adminSendReply()">Reply</button>
                      </div>
                 </div>
             </section>
@@ -482,700 +650,700 @@
 
         <!-- Bottom Navigation (User Only) -->
         <nav class="bottom-nav" id="user-nav">
-            <a class="nav-item active" onclick="window.showSection('market')">
+            <a class="nav-item active" onclick="showSection('market')">
                 <i class="fas fa-chart-line"></i>
                 <span>Market</span>
             </a>
-            <a class="nav-item" onclick="window.showSection('wallet')">
+            <a class="nav-item" onclick="showSection('wallet')">
                 <i class="fas fa-wallet"></i>
                 <span>Wallet</span>
             </a>
-            <a class="nav-item" onclick="window.showSection('chat')">
+            <a class="nav-item" onclick="showSection('chat')">
                 <i class="fas fa-comment-dots"></i>
                 <span>Chat</span>
             </a>
-            <a class="nav-item" onclick="window.showSection('profile')">
+            <a class="nav-item" onclick="showSection('profile')">
                 <i class="fas fa-user"></i>
                 <span>Profile</span>
             </a>
         </nav>
     </div>
 
-    <!-- FIREBASE SCRIPTS -->
-    <script type="module">
-      // Import the functions you need from the SDKs you need
-      import { initializeApp } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-app.js";
-      import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-analytics.js";
-      import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-auth.js";
-      import { getFirestore, collection, doc, setDoc, getDoc, updateDoc, addDoc, onSnapshot, query, where, orderBy, getDocs, serverTimestamp, arrayUnion, increment, deleteDoc } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-firestore.js";
+    <!-- Scripts -->
+    <script>
+        // --- DATA SIMULATION (LocalStorage) ---
+        const DB_KEY = 'tkcoin_app_data';
+        const SESSION_KEY = 'tkcoin_session';
 
-      // Your web app's Firebase configuration
-      const firebaseConfig = {
-        apiKey: "AIzaSyCChxbenpYlcBxTiqPqBDrjOefHkotX7Zg",
-        authDomain: "tkcoinfinel.firebaseapp.com",
-        databaseURL: "https://tkcoinfinel-default-rtdb.asia-southeast1.firebasedatabase.app",
-        projectId: "tkcoinfinel",
-        storageBucket: "tkcoinfinel.firebasestorage.app",
-        messagingSenderId: "131190927556",
-        appId: "1:131190927556:web:4920420b66522722c7d991",
-        measurementId: "G-2M0LDFRFH5"
-      };
+        let db = {
+            users: [],
+            currentUser: null,
+            market: {
+                tkPrice: 1.50,
+                usdtRate: 280, // 1 USDT = 280 PKR
+                mode: 'auto', // auto or manual
+                history: []
+            },
+            settings: {
+                easypaisa: '0300-1234567',
+                jazzcash: '0321-7654321',
+                usdt: 'TRC20Address...',
+                minWithdraw: 50,
+                withdrawFee: 0.05 // 5%
+            },
+            news: [
+                { title: "Welcome to TK Coin!", date: new Date().toLocaleDateString() },
+                { title: "Market is bullish today.", date: new Date().toLocaleDateString() }
+            ],
+            deposits: [],
+            withdrawals: [],
+            chats: [] // { userId, userEmail, messages: [{text, sender: 'user'|'admin', time}] }
+        };
 
-      // Initialize Firebase
-      const app = initializeApp(firebaseConfig);
-      const analytics = getAnalytics(app);
-      const auth = getAuth(app);
-      const db = getFirestore(app);
+        // --- INIT ---
+        function initApp() {
+            const storedData = localStorage.getItem(DB_KEY);
+            if (storedData) {
+                db = JSON.parse(storedData);
+            } else {
+                // Seed Admin
+                db.users.push({
+                    name: "Admin",
+                    email: "admin@app.com",
+                    pass: "admin123",
+                    role: "admin",
+                    isPremium: true,
+                    balanceTK: 10000,
+                    balancePKR: 0,
+                    avatar: "https://picsum.photos/seed/admin/50/50"
+                });
+                saveDB();
+            }
 
-      // --- GLOBAL VARIABLES ---
-      let currentUserData = null;
-      let unsubscribeUser = null;
-      let unsubscribeMarket = null;
-      let unsubscribeChat = null;
-      let currentAdminChatUser = null;
-      
-      // Avatar Seeds List
-      const avatarSeeds = ['alex', 'bob', 'charlie', 'david', 'emma', 'frank', 'grace', 'henry', 'ivy', 'jack'];
+            // Session Check
+            const session = localStorage.getItem(SESSION_KEY);
+            if (session) {
+                const user = db.users.find(u => u.email === session);
+                if (user) {
+                    loginSuccess(user);
+                }
+            }
 
-      // --- AUTH LOGIC ---
-      let isSignup = false;
+            // Start Loops
+            setInterval(updateMarket, 2000);
+            setInterval(renderChat, 1000);
+            renderTicker();
+        }
 
-      window.toggleAuthMode = function() {
-          isSignup = !isSignup;
-          document.querySelector('.auth-box h2').innerText = isSignup ? "Create Account" : "TK Coin Login";
-          document.getElementById('auth-btn').innerText = isSignup ? "Signup" : "Login";
-          document.querySelector('.auth-toggle').innerText = isSignup ? "Already have an account? Login" : "Don't have an account? Signup";
-      };
+        function saveDB() {
+            localStorage.setItem(DB_KEY, JSON.stringify(db));
+        }
 
-      document.getElementById('auth-form').addEventListener('submit', async (e) => {
-          e.preventDefault();
-          const email = document.getElementById('auth-email').value.trim();
-          const pass = document.getElementById('auth-pass').value.trim();
-          const btn = document.getElementById('auth-btn');
+        // --- AUTH ---
+        let isSignup = false;
 
-          if (!email || !pass) return showToast("Please fill all fields", "error");
-          
-          btn.disabled = true;
-          btn.innerText = "Processing...";
+        function toggleAuthMode() {
+            isSignup = !isSignup;
+            document.querySelector('.auth-box h2').innerText = isSignup ? "Create Account" : "TK Coin Login";
+            document.getElementById('auth-btn').innerText = isSignup ? "Signup" : "Login";
+            document.querySelector('.auth-toggle').innerText = isSignup ? "Already have an account? Login" : "Don't have an account? Signup";
+        }
 
-          try {
-              if (isSignup) {
-                  // 1. Create Auth User
-                  const userCredential = await createUserWithEmailAndPassword(auth, email, pass);
-                  const user = userCredential.user;
-                  
-                  // 2. Determine Role
-                  let role = 'user';
-                  if (email.toLowerCase() === 'admin@app.com') role = 'admin';
+        document.getElementById('auth-form').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const email = document.getElementById('auth-email').value;
+            const pass = document.getElementById('auth-pass').value;
 
-                  // 3. Create Firestore Doc
-                  const randomSeed = avatarSeeds[Math.floor(Math.random() * avatarSeeds.length)];
-                  const randomAvatar = `https://picsum.photos/seed/${randomSeed}/200/200`;
+            if (isSignup) {
+                if (db.users.find(u => u.email === email)) {
+                    showToast("Email already exists", "error");
+                    return;
+                }
+                const newUser = {
+                    name: email.split('@')[0],
+                    email: email,
+                    pass: pass,
+                    role: "user",
+                    isPremium: false,
+                    balanceTK: 0,
+                    balancePKR: 0,
+                    avatar: `https://picsum.photos/seed/${email}/50/50`,
+                    history: []
+                };
+                db.users.push(newUser);
+                saveDB();
+                showToast("Account created! Please login.");
+                toggleAuthMode();
+            } else {
+                const user = db.users.find(u => u.email === email && u.pass === pass);
+                if (user) {
+                    localStorage.setItem(SESSION_KEY, email);
+                    loginSuccess(user);
+                } else {
+                    showToast("Invalid credentials", "error");
+                }
+            }
+        });
 
-                  await setDoc(doc(db, "users", user.uid), {
-                      email: email,
-                      name: email.split('@')[0],
-                      role: role,
-                      isPremium: false,
-                      balanceTK: 0,
-                      avatar: randomAvatar,
-                      createdAt: serverTimestamp()
-                  });
+        function loginSuccess(user) {
+            db.currentUser = user;
+            document.getElementById('auth-screen').classList.add('hidden');
+            document.getElementById('app-container').classList.remove('hidden');
+            
+            updateUI();
 
-                  // 4. Initialize Market if not exists (One time setup)
-                  const marketRef = doc(db, "market", "global");
-                  const marketSnap = await getDoc(marketRef);
-                  if (!marketSnap.exists()) {
-                      await setDoc(marketRef, {
-                          tkPrice: 1.50,
-                          usdtRate: 280,
-                          news: [{ title: "Welcome to TK Coin! Official Launch." }]
-                      });
-                  }
+            if (user.role === 'admin') {
+                document.getElementById('user-nav').classList.add('hidden');
+                document.getElementById('user-views').classList.add('hidden');
+                document.getElementById('admin-views').classList.remove('hidden');
+                showAdminSection('dashboard');
+                loadAdminData();
+            } else {
+                document.getElementById('user-nav').classList.remove('hidden');
+                document.getElementById('user-views').classList.remove('hidden');
+                document.getElementById('admin-views').classList.add('hidden');
+                showSection('market');
+            }
+        }
 
-                  showToast("Account created successfully!");
-              } else {
-                  // Login
-                  await signInWithEmailAndPassword(auth, email, pass);
-                  showToast("Logged in successfully!");
-              }
-          } catch (error) {
-              console.error(error);
-              showToast(error.message, "error");
-          } finally {
-              btn.disabled = false;
-              btn.innerText = isSignup ? "Signup" : "Login";
-          }
-      });
+        function logout() {
+            localStorage.removeItem(SESSION_KEY);
+            location.reload();
+        }
 
-      window.logout = function() {
-          signOut(auth).then(() => {
-              showToast("Logged out");
-          });
-      };
+        // --- NAVIGATION ---
+        function showSection(sectionId) {
+            // Hide all user sections
+            document.querySelectorAll('#user-views .section').forEach(el => el.classList.add('hidden'));
+            // Show target
+            document.getElementById(`view-${sectionId}`).classList.remove('hidden');
+            
+            // Update nav active state
+            document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+            // Very simple matching for nav highlight
+            if (sectionId === 'market') document.querySelectorAll('.nav-item')[0].classList.add('active');
+            if (sectionId === 'wallet') document.querySelectorAll('.nav-item')[1].classList.add('active');
+            if (sectionId === 'chat') document.querySelectorAll('.nav-item')[2].classList.add('active');
+            if (sectionId === 'profile') document.querySelectorAll('.nav-item')[3].classList.add('active');
 
-      // --- STATE MANAGEMENT ---
-      onAuthStateChanged(auth, (user) => {
-          if (user) {
-              document.getElementById('auth-screen').classList.add('hidden');
-              document.getElementById('app-container').classList.remove('hidden');
-              loadUserData(user.uid);
-              loadMarketData();
-          } else {
-              document.getElementById('auth-screen').classList.remove('hidden');
-              document.getElementById('app-container').classList.add('hidden');
-              if(unsubscribeUser) unsubscribeUser();
-              if(unsubscribeMarket) unsubscribeMarket();
-          }
-      });
+            updateUI(); // Refresh data
+        }
 
-      // --- DATA LOADERS ---
-      function loadUserData(uid) {
-          unsubscribeUser = onSnapshot(doc(db, "users", uid), (docSnap) => {
-              if (docSnap.exists()) {
-                  currentUserData = docSnap.data();
-                  currentUserData.id = uid; 
-                  updateUI();
-                  
-                  if (currentUserData.role === 'admin') {
-                      setupAdminView();
-                  } else {
-                      setupUserView(uid);
-                  }
-              }
-          });
-      }
+        function showAdminSection(sectionId) {
+            document.querySelectorAll('#admin-views .section').forEach(el => el.classList.add('hidden'));
+            
+            if(sectionId === 'dashboard') {
+                document.getElementById('view-admin-dashboard').classList.remove('hidden');
+            } else {
+                document.getElementById(`admin-${sectionId}`).classList.remove('hidden');
+            }
+            
+            if (sectionId === 'deposits') loadAdminDeposits();
+            if (sectionId === 'users') loadAdminUsers();
+            if (sectionId === 'market') loadAdminMarket();
+            if (sectionId === 'chat') loadAdminChatList();
+        }
 
-      function setupUserView(uid) {
-          document.getElementById('user-nav').classList.remove('hidden');
-          document.getElementById('user-views').classList.remove('hidden');
-          document.getElementById('admin-views').classList.add('hidden');
-          
-          // Load Transactions (Realtime)
-          const q = query(collection(db, "transactions"), where("userId", "==", uid), orderBy("timestamp", "desc"));
-          onSnapshot(q, (snapshot) => {
-              const list = document.getElementById('transaction-list');
-              list.innerHTML = "";
-              if(snapshot.empty) list.innerHTML = "<div style='text-align:center; color:#555; padding:20px;'>No transactions yet.</div>";
-              
-              snapshot.forEach((doc) => {
-                  const t = doc.data();
-                  const isDep = t.type === 'deposit';
-                  const color = t.status === 'approved' ? 'text-green' : (t.status === 'rejected' ? 'text-danger' : 'text-orange');
-                  list.innerHTML += `
-                  <div style="background:var(--bg-card); padding:10px; border-radius:6px; border:1px solid #333; display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
-                      <div style="display:flex; align-items:center; gap:10px;">
-                          <div style="background:#333; width:35px; height:35px; border-radius:50%; display:flex; align-items:center; justify-content:center;"><i class="fas ${isDep ? 'fa-arrow-down text-green' : 'fa-arrow-up text-danger'}"></i></div>
-                          <div>
-                              <div style="font-weight:bold; text-transform:capitalize;">${t.type}</div>
-                              <div style="font-size:0.8rem; color:#aaa;">${t.method || 'N/A'}</div>
-                          </div>
-                      </div>
-                      <div style="text-align:right;">
-                          <div class="${color}">${isDep ? '+' : '-'}${t.amount} TK</div>
-                          <div class="status-badge status-${t.status}">${t.status.toUpperCase()}</div>
-                      </div>
-                  </div>`;
-              });
-          });
+        // --- UI UPDATE ---
+        function updateUI() {
+            if (!db.currentUser) return;
+            const u = db.currentUser; // Reference to object in db array would be better but this works for display
 
-          // Load Chat
-          loadUserChat(uid);
-      }
+            // Reload user from DB to get fresh data
+            const freshUser = db.users.find(x => x.email === u.email);
+            db.currentUser = freshUser;
 
-      function setupAdminView() {
-          document.getElementById('user-nav').classList.add('hidden');
-          document.getElementById('user-views').classList.add('hidden');
-          document.getElementById('admin-views').classList.remove('hidden');
-          window.showAdminSection('dashboard');
-      }
+            document.getElementById('header-name').innerText = freshUser.name;
+            document.getElementById('header-balance').innerText = freshUser.balanceTK + " TK";
+            document.getElementById('header-avatar').src = freshUser.avatar;
 
-      function loadMarketData() {
-          unsubscribeMarket = onSnapshot(doc(db, "market", "global"), (docSnap) => {
-              if (docSnap.exists()) {
-                  const data = docSnap.data();
-                  document.getElementById('market-price').innerText = data.tkPrice.toFixed(2);
-                  document.getElementById('rate-usdt').innerText = data.usdtRate + " PKR";
-                  document.getElementById('rate-pkr').innerText = (data.tkPrice * data.usdtRate).toFixed(2) + " PKR";
-                  
-                  // Update Admin Inputs
-                  document.getElementById('admin-tk-price').value = data.tkPrice;
-                  document.getElementById('admin-usdt-rate').value = data.usdtRate;
+            // Profile
+            document.getElementById('profile-name').innerText = freshUser.name;
+            document.getElementById('profile-email').innerText = freshUser.email;
+            if (freshUser.isPremium) {
+                document.getElementById('profile-status').innerHTML = `<span class="text-blue"><i class="fas fa-check-circle blue-tick"></i> Premium User</span>`;
+                document.getElementById('header-premium-badge').classList.remove('hidden');
+            } else {
+                document.getElementById('profile-status').innerText = "Standard User";
+                document.getElementById('header-premium-badge').classList.add('hidden');
+            }
 
-                  // Ticker
-                  let tickerHtml = "";
-                  data.news.forEach(n => tickerHtml += `<span class="ticker-item">📢 ${n.title}</span>`);
-                  document.getElementById('news-ticker').innerHTML = tickerHtml;
+            // Wallet
+            document.getElementById('wallet-tk').innerText = freshUser.balanceTK.toFixed(2);
+            document.getElementById('wallet-pkr').innerText = (freshUser.balanceTK * db.market.usdtRate).toFixed(2); // Assuming 1 TK = 1 USDT for simplicity in conversion logic, or market logic
+            
+            // Withdraw Page logic
+            const fee = freshUser.isPremium ? 0 : db.settings.withdrawFee * 100;
+            document.getElementById('fee-display').innerText = `Fee: ${fee}%`;
+            document.getElementById('withdraw-bal-display').innerText = freshUser.balanceTK.toFixed(2) + " TK";
 
-                  // News Feed
-                  let feedHtml = "";
-                  data.news.slice().reverse().forEach(n => {
-                      feedHtml += `<div style="background:var(--bg-card); padding:10px; border-radius:6px;">${n.title}</div>`;
-                  });
-                  document.getElementById('news-feed').innerHTML = feedHtml;
-                  
-                  drawChart();
-              }
-          });
-      }
+            // History
+            renderHistory();
+        }
 
-      // --- UI FUNCTIONS ---
-      function updateUI() {
-          const u = currentUserData;
-          if(!u) return;
-          
-          document.getElementById('header-name').innerText = u.name;
-          document.getElementById('header-balance').innerText = u.balanceTK.toFixed(2) + " TK";
-          document.getElementById('header-avatar').src = u.avatar;
-          
-          // Profile Section
-          document.getElementById('profile-name').innerText = u.name;
-          document.getElementById('profile-email').innerText = u.email;
-          document.getElementById('profile-avatar').src = u.avatar;
-          
-          // Wallet Section
-          document.getElementById('wallet-tk').innerText = u.balanceTK.toFixed(2);
-          // Approx PKR based on market rate
-          const usdtRate = parseFloat(document.getElementById('rate-usdt').innerText) || 280;
-          document.getElementById('wallet-pkr').innerText = (u.balanceTK * usdtRate).toFixed(2);
-          document.getElementById('withdraw-bal-display').innerText = u.balanceTK.toFixed(2) + " TK";
+        function renderHistory() {
+            const list = document.getElementById('transaction-list');
+            list.innerHTML = "";
+            // Combine deposits and withdrawals for history view logic (mocking history for now)
+            const myDeposits = db.deposits.filter(d => d.userEmail === db.currentUser.email).reverse();
+            
+            if(myDeposits.length === 0) list.innerHTML = "<div style='text-align:center; color:#555;'>No transactions yet.</div>";
 
-          // Premium Status
-          if(u.isPremium) {
-              document.getElementById('profile-status').innerHTML = `<span class="text-blue"><i class="fas fa-check-circle blue-tick"></i> Premium User</span>`;
-              document.getElementById('header-premium-badge').classList.remove('hidden');
-              document.getElementById('fee-display').innerText = "Fee: 0% (Pro)";
-          } else {
-              document.getElementById('profile-status').innerText = "Standard User";
-              document.getElementById('header-premium-badge').classList.add('hidden');
-              document.getElementById('fee-display').innerText = "Fee: 5%";
-          }
-      }
+            myDeposits.forEach(tx => {
+                let color = tx.status === 'approved' ? 'text-green' : (tx.status === 'rejected' ? 'text-danger' : 'text-orange');
+                let icon = tx.method === 'usdt' ? 'fa-dollar-sign' : 'fa-mobile-alt';
+                
+                list.innerHTML += `
+                <div style="background:var(--bg-card); padding:10px; border-radius:6px; border:1px solid #333; display:flex; justify-content:space-between; align-items:center;">
+                    <div style="display:flex; align-items:center; gap:10px;">
+                        <div style="background:#333; width:40px; height:40px; border-radius:50%; display:flex; align-items:center; justify-content:center;"><i class="fas ${icon} text-orange"></i></div>
+                        <div>
+                            <div style="font-weight:bold;">Deposit (${tx.method})</div>
+                            <div style="font-size:0.8rem; color:#aaa;">${tx.date}</div>
+                        </div>
+                    </div>
+                    <div style="text-align:right;">
+                        <div class="${color}">+${tx.amount} TK</div>
+                        <div class="status-badge status-${tx.status}">${tx.status.toUpperCase()}</div>
+                    </div>
+                </div>`;
+            });
+        }
 
-      // --- AVATAR CHANGE ---
-      window.changeAvatar = async function() {
-          if (!confirm("Change your avatar?")) return;
-          // Simple logic: Generate a random new seed
-          const randomSeed = Math.random().toString(36).substring(7);
-          const newAvatar = `https://picsum.photos/seed/${randomSeed}/200/200`;
-          
-          try {
-              await updateDoc(doc(db, "users", currentUserData.id), { avatar: newAvatar });
-              showToast("Avatar Updated!");
-          } catch(e) {
-              console.error(e);
-              showToast("Error updating avatar", "error");
-          }
-      };
+        // --- MARKET ---
+        function updateMarket() {
+            if (db.market.mode === 'auto') {
+                // Random fluctuation
+                const change = (Math.random() - 0.5) * 0.1;
+                db.market.tkPrice = Math.max(0.1, db.market.tkPrice + change);
+            }
+            
+            // Update DOM
+            document.getElementById('market-price').innerText = db.market.tkPrice.toFixed(2);
+            document.getElementById('rate-usdt').innerText = db.market.usdtRate + " PKR";
+            // Just a mock calc for PKR rate of TK based on USDT rate
+            document.getElementById('rate-pkr').innerText = (db.market.tkPrice * db.market.usdtRate).toFixed(2) + " PKR";
 
-      // --- NAVIGATION ---
-      window.showSection = function(id) {
-          document.querySelectorAll('#user-views .section').forEach(e => e.classList.add('hidden'));
-          document.getElementById(`view-${id}`).classList.remove('hidden');
-          
-          // Nav Highlight
-          document.querySelectorAll('.nav-item').forEach(e => e.classList.remove('active'));
-          const map = {'market':0, 'wallet':1, 'chat':2, 'profile':3};
-          if(map[id] !== undefined) document.querySelectorAll('.nav-item')[map[id]].classList.add('active');
-      };
+            drawChart();
+            if(db.currentUser && db.currentUser.role === 'admin') {
+                 // Update admin inputs if in manual mode (optional sync)
+            }
+        }
 
-      window.showAdminSection = function(id) {
-          document.querySelectorAll('#admin-views .section').forEach(e => e.classList.add('hidden'));
-          document.getElementById(`view-admin-${id}`).classList.remove('hidden');
-          
-          if(id === 'deposits') loadAdminDeposits();
-          if(id === 'users') loadAdminUsers();
-          if(id === 'chat') loadAdminChatList();
-      };
+        function drawChart() {
+            const canvas = document.getElementById('marketCanvas');
+            const ctx = canvas.getContext('2d');
+            canvas.width = canvas.parentElement.offsetWidth;
+            canvas.height = canvas.parentElement.offsetHeight;
 
-      // --- ACTIONS ---
+            // Generate pseudo history based on current price
+            const points = [];
+            let price = db.market.tkPrice;
+            for(let i=0; i<20; i++) {
+                points.unshift(price);
+                price = price * (1 + (Math.random() - 0.5) * 0.05);
+            }
+            points.push(db.market.tkPrice); // current
 
-      // 1. Deposit
-      window.updateDepositDetails = function() {
-          const method = document.getElementById('deposit-method').value;
-          const numDisplay = document.getElementById('deposit-number');
-          const nameDisplay = document.getElementById('deposit-name');
-          
-          if(method === 'easypaisa') { numDisplay.innerText = "0300-1234567"; nameDisplay.innerText = "Ali Khan - Easypaisa"; }
-          else if(method === 'jazzcash') { numDisplay.innerText = "0321-7654321"; nameDisplay.innerText = "Ali Khan - JazzCash"; }
-          else { numDisplay.innerText = "T9y...XYZ"; nameDisplay.innerText = "USDT (TRC20)"; }
-          window.calculateDeposit();
-      };
+            const max = Math.max(...points) * 1.05;
+            const min = Math.min(...points) * 0.95;
+            const range = max - min;
+            const stepX = canvas.width / (points.length - 1);
 
-      window.calculateDeposit = function() {
-          const pkr = parseFloat(document.getElementById('deposit-amount').value) || 0;
-          const usdtRate = parseFloat(document.getElementById('rate-usdt').innerText) || 280;
-          const receive = pkr / usdtRate;
-          document.getElementById('deposit-calc-receive').innerText = receive.toFixed(2);
-      };
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            ctx.beginPath();
+            ctx.strokeStyle = '#ff6600';
+            ctx.lineWidth = 2;
 
-      window.copyDepositNumber = function() {
-          const num = document.getElementById('deposit-number').innerText;
-          navigator.clipboard.writeText(num);
-          showToast("Number Copied!");
-      };
+            points.forEach((p, i) => {
+                const x = i * stepX;
+                const y = canvas.height - ((p - min) / range) * canvas.height;
+                if(i===0) ctx.moveTo(x, y);
+                else ctx.lineTo(x, y);
+            });
+            ctx.stroke();
+        }
 
-      window.submitDeposit = async function() {
-          const amount = parseFloat(document.getElementById('deposit-amount').value);
-          const ref = document.getElementById('deposit-ref').value;
-          const method = document.getElementById('deposit-method').value;
-          
-          if (!amount || amount < 100) return showToast("Minimum deposit 100 PKR", "error");
-          if (!ref) return showToast("Enter Transaction ID", "error");
+        // --- DEPOSIT ---
+        function updateDepositDetails() {
+            const method = document.getElementById('deposit-method').value;
+            const displayNum = document.getElementById('deposit-number');
+            const displayName = document.getElementById('deposit-name');
+            
+            if (method === 'easypaisa') { displayNum.innerText = db.settings.easypaisa; displayName.innerText = "Ali Khan - Easypaisa"; }
+            else if (method === 'jazzcash') { displayNum.innerText = db.settings.jazzcash; displayName.innerText = "Ali Khan - JazzCash"; }
+            else { displayNum.innerText = db.settings.usdt; displayName.innerText = "USDT (TRC20)"; }
+            calculateDeposit();
+        }
 
-          const usdtRate = parseFloat(document.getElementById('rate-usdt').innerText) || 280;
-          const receiveTk = amount / usdtRate;
+        function calculateDeposit() {
+            const pkr = parseFloat(document.getElementById('deposit-amount').value) || 0;
+            const tk = pkr / db.market.usdtRate; // Assuming 1 USDT = 280 PKR, and we are buying TK with PKR. Wait.
+            // Logic: User sends PKR -> buys USDT -> buys TK?
+            // Simplified: 1 TK = 1 USDT (internal value).
+            // User sends 280 PKR -> Receives 1 TK.
+            const receive = pkr / db.market.usdtRate;
+            document.getElementById('deposit-calc-receive').innerText = receive.toFixed(2);
+        }
 
-          try {
-              await addDoc(collection(db, "transactions"), {
-                  userId: currentUserData.id,
-                  userEmail: currentUserData.email,
-                  type: 'deposit',
-                  method: method,
-                  amount: receiveTk.toFixed(2),
-                  ref: ref,
-                  status: 'pending',
-                  timestamp: serverTimestamp()
-              });
-              showToast("Deposit Request Submitted!");
-              window.showSection('wallet');
-          } catch(e) { showToast(e.message, "error"); }
-      };
+        function copyDepositNumber() {
+            const num = document.getElementById('deposit-number').innerText;
+            navigator.clipboard.writeText(num);
+            showToast("Number Copied!");
+        }
 
-      // 2. Withdraw
-      window.submitWithdraw = async function() {
-          const amount = parseFloat(document.getElementById('withdraw-amount').value);
-          const method = document.getElementById('withdraw-method').value;
-          const account = document.getElementById('withdraw-account').value;
+        function submitDeposit() {
+            const amount = parseFloat(document.getElementById('deposit-amount').value);
+            const ref = document.getElementById('deposit-ref').value;
+            const method = document.getElementById('deposit-method').value;
 
-          if (!amount || amount < 50) return showToast("Min withdraw 50 TK", "error");
-          if (!account) return showToast("Enter account details", "error");
+            if (!amount || amount < 100) return showToast("Minimum deposit 100 PKR", "error");
+            if (!ref) return showToast("Enter Transaction ID", "error");
 
-          const feeRate = currentUserData.isPremium ? 0 : 0.05;
-          const fee = amount * feeRate;
-          const total = amount + fee;
+            const receiveTk = amount / db.market.usdtRate;
+            
+            db.deposits.push({
+                id: Date.now(),
+                userEmail: db.currentUser.email,
+                method: method,
+                amount: receiveTk.toFixed(2),
+                ref: ref,
+                date: new Date().toLocaleString(),
+                status: 'pending'
+            });
 
-          if (total > currentUserData.balanceTK) return showToast("Insufficient balance including fee", "error");
+            saveDB();
+            showToast("Deposit Request Submitted!");
+            showSection('wallet');
+        }
 
-          try {
-              // Add Request (Pending). Balance deduction happens on APPROVAL.
-              await addDoc(collection(db, "transactions"), {
-                  userId: currentUserData.id,
-                  userEmail: currentUserData.email,
-                  type: 'withdraw',
-                  method: method,
-                  account: account,
-                  amount: amount,
-                  fee: fee,
-                  status: 'pending',
-                  timestamp: serverTimestamp()
-              });
-              showToast("Withdrawal Requested!");
-              window.showSection('wallet');
-          } catch(e) { showToast(e.message, "error"); }
-      };
+        // --- WITHDRAW ---
+        function submitWithdraw() {
+            const amount = parseFloat(document.getElementById('withdraw-amount').value);
+            const method = document.getElementById('withdraw-method').value;
+            const account = document.getElementById('withdraw-account').value;
 
-      // 3. Transfer
-      window.submitTransfer = async function() {
-          const email = document.getElementById('transfer-email').value;
-          const amount = parseFloat(document.getElementById('transfer-amount').value);
+            if (!amount || amount < db.settings.minWithdraw) return showToast(`Min withdraw ${db.settings.minWithdraw} TK`, "error");
+            if (!account) return showToast("Enter account details", "error");
 
-          if (!email || email === currentUserData.email) return showToast("Invalid email", "error");
-          if (!amount || amount <= 0) return showToast("Invalid amount", "error");
-          if (amount > currentUserData.balanceTK) return showToast("Insufficient balance", "error");
+            const feeRate = db.currentUser.isPremium ? 0 : db.settings.withdrawFee;
+            const fee = amount * feeRate;
+            const total = amount + fee;
 
-          // Find Receiver
-          const q = query(collection(db, "users"), where("email", "==", email));
-          const snap = await getDocs(q);
-          
-          if (snap.empty) return showToast("User not found", "error");
-          const receiverDoc = snap.docs[0];
-          
-          try {
-              // Use Batch for atomicity? Or just update docs. For simplicity, sequential updates.
-              await updateDoc(doc(db, "users", currentUserData.id), { balanceTK: increment(-amount) });
-              await updateDoc(doc(db, "users", receiverDoc.id), { balanceTK: increment(amount) });
-              showToast("Transfer Successful!");
-              window.showSection('wallet');
-          } catch(e) { showToast(e.message, "error"); }
-      };
+            if (total > db.currentUser.balanceTK) return showToast("Insufficient balance including fee", "error");
 
-      // 4. Premium
-      window.upgradePremium = async function() {
-          if (currentUserData.balanceTK >= 100) {
-              try {
-                  await updateDoc(doc(db, "users", currentUserData.id), {
-                      balanceTK: increment(-100),
-                      isPremium: true
-                  });
-                  showToast("Upgraded to Premium!");
-              } catch(e) { showToast(e.message, "error"); }
-          } else {
-              showToast("Need 100 TK", "error");
-          }
-      };
+            // Deduct balance
+            const u = db.users.find(u => u.email === db.currentUser.email);
+            u.balanceTK -= total;
 
-      // 5. Chat
-      function loadUserChat(uid) {
-          if(unsubscribeChat) unsubscribeChat();
-          const chatRef = doc(db, "chats", uid);
-          
-          unsubscribeChat = onSnapshot(chatRef, (docSnap) => {
-              const msgsContainer = document.getElementById('chat-messages');
-              msgsContainer.innerHTML = "";
-              if(docSnap.exists()) {
-                  docSnap.data().messages.forEach(m => {
-                      const cls = m.sender === 'admin' ? 'msg-admin' : 'msg-user';
-                      msgsContainer.innerHTML += `<div class="message ${cls}">${m.text}</div>`;
-                  });
-                  msgsContainer.scrollTop = msgsContainer.scrollHeight;
-              } else {
-                  msgsContainer.innerHTML = `<div style="text-align:center; color:#777; margin-top:20px;">No messages yet.</div>`;
-              }
-          });
-      }
+            db.withdrawals.push({
+                id: Date.now(),
+                userEmail: db.currentUser.email,
+                method: method,
+                account: account,
+                amount: amount,
+                fee: fee,
+                date: new Date().toLocaleString(),
+                status: 'pending'
+            });
 
-      window.sendChatMessage = async function() {
-          const txt = document.getElementById('chat-input').value;
-          if(!txt) return;
-          
-          const chatRef = doc(db, "chats", currentUserData.id);
-          // If doc doesn't exist, setDoc first? updateDoc fails if missing.
-          // Check existence or use setDoc with merge. 
-          // Simpler: arrayUnion works on existing arrays. We assume doc exists or we create it.
-          const snap = await getDoc(chatRef);
-          if(!snap.exists()) {
-              await setDoc(chatRef, { messages: [] });
-          }
-          
-          try {
-              await updateDoc(chatRef, {
-                  messages: arrayUnion({ sender: 'user', text: txt, time: serverTimestamp() })
-              });
-              document.getElementById('chat-input').value = "";
-          } catch(e) { console.error(e); }
-      };
+            saveDB();
+            showToast("Withdrawal Requested!");
+            updateUI();
+            showSection('wallet');
+        }
 
-      // --- ADMIN FUNCTIONS ---
+        // --- TRANSFER ---
+        function submitTransfer() {
+            const email = document.getElementById('transfer-email').value;
+            const amount = parseFloat(document.getElementById('transfer-amount').value);
 
-      // Market
-      window.adminUpdateMarket = async function() {
-          const tk = parseFloat(document.getElementById('admin-tk-price').value);
-          const usdt = parseFloat(document.getElementById('admin-usdt-rate').value);
-          
-          try {
-              await updateDoc(doc(db, "market", "global"), { tkPrice: tk, usdtRate: usdt });
-              showToast("Market Updated");
-          } catch(e) { showToast(e.message, "error"); }
-      };
+            if (!email || email === db.currentUser.email) return showToast("Invalid email", "error");
+            if (!amount || amount <= 0) return showToast("Invalid amount", "error");
+            if (amount > db.currentUser.balanceTK) return showToast("Insufficient balance", "error");
 
-      // News
-      window.postNews = async function() {
-          const headline = document.getElementById('admin-news-headline').value;
-          if(!headline) return;
-          try {
-              await updateDoc(doc(db, "market", "global"), {
-                  news: arrayUnion({ title: headline })
-              });
-              document.getElementById('admin-news-headline').value = "";
-              showToast("News Posted");
-          } catch(e) { showToast(e.message, "error"); }
-      };
+            const receiver = db.users.find(u => u.email === email);
+            if (!receiver) return showToast("User not found", "error");
 
-      // Deposits / Withdrawals List
-      async function loadAdminDeposits() {
-          const list = document.getElementById('admin-deposit-list');
-          const q = query(collection(db, "transactions"), where("status", "==", "pending"), orderBy("timestamp", "desc"));
-          
-          // Use onSnapshot for realtime admin view
-          onSnapshot(q, (snapshot) => {
-              list.innerHTML = "";
-              if(snapshot.empty) list.innerHTML = "<div style='text-align:center; color:#777;'>No pending requests</div>";
-              
-              snapshot.forEach(d => {
-                  const t = d.data();
-                  const icon = t.type === 'deposit' ? 'fa-arrow-down text-green' : 'fa-arrow-up text-danger';
-                  
-                  list.innerHTML += `
-                  <div style="background:#333; padding:10px; margin-bottom:5px; border-radius:5px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;">
-                      <div>
-                          <div style="font-weight:bold;">${t.userEmail}</div>
-                          <small>${t.type.toUpperCase()} (${t.method || 'N/A'}) - ${t.amount} TK</small>
-                      </div>
-                      <div>
-                          <button class="btn btn-sm" style="background:green" onclick="window.adminProcessReq('${d.id}', '${t.userId}', ${t.amount}, 'approve')"><i class="fas fa-check"></i></button>
-                          <button class="btn btn-sm" style="background:red" onclick="window.adminProcessReq('${d.id}', '${t.userId}', 0, 'reject')"><i class="fas fa-times"></i></button>
-                      </div>
-                  </div>`;
-              });
-              
-              // Update badge count
-              document.getElementById('admin-dep-pending-count').innerText = snapshot.size;
-          });
-      }
+            // Execute Transfer
+            const sender = db.users.find(u => u.email === db.currentUser.email);
+            sender.balanceTK -= amount;
+            receiver.balanceTK += amount;
 
-      window.adminProcessReq = async function(transId, userId, amount, action) => {
-          try {
-              const transRef = doc(db, "transactions", transId);
-              const userRef = doc(db, "users", userId);
-              
-              if (action === 'approve') {
-                  // Check if it's deposit or withdraw
-                  const snap = await getDoc(transRef);
-                  const type = snap.data().type;
-                  
-                  if (type === 'deposit') {
-                      await updateDoc(userRef, { balanceTK: increment(amount) });
-                  } else {
-                      // Withdraw approved -> Deduct balance
-                      // Already logic handled: Withdraw request was pending, balance still with user.
-                      // Now deduct.
-                      await updateDoc(userRef, { balanceTK: increment(-amount) });
-                  }
-                  
-                  await updateDoc(transRef, { status: 'approved' });
-                  showToast("Approved");
-              } else {
-                  await updateDoc(transRef, { status: 'rejected' });
-                  showToast("Rejected");
-              }
-          } catch(e) { showToast(e.message, "error"); }
-      };
+            saveDB();
+            showToast("Transfer Successful!");
+            updateUI();
+            showSection('wallet');
+        }
 
-      // Users List
-      async function loadAdminUsers() {
-          const list = document.getElementById('admin-user-list');
-          const snap = await getDocs(collection(db, "users"));
-          let html = "";
-          snap.forEach(d => {
-              const u = d.data();
-              // Don't show admin in list
-              if(u.role === 'admin') return;
-              
-              // Note: Passwords are not accessible in Firebase Auth for security. 
-              // Only Email is shown.
-              html += `
-              <div style="background:#333; padding:10px; margin-bottom:5px; border-radius:5px; display:flex; justify-content:space-between;">
-                  <div>
-                      <div style="color:var(--primary);">${u.name}</div>
-                      <small style="color:#aaa;">${u.email}</small>
-                  </div>
-                  <div style="text-align:right;">
-                      <div>${u.balanceTK.toFixed(2)} TK</div>
-                      <small>${u.isPremium ? '<span class="text-blue">Pro</span>' : 'User'}</small>
-                  </div>
-              </div>`;
-          });
-          list.innerHTML = html || "No users found.";
-      }
+        // --- PREMIUM ---
+        function upgradePremium() {
+            const u = db.users.find(u => u.email === db.currentUser.email);
+            if (u.balanceTK >= 100) {
+                u.balanceTK -= 100;
+                u.isPremium = true;
+                saveDB();
+                showToast("Upgraded to Premium!");
+                updateUI();
+            } else {
+                showToast("Not enough balance (Need 100 TK)", "error");
+            }
+        }
 
-      // Admin Chat
-      async function loadAdminChatList() {
-          const list = document.getElementById('admin-chat-list');
-          const snap = await getDocs(collection(db, "chats"));
-          let html = "";
-          snap.forEach(d => {
-              html += `<div style="background:#333; padding:10px; cursor:pointer; margin-bottom:5px; border-radius:5px;" onclick="window.openAdminChat('${d.id}')">Chat ID: ${d.id.substring(0,8)}...</div>`;
-          });
-          list.innerHTML = html || "No chats available.";
-          document.getElementById('admin-chat-window').classList.add('hidden');
-      }
+        // --- CHAT ---
+        function renderChat() {
+            if (db.currentUser && db.currentUser.role !== 'admin' && document.getElementById('view-chat').classList.contains('hidden') === false) {
+                const container = document.getElementById('chat-messages');
+                const userChat = db.chats.find(c => c.userEmail === db.currentUser.email);
+                
+                if (!userChat) {
+                    container.innerHTML = `<div style="text-align:center; color:#777; margin-top:20px;">Start a conversation with support.</div>`;
+                    return;
+                }
 
-      window.openAdminChat = function(uid) {
-          currentAdminChatUser = uid;
-          document.getElementById('admin-chat-window').classList.remove('hidden');
-          
-          // Listen to that specific chat
-          onSnapshot(doc(db, "chats", uid), (snap) => {
-              const msgs = document.getElementById('admin-chat-messages');
-              msgs.innerHTML = "";
-              if(snap.exists()){
-                  snap.data().messages.forEach(m => {
-                      const cls = m.sender === 'admin' ? 'msg-admin' : 'msg-user';
-                      msgs.innerHTML += `<div class="message ${cls}">${m.text}</div>`;
-                  });
-                  msgs.scrollTop = msgs.scrollHeight;
-              }
-          });
-      };
+                container.innerHTML = "";
+                userChat.messages.forEach(msg => {
+                    const cls = msg.sender === 'admin' ? 'msg-admin' : 'msg-user';
+                    container.innerHTML += `<div class="message ${cls}">${msg.text}</div>`;
+                });
+                container.scrollTop = container.scrollHeight;
+            }
+        }
 
-      window.adminSendReply = async function() {
-          const txt = document.getElementById('admin-chat-input').value;
-          if(!txt || !currentAdminChatUser) return;
-          
-          const chatRef = doc(db, "chats", currentAdminChatUser);
-          const snap = await getDoc(chatRef);
-          if(!snap.exists()) await setDoc(chatRef, { messages: [] });
+        function sendChatMessage() {
+            const input = document.getElementById('chat-input');
+            const text = input.value;
+            if (!text) return;
 
-          try {
-              await updateDoc(chatRef, {
-                  messages: arrayUnion({ sender: 'admin', text: txt, time: serverTimestamp() })
-              });
-              document.getElementById('admin-chat-input').value = "";
-          } catch(e) { console.error(e); }
-      };
+            let chat = db.chats.find(c => c.userEmail === db.currentUser.email);
+            if (!chat) {
+                chat = { userEmail: db.currentUser.email, messages: [] };
+                db.chats.push(chat);
+            }
 
-      // --- UTILS ---
-      function showToast(msg, type="success") {
-          const container = document.getElementById('toast-container');
-          const toast = document.createElement('div');
-          toast.className = 'toast';
-          if(type==='error') toast.style.borderLeftColor = 'red';
-          toast.innerText = msg;
-          container.appendChild(toast);
-          setTimeout(() => toast.remove(), 3000);
-      }
+            chat.messages.push({ sender: 'user', text: text, time: new Date() });
+            saveDB();
+            input.value = "";
+            renderChat();
 
-      function drawChart() {
-          const canvas = document.getElementById('marketCanvas');
-          const ctx = canvas.getContext('2d');
-          canvas.width = canvas.parentElement.offsetWidth;
-          canvas.height = canvas.parentElement.offsetHeight;
-          
-          const price = parseFloat(document.getElementById('market-price').innerText) || 1.5;
-          
-          // Generate random chart based on price
-          const points = [];
-          let p = price;
-          for(let i=0; i<20; i++) {
-              points.push(p);
-              p = p * (1 + (Math.random() - 0.5) * 0.1);
-          }
-          points.push(price);
-          
-          const max = Math.max(...points) * 1.05;
-          const min = Math.min(...points) * 0.95;
-          const range = max - min;
-          const stepX = canvas.width / (points.length - 1);
+            // Auto Reply Simulation
+            setTimeout(() => {
+                chat.messages.push({ sender: 'admin', text: "Thanks for your message! Admin will reply soon.", time: new Date() });
+                saveDB();
+                renderChat();
+                showToast("New Admin Message");
+            }, 2000);
+        }
 
-          ctx.clearRect(0,0, canvas.width, canvas.height);
-          ctx.beginPath();
-          ctx.strokeStyle = '#ff6600';
-          ctx.lineWidth = 3;
-          
-          points.forEach((pt, i) => {
-              const x = i * stepX;
-              const y = canvas.height - ((pt - min) / range) * canvas.height;
-              if(i===0) ctx.moveTo(x, y);
-              else ctx.lineTo(x, y);
-          });
-          ctx.stroke();
-      }
+        // --- ADMIN FUNCTIONS ---
+        function loadAdminData() {
+            document.getElementById('admin-dep-pending-count').innerText = db.deposits.filter(d => d.status === 'pending').length;
+        }
 
-      window.showAboutModal = function() {
-          const modalHtml = `
-          <div style="position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); z-index:10000; display:flex; justify-content:center; align-items:center;">
-              <div style="background:var(--bg-card); padding:20px; border-radius:10px; max-width:90%; width:300px; border:1px solid var(--primary); text-align:center;">
-                  <h3 class="text-orange">About TK Coin</h3>
-                  <p style="margin:10px 0; color:#ccc;">Version 2.0<br>Firebase Powered.<br>Secure & Fast.</p>
-                  <button class="btn" onclick="this.parentElement.parentElement.remove()">Close</button>
-              </div>
-          </div>`;
-          document.body.insertAdjacentHTML('beforeend', modalHtml);
-      }
-      
-      // Initial calls
-      window.updateDepositDetails();
+        function loadAdminDeposits() {
+            const tbody = document.getElementById('admin-deposit-list');
+            tbody.innerHTML = "";
+            const pending = db.deposits.filter(d => d.status === 'pending');
+
+            if (pending.length === 0) tbody.innerHTML = "<tr><td colspan='5'>No pending deposits</td></tr>";
+
+            pending.forEach((d, index) => {
+                tbody.innerHTML += `
+                <tr>
+                    <td>${d.userEmail}</td>
+                    <td>${d.method}</td>
+                    <td>${d.amount}</td>
+                    <td>${d.ref}</td>
+                    <td>
+                        <button class="btn btn-sm" style="background:green; padding:2px 5px;" onclick="adminApproveDeposit(${d.id})"><i class="fas fa-check"></i></button>
+                        <button class="btn btn-sm" style="background:red; padding:2px 5px;" onclick="adminRejectDeposit(${d.id})"><i class="fas fa-times"></i></button>
+                    </td>
+                </tr>`;
+            });
+        }
+
+        function adminApproveDeposit(id) {
+            const dep = db.deposits.find(d => d.id === id);
+            if (dep) {
+                dep.status = 'approved';
+                const u = db.users.find(u => u.email === dep.userEmail);
+                if (u) u.balanceTK += parseFloat(dep.amount);
+                saveDB();
+                loadAdminDeposits();
+                loadAdminData();
+                showToast("Deposit Approved");
+            }
+        }
+
+        function adminRejectDeposit(id) {
+            const dep = db.deposits.find(d => d.id === id);
+            if (dep) {
+                dep.status = 'rejected';
+                saveDB();
+                loadAdminDeposits();
+                loadAdminData();
+                showToast("Deposit Rejected");
+            }
+        }
+
+        function loadAdminUsers() {
+            const tbody = document.getElementById('admin-user-list');
+            tbody.innerHTML = "";
+            db.users.forEach(u => {
+                if (u.role === 'admin') return;
+                tbody.innerHTML += `
+                <tr>
+                    <td>${u.name}</td>
+                    <td>${u.email}</td>
+                    <td style="color:#aaa;">${u.pass}</td>
+                    <td>${u.balanceTK.toFixed(2)}</td>
+                    <td>${u.isPremium ? '<span class="text-blue">Pro</span>' : 'User'}</td>
+                </tr>`;
+            });
+        }
+
+        function loadAdminMarket() {
+            document.getElementById('admin-tk-price').value = db.market.tkPrice;
+            document.getElementById('admin-usdt-rate').value = db.market.usdtRate;
+            document.getElementById('admin-market-mode').value = db.market.mode;
+        }
+
+        function adminUpdateMarket() {
+            db.market.tkPrice = parseFloat(document.getElementById('admin-tk-price').value);
+            db.market.usdtRate = parseFloat(document.getElementById('admin-usdt-rate').value);
+            db.market.mode = document.getElementById('admin-market-mode').value;
+            saveDB();
+            showToast("Market Settings Updated");
+        }
+
+        function postNews() {
+            const title = document.getElementById('admin-news-headline').value;
+            if (title) {
+                db.news.unshift({ title: title, date: new Date().toLocaleDateString() });
+                saveDB();
+                renderTicker();
+                document.getElementById('admin-news-headline').value = "";
+                showToast("News Posted");
+            }
+        }
+
+        function renderTicker() {
+            const ticker = document.getElementById('news-ticker');
+            const feed = document.getElementById('news-feed');
+            
+            let html = "";
+            let feedHtml = "";
+            
+            db.news.forEach(n => {
+                html += `<span class="ticker-item">📢 ${n.title}</span>`;
+                feedHtml += `
+                <div style="background:var(--bg-card); padding:10px; border-radius:6px; font-size:0.9rem;">
+                    <div>${n.title}</div>
+                    <small style="color:#777;">${n.date}</small>
+                </div>`;
+            });
+
+            ticker.innerHTML = html;
+            if(feed) feed.innerHTML = feedHtml;
+        }
+
+        // Admin Chat
+        let currentAdminChatUser = null;
+
+        function loadAdminChatList() {
+            const list = document.getElementById('admin-chat-list');
+            list.innerHTML = "";
+            if(db.chats.length === 0) list.innerHTML = "No chats yet";
+            
+            db.chats.forEach(c => {
+                list.innerHTML += `<div onclick="openAdminChat('${c.userEmail}')" style="background:#333; padding:10px; margin-bottom:5px; cursor:pointer; border-radius:4px;">
+                    ${c.userEmail} (${c.messages.length} msgs)
+                </div>`;
+            });
+            document.getElementById('admin-chat-window').classList.add('hidden');
+        }
+
+        function openAdminChat(email) {
+            currentAdminChatUser = email;
+            document.getElementById('admin-chat-window').classList.remove('hidden');
+            renderAdminChatMessages();
+        }
+
+        function renderAdminChatMessages() {
+            const container = document.getElementById('admin-chat-messages');
+            const chat = db.chats.find(c => c.userEmail === currentAdminChatUser);
+            if (!chat) return;
+
+            container.innerHTML = "";
+            chat.messages.forEach(msg => {
+                const cls = msg.sender === 'admin' ? 'msg-admin' : 'msg-user';
+                container.innerHTML += `<div class="message ${cls}">${msg.text}</div>`;
+            });
+            container.scrollTop = container.scrollHeight;
+        }
+
+        function adminSendReply() {
+            const input = document.getElementById('admin-chat-input');
+            const text = input.value;
+            if(!text || !currentAdminChatUser) return;
+
+            const chat = db.chats.find(c => c.userEmail === currentAdminChatUser);
+            chat.messages.push({ sender: 'admin', text: text, time: new Date() });
+            saveDB();
+            input.value = "";
+            renderAdminChatMessages();
+        }
+
+        // --- UTILS ---
+        function showToast(msg, type="success") {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            toast.className = 'toast';
+            if(type==='error') toast.style.borderLeftColor = 'red';
+            toast.innerText = msg;
+            container.appendChild(toast);
+            setTimeout(() => toast.remove(), 3000);
+        }
+
+        function showAboutModal() {
+            // Simple modal implementation using native confirm for now or simple alert substitute
+            const modalHtml = `
+            <div style="position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); z-index:10000; display:flex; justify-content:center; align-items:center;">
+                <div style="background:var(--bg-card); padding:20px; border-radius:10px; max-width:90%; width:300px; border:1px solid var(--primary);">
+                    <h3 class="text-orange">About App</h3>
+                    <p style="margin:10px 0; color:#ccc;">Version 1.0<br>Tk Coin Wallet & Trading Simulator.</p>
+                    <button class="btn" onclick="this.parentElement.parentElement.remove()">Close</button>
+                </div>
+            </div>`;
+            document.body.insertAdjacentHTML('beforeend', modalHtml);
+        }
+
+        // Start
+        initApp();
+
     </script>
+
+<script>
+// ===== FIREBASE DB HELPERS =====
+function saveDBFirebase(db){
+    firebaseSet(firebaseRef(firebaseDB, "/"), db);
+}
+
+function loadDBFirebase(callback){
+    firebaseGet(firebaseRef(firebaseDB, "/")).then(snap=>{
+        if(snap.exists()) callback(snap.val());
+        else callback(null);
+    });
+}
+
+firebaseOn(firebaseRef(firebaseDB, "/"), snap=>{
+    if(snap.exists() && window.db){
+        window.db = snap.val();
+        if(typeof updateUI === "function") updateUI();
+    }
+});
+// ==============================
+</script>
+
 </body>
 </html>
