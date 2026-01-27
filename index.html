@@ -701,6 +701,7 @@ window.dbFirebase = dbFirebase;
         };
 
         // --- INIT ---
+        let storedData = null;
         function initApp() {
             // Firebase only mode
             if (storedData) {
@@ -716,7 +717,8 @@ window.dbFirebase = dbFirebase;
                     balanceTK: 10000,
                     balancePKR: 0,
                     avatar: "https://picsum.photos/seed/admin/50/50"
-                });
+                   if(cb) cb();
+   });
                 saveDB();
             }
 
@@ -784,7 +786,8 @@ window.dbFirebase = dbFirebase;
                     showToast("Invalid credentials", "error");
                 }
             }
-        });
+           if(cb) cb();
+   });
 
         function loginSuccess(user) {
             db.currentUser = user;
@@ -908,7 +911,8 @@ window.dbFirebase = dbFirebase;
                         <div class="status-badge status-${tx.status}">${tx.status.toUpperCase()}</div>
                     </div>
                 </div>`;
-            });
+               if(cb) cb();
+   });
         }
 
         // --- MARKET ---
@@ -961,7 +965,8 @@ window.dbFirebase = dbFirebase;
                 const y = canvas.height - ((p - min) / range) * canvas.height;
                 if(i===0) ctx.moveTo(x, y);
                 else ctx.lineTo(x, y);
-            });
+               if(cb) cb();
+   });
             ctx.stroke();
         }
 
@@ -1011,7 +1016,8 @@ window.dbFirebase = dbFirebase;
                 ref: ref,
                 date: new Date().toLocaleString(),
                 status: 'pending'
-            });
+               if(cb) cb();
+   });
 
             saveDB();
             showToast("Deposit Request Submitted!");
@@ -1046,7 +1052,8 @@ window.dbFirebase = dbFirebase;
                 fee: fee,
                 date: new Date().toLocaleString(),
                 status: 'pending'
-            });
+               if(cb) cb();
+   });
 
             saveDB();
             showToast("Withdrawal Requested!");
@@ -1106,7 +1113,8 @@ window.dbFirebase = dbFirebase;
                 userChat.messages.forEach(msg => {
                     const cls = msg.sender === 'admin' ? 'msg-admin' : 'msg-user';
                     container.innerHTML += `<div class="message ${cls}">${msg.text}</div>`;
-                });
+                   if(cb) cb();
+   });
                 container.scrollTop = container.scrollHeight;
             }
         }
@@ -1160,7 +1168,8 @@ window.dbFirebase = dbFirebase;
                         <button class="btn btn-sm" style="background:red; padding:2px 5px;" onclick="adminRejectDeposit(${d.id})"><i class="fas fa-times"></i></button>
                     </td>
                 </tr>`;
-            });
+               if(cb) cb();
+   });
         }
 
         function adminApproveDeposit(id) {
@@ -1200,7 +1209,8 @@ window.dbFirebase = dbFirebase;
                     <td>${u.balanceTK.toFixed(2)}</td>
                     <td>${u.isPremium ? '<span class="text-blue">Pro</span>' : 'User'}</td>
                 </tr>`;
-            });
+               if(cb) cb();
+   });
         }
 
         function loadAdminMarket() {
@@ -1242,7 +1252,8 @@ window.dbFirebase = dbFirebase;
                     <div>${n.title}</div>
                     <small style="color:#777;">${n.date}</small>
                 </div>`;
-            });
+               if(cb) cb();
+   });
 
             ticker.innerHTML = html;
             if(feed) feed.innerHTML = feedHtml;
@@ -1260,7 +1271,8 @@ window.dbFirebase = dbFirebase;
                 list.innerHTML += `<div onclick="openAdminChat('${c.userEmail}')" style="background:#333; padding:10px; margin-bottom:5px; cursor:pointer; border-radius:4px;">
                     ${c.userEmail} (${c.messages.length} msgs)
                 </div>`;
-            });
+               if(cb) cb();
+   });
             document.getElementById('admin-chat-window').classList.add('hidden');
         }
 
@@ -1279,7 +1291,8 @@ window.dbFirebase = dbFirebase;
             chat.messages.forEach(msg => {
                 const cls = msg.sender === 'admin' ? 'msg-admin' : 'msg-user';
                 container.innerHTML += `<div class="message ${cls}">${msg.text}</div>`;
-            });
+               if(cb) cb();
+   });
             container.scrollTop = container.scrollHeight;
         }
 
@@ -1321,8 +1334,7 @@ window.dbFirebase = dbFirebase;
 
         // Start
         
-loadDBFirebase();
-initApp();
+loadDBFirebase(()=>{ initApp(); });
 
 
     </script>
@@ -1334,12 +1346,13 @@ function saveDB(){
    fbSet(fbRef(dbFirebase, "tkcoinDB"), db);
 }
 
-function loadDBFirebase(){
+function loadDBFirebase(cb){
    fbGet(fbRef(dbFirebase, "tkcoinDB")).then(snap=>{
       if(snap.exists()){
          db = snap.val();
          if(typeof updateUI==="function") updateUI();
       }
+      if(cb) cb();
    });
 }
 
