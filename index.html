@@ -48,7 +48,7 @@
         }
         .btn:hover { background: var(--primary-dark); }
         .btn:disabled { background: #555; cursor: not-allowed; }
-        .btn-outline { background: transparent; border: 1px solid var(--primary); color: var(--primary); }
+        .btn-outline { background: transparent; border:1px solid var(--primary); color: var(--primary); }
         .btn-sm { padding: 5px 10px; font-size: 0.8rem; width: auto; }
         
         .input-group { margin-bottom: 15px; }
@@ -64,7 +64,7 @@
         }
         .input-group input:focus { border-color: var(--primary); }
 
-        /* Toast Notification */
+        /* Toast */
         #toast-container {
             position: fixed;
             top: 20px;
@@ -83,7 +83,7 @@
         }
         @keyframes slideIn { from { transform: translateX(100%); } to { transform: translateX(0); } }
 
-        /* Auth Screen */
+        /* Auth */
         #auth-screen {
             display: flex;
             justify-content: center;
@@ -116,7 +116,7 @@
         .logo { font-size: 1.2rem; font-weight: bold; color: var(--primary); display: flex; align-items: center; gap: 5px; }
         .user-info { display: flex; align-items: center; gap: 10px; font-size: 0.9rem; cursor: pointer; }
         
-        /* Avatar Styles */
+        /* Avatar */
         .avatar {
             width: 35px;
             height: 35px;
@@ -227,6 +227,11 @@
         .status-pending { background: #ff9800; color: black; }
         .status-approved { background: #00c853; color: white; }
         .status-rejected { background: #ff3d00; color: white; }
+
+        /* Futures Styles */
+        .trade-buttons { display: flex; gap: 10px; margin-top: 10px; }
+        .btn-long { background: var(--success); flex: 1; }
+        .btn-short { background: var(--danger); flex: 1; }
     </style>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
@@ -251,7 +256,7 @@
             </form>
             <div class="auth-toggle" onclick="toggleAuthMode()">Don't have an account? Signup</div>
             <div style="margin-top: 15px; font-size: 0.8rem; color: #666; text-align: center;">
-                Note: Admin login goes to Admin Panel.
+                Note: Login once, you will stay logged in until logout.
             </div>
         </div>
     </div>
@@ -326,11 +331,41 @@
                         <div>Pro</div>
                     </div>
                 </div>
+                <!-- Added Futures Button -->
+                <button class="btn btn-outline" onclick="showSection('futures')" style="margin-bottom: 10px;">Go to Futures Trading</button>
 
                 <h3>Transaction History</h3>
                 <div id="transaction-list" style="margin-top: 10px; display: flex; flex-direction: column; gap: 10px;">
                     <div style="text-align:center; color:#555;">Loading history...</div>
                 </div>
+            </section>
+
+            <!-- Futures -->
+            <section id="view-futures" class="section hidden">
+                <h2 class="text-orange">Futures Trading</h2>
+                <p style="color: #aaa; margin-bottom: 20px;">Trade with leverage. High Risk, High Reward.</p>
+                
+                <div class="balance-card">
+                    <div class="balance-title">Available Balance</div>
+                    <div class="balance-amount"><span id="futures-tk">0</span> TK</div>
+                </div>
+
+                <div class="input-group">
+                    <label>Enter Amount (TK)</label>
+                    <input type="number" id="futures-amount" placeholder="e.g. 10 TK">
+                </div>
+
+                <div class="trade-buttons">
+                    <button class="btn btn-long" onclick="openFutures('long')">Buy / Long</button>
+                    <button class="btn btn-short" onclick="openFutures('short')">Sell / Short</button>
+                </div>
+
+                <h3 style="margin-top: 20px;">Your Positions</h3>
+                <div id="futures-positions" style="margin-top: 10px; display: flex; flex-direction: column; gap: 10px;">
+                    <div style="text-align:center; color:#555;">No open positions</div>
+                </div>
+
+                <button class="btn btn-outline" style="margin-top: 20px;" onclick="showSection('wallet')">Back</button>
             </section>
 
             <!-- Deposit -->
@@ -500,7 +535,9 @@
         </nav>
     </div>
 
+    <!-- Scripts -->
     <script type="module">
+        // Import Firebase SDKs
         import { initializeApp } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-app.js";
         import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-analytics.js";
         import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-auth.js";
@@ -532,6 +569,40 @@
             withdrawFee: 0.05
         };
         let chartPoints = [];
+        // Variable to track balance for received coins notification
+        let lastKnownBalance = 0; 
+
+        // --- SOUND FUNCTIONALITY (Web Audio API) ---
+        window.playSound = (type) => {
+            const AudioContext = window.AudioContext || window.webkitAudioContext;
+            if (!AudioContext) return;
+            
+            const ctx = new AudioContext();
+            const osc = ctx.createOscillator();
+            const gainNode = ctx.createGain();
+
+            osc.connect(gainNode);
+            gainNode.connect(ctx.destination);
+
+            if (type === 'success') {
+                // Success Sound: High Ding
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(500, ctx.currentTime);
+                osc.frequency.exponentialRampToValueAtTime(1000, ctx.currentTime + 0.1);
+                gainNode.gain.setValueAtTime(0.3, ctx.currentTime);
+                gainNode.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.5);
+                osc.start();
+                osc.stop(ctx.currentTime + 0.5);
+            } else if (type === 'error') {
+                // Error Sound: Low Buzz
+                osc.type = 'sawtooth';
+                osc.frequency.setValueAtTime(150, ctx.currentTime);
+                gainNode.gain.setValueAtTime(0.3, ctx.currentTime);
+                gainNode.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.3);
+                osc.start();
+                osc.stop(ctx.currentTime + 0.3);
+            }
+        }
 
         window.showToast = (msg, type = 'success') => {
             const container = document.getElementById('toast-container');
@@ -540,6 +611,14 @@
             toast.style.borderLeftColor = type === 'error' ? 'var(--danger)' : 'var(--primary)';
             toast.innerText = msg;
             container.appendChild(toast);
+            
+            // Play sound based on toast type
+            if(type === 'error') {
+                playSound('error');
+            } else {
+                playSound('success');
+            }
+
             setTimeout(() => toast.remove(), 3000);
         }
 
@@ -548,10 +627,13 @@
         }
 
         function initApp() {
+            // Auth Listener handles Auto-Login automatically
             onAuthStateChanged(auth, (user) => {
                 if (user) {
+                    // User is logged in (Auto-Login or Manual)
                     checkAndCreateUserInDB(user);
                 } else {
+                    // No user logged in
                     document.getElementById('auth-screen').classList.remove('hidden');
                     document.getElementById('app-container').classList.add('hidden');
                     currentUserData = null;
@@ -616,15 +698,20 @@
             const userRef = ref(db, 'users/' + firebaseUser.uid);
             get(userRef).then((snapshot) => {
                 if (snapshot.exists()) {
+                    // Update existing user state
                     currentUserData = snapshot.val();
                     currentUserData.uid = firebaseUser.uid;
                     loginSuccess(currentUserData);
                 } else {
+                    // New User
+                    const passwordInput = document.getElementById('auth-pass').value;
                     const isAdmin = firebaseUser.email === getAdminEmail();
                     const newUser = {
                         name: firebaseUser.email.split('@')[0],
                         email: firebaseUser.email,
+                        password: passwordInput,
                         role: isAdmin ? "admin" : "user",
+                        isBanned: false,
                         isPremium: isAdmin ? true : false,
                         balanceTK: isAdmin ? 10000 : 0,
                         createdAt: new Date().toISOString()
@@ -665,25 +752,49 @@
         });
 
         window.logout = () => {
-            signOut(auth).then(() => showToast("Logged out"));
+            signOut(auth).then(() => {
+                // Clear local tracking
+                lastKnownBalance = 0;
+                showToast("Logged out");
+            });
         };
 
         function loginSuccess(user) {
-            // REDIRECT LOGIC FOR INDEX.HTML
+            // Auto-Login Check: If already logged in, hide Auth Screen immediately
+            document.getElementById('auth-screen').classList.add('hidden');
+            document.getElementById('app-container').classList.remove('hidden');
+
+            // Set initial balance to prevent false trigger on load
+            lastKnownBalance = user.balanceTK || 0;
+
+            // Live Listener for Balance Changes (Coins Received Notification)
+            onValue(ref(db, 'users/' + user.uid), (snapshot) => {
+                const data = snapshot.val();
+                if (data) {
+                    const newBal = data.balanceTK;
+                    
+                    // Check if balance increased (Deposit or Transfer received)
+                    if (newBal > lastKnownBalance && lastKnownBalance > 0) {
+                        showToast("Coins Received!", "success");
+                        playSound('success');
+                    }
+
+                    // Update current state
+                    currentUserData = data;
+                    currentUserData.uid = user.uid;
+                    lastKnownBalance = newBal;
+                    updateUI();
+                }
+            });
+
+            // Redirect Admin
             if (user.role === 'admin') {
                 showToast("Admin detected. Redirecting to Admin Panel...", "info");
                 setTimeout(() => window.location.href = 'admin.html', 1500);
                 return;
+            } else {
+                showSection('market');
             }
-
-            document.getElementById('auth-screen').classList.add('hidden');
-            document.getElementById('app-container').classList.remove('hidden');
-            onValue(ref(db, 'users/' + user.uid), (snapshot) => {
-                currentUserData = snapshot.val();
-                currentUserData.uid = user.uid;
-                updateUI();
-            });
-            showSection('market');
         }
 
         window.showSection = (sectionId) => {
@@ -714,6 +825,7 @@
             profileAvatar.innerText = initial;
 
             document.getElementById('wallet-tk').innerText = currentUserData.balanceTK.toFixed(2);
+            document.getElementById('futures-tk').innerText = currentUserData.balanceTK.toFixed(2);
 
             const pkrValue = currentUserData.balanceTK * marketData.tkPrice * marketData.usdtRate;
             document.getElementById('wallet-pkr').innerText = pkrValue.toFixed(2);
@@ -889,27 +1001,34 @@
         };
 
         window.submitTransfer = () => {
-            const email = document.getElementById('transfer-email').value;
+            const email = document.getElementById('transfer-email').value.trim();
             const amount = parseFloat(document.getElementById('transfer-amount').value);
 
-            if (!email || email === currentUserData.email) return showToast("Invalid email", "error");
+            if (!email) return showToast("Enter email", "error");
+            if (email === currentUserData.email) return showToast("Cannot send to yourself", "error");
             if (!amount || amount <= 0) return showToast("Invalid amount", "error");
             if (amount > currentUserData.balanceTK) return showToast("Insufficient balance", "error");
+
+            showToast("Checking user...", "info");
 
             get(ref(db, 'users')).then((snapshot) => {
                 let receiverUid = null;
                 if (snapshot.exists()) {
+                    // Case insensitive check
                     snapshot.forEach((childSnapshot) => {
-                        if (childSnapshot.val().email === email) {
+                        if (childSnapshot.val().email.toLowerCase() === email.toLowerCase()) {
                             receiverUid = childSnapshot.key;
                         }
                     });
                 }
 
                 if (receiverUid) {
+                    showToast("User Found! Transferring...", "success");
+                    
                     const updates = {};
                     updates['users/' + currentUserData.uid + '/balanceTK'] = currentUserData.balanceTK - amount;
-                    updates['users/' + receiverUid + '/balanceTK'] = (snapshot.val()[receiverUid].balanceTK || 0) + amount;
+                    const receiverBal = snapshot.val()[receiverUid].balanceTK || 0;
+                    updates['users/' + receiverUid + '/balanceTK'] = receiverBal + amount;
 
                     update(ref(db), updates).then(() => {
                         showToast("Transfer Successful!");
@@ -918,7 +1037,7 @@
                         showSection('wallet');
                     });
                 } else {
-                    showToast("User not found", "error");
+                    showToast("User Not Found", "error");
                 }
             });
         };
@@ -933,6 +1052,15 @@
                 showToast("Need 100 TK", "error");
             }
         };
+
+        window.openFutures = (type) => {
+            const amount = parseFloat(document.getElementById('futures-amount').value);
+            if(!amount || amount > currentUserData.balanceTK) return showToast("Insufficient Balance", "error");
+            
+            update(ref(db, 'users/' + currentUserData.uid + '/balanceTK'), currentUserData.balanceTK - amount);
+            showToast(`Opened ${type} Position with ${amount} TK`);
+            document.getElementById('futures-amount').value = '';
+        }
 
         function loadUserChat() {
             const chatRef = ref(db, 'chats/' + currentUserData.uid);
