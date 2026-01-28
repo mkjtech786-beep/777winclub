@@ -917,7 +917,7 @@
             document.getElementById('withdraw-calc-usdt').innerText = pkrVal.toFixed(2);
         }
 
-        // UPDATED WITHDRAW LOGIC: DEDUCT BALANCE IMMEDIATELY ON SUBMIT
+        // UPDATED WITHDRAW LOGIC: FIXED KEY ASSIGNMENT
         window.submitWithdraw = () => {
             const amount = parseFloat(document.getElementById('withdraw-amount').value);
             const method = document.getElementById('withdraw-method').value;
@@ -935,9 +935,8 @@
             const usdtVal = amount * marketData.tkPrice;
             const pkrVal = usdtVal * marketData.usdtRate;
 
-            // Atomic update: Deduct Balance AND Create Request
-            const updates = {};
-            updates['users/' + currentUserData.uid + '/balanceTK'] = currentUserData.balanceTK - total;
+            // 1. Get a new unique key for the withdrawal
+            const newWithdrawKey = push(ref(db, 'withdrawals')).key;
 
             const withdrawData = {
                 userId: currentUserData.uid,
@@ -951,9 +950,11 @@
                 date: new Date().toLocaleString(),
                 status: 'pending'
             };
-            
-            const newKey = push(ref(db, 'withdrawals'), withdrawData).key;
-            updates['withdrawals/' + newKey] = withdrawData;
+
+            // 2. Atomic update: Deduct Balance AND Create Request
+            const updates = {};
+            updates['users/' + currentUserData.uid + '/balanceTK'] = currentUserData.balanceTK - total;
+            updates['withdrawals/' + newWithdrawKey] = withdrawData;
 
             update(ref(db), updates).then(() => {
                 showToast("Withdrawal Requested. Balance Deducted.");
@@ -964,6 +965,9 @@
                 document.getElementById('withdraw-amount').value = '';
                 document.getElementById('withdraw-account').value = '';
                 showSection('wallet');
+            }).catch((error) => {
+                console.error("Withdraw Error:", error);
+                showToast("Failed to submit request. Try again.", "error");
             });
         };
 
