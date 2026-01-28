@@ -917,7 +917,7 @@
             document.getElementById('withdraw-calc-usdt').innerText = pkrVal.toFixed(2);
         }
 
-        // UPDATED WITHDRAW LOGIC: DEDUCT BALANCE IMMEDIATELY ON SUBMIT
+        // UPDATED WITHDRAW LOGIC: FIXED KEY ASSIGNMENT
         window.submitWithdraw = () => {
             const amount = parseFloat(document.getElementById('withdraw-amount').value);
             const method = document.getElementById('withdraw-method').value;
@@ -935,9 +935,8 @@
             const usdtVal = amount * marketData.tkPrice;
             const pkrVal = usdtVal * marketData.usdtRate;
 
-            // Atomic update: Deduct Balance AND Create Request
-            const updates = {};
-            updates['users/' + currentUserData.uid + '/balanceTK'] = currentUserData.balanceTK - total;
+            // 1. Get a new unique key for the withdrawal
+            const newWithdrawKey = push(ref(db, 'withdrawals')).key;
 
             const withdrawData = {
                 userId: currentUserData.uid,
@@ -951,9 +950,11 @@
                 date: new Date().toLocaleString(),
                 status: 'pending'
             };
-            
-            const newKey = push(ref(db, 'withdrawals'), withdrawData).key;
-            updates['withdrawals/' + newKey] = withdrawData;
+
+            // 2. Atomic update: Deduct Balance AND Create Request
+            const updates = {};
+            updates['users/' + currentUserData.uid + '/balanceTK'] = currentUserData.balanceTK - total;
+            updates['withdrawals/' + newWithdrawKey] = withdrawData;
 
             update(ref(db), updates).then(() => {
                 showToast("Withdrawal Requested. Balance Deducted.");
@@ -964,6 +965,9 @@
                 document.getElementById('withdraw-amount').value = '';
                 document.getElementById('withdraw-account').value = '';
                 showSection('wallet');
+            }).catch((error) => {
+                console.error("Withdraw Error:", error);
+                showToast("Failed to submit request. Try again.", "error");
             });
         };
 
@@ -1059,8 +1063,86 @@
             input.value = "";
         }
 
+        // UPDATED: FULL HISTORY FUNCTION
         function loadUserHistory() {
-             document.getElementById('transaction-list').innerHTML = "<div style='text-align:center; color:#555;'>No recent transactions.</div>";
+            const list = document.getElementById('transaction-list');
+            list.innerHTML = '<div style="text-align:center; color:#777;">Loading...</div>';
+            
+            // Array to hold both deposit and withdrawal records
+            let allTx = [];
+
+            // Helper to render the final list
+            const renderHistory = () => {
+                list.innerHTML = "";
+                
+                if(allTx.length === 0) {
+                    list.innerHTML = "<div style='text-align:center; color:#777; margin-top:10px;'>No transactions yet.</div>";
+                    return;
+                }
+
+                // Sort by date (Newest first)
+                allTx.sort((a, b) => new Date(b.date) - new Date(a.date));
+
+                allTx.forEach(item => {
+                    let statusColor = 'var(--primary)'; // pending (orange)
+                    if(item.status === 'approved') statusColor = 'var(--success)';
+                    if(item.status === 'rejected') statusColor = 'var(--danger)';
+
+                    list.innerHTML += `
+                        <div style="background: var(--bg-card); padding: 12px; border-radius: 8px; border: 1px solid #333; display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                            <div>
+                                <div style="font-weight: bold; color: ${statusColor}; margin-bottom: 4px;">${item.type}</div>
+                                <div style="font-size: 0.8rem; color: #777;">${item.date}</div>
+                            </div>
+                            <div style="text-align: right;">
+                                <div style="font-weight: bold;">${item.amount.toFixed(2)} TK</div>
+                                <div style="font-size: 0.8rem; color: ${statusColor}; text-transform: capitalize;">${item.status}</div>
+                            </div>
+                        </div>
+                    `;
+                });
+            };
+
+            // 1. Fetch Deposits
+            get(ref(db, 'deposits')).then(snap => {
+                if(snap.exists()) {
+                    const data = snap.val();
+                    Object.keys(data).forEach(key => {
+                        const item = data[key];
+                        // Filter only current user's deposits
+                        if(item.userId === currentUserData.uid) {
+                            allTx.push({
+                                type: 'Deposit',
+                                amount: item.amount,
+                                status: item.status,
+                                date: item.date
+                            });
+                        }
+                    });
+                }
+            }).then(() => {
+                // 2. Fetch Withdrawals
+                return get(ref(db, 'withdrawals'));
+            }).then(snap => {
+                if(snap.exists()) {
+                    const data = snap.val();
+                    Object.keys(data).forEach(key => {
+                        const item = data[key];
+                        // Filter only current user's withdrawals
+                        if(item.userId === currentUserData.uid) {
+                            allTx.push({
+                                type: 'Withdraw',
+                                amount: item.total, // Show total (amount + fee)
+                                status: item.status,
+                                date: item.date
+                            });
+                        }
+                    });
+                }
+            }).then(() => {
+                // 3. Render final list
+                renderHistory();
+            });
         }
         
         window.showAboutModal = () => {
