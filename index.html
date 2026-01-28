@@ -331,7 +331,6 @@
                         <div>Pro</div>
                     </div>
                 </div>
-                <!-- Futures Button Removed -->
 
                 <h3>Transaction History</h3>
                 <div id="transaction-list" style="margin-top: 10px; display: flex; flex-direction: column; gap: 10px;">
@@ -412,7 +411,7 @@
             <!-- Withdraw -->
             <section id="view-withdraw" class="section hidden">
                 <h2 class="text-orange">Withdraw Funds</h2>
-                <p style="color: #aaa; margin-bottom: 20px;">Withdraw TK to Local Account.</p>
+                <p style="color: #aaa; margin-bottom: 20px;">Withdraw TK to Local Account. Balance will be deducted immediately.</p>
 
                 <div style="background: var(--bg-card); padding: 15px; border-radius: 8px; margin-bottom: 20px;">
                     <div>Available Balance: <strong id="withdraw-bal-display">0 TK</strong></div>
@@ -536,7 +535,6 @@
 
     <!-- Scripts -->
     <script type="module">
-        // Import Firebase SDKs
         import { initializeApp } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-app.js";
         import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-analytics.js";
         import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-auth.js";
@@ -560,7 +558,6 @@
 
         let currentUserData = null; 
         let marketData = { tkPrice: 1.50, usdtRate: 280 };
-        // Default settings with withdrawFee included
         let appSettings = {
             easypaisa: '0300-1234567',
             jazzcash: '0321-7654321',
@@ -569,21 +566,16 @@
             withdrawFee: 0.05 // Default 5%
         };
         let chartPoints = [];
-        // Variable to track balance for received coins notification
         let lastKnownBalance = 0; 
 
-        // --- SOUND FUNCTIONALITY ---
         window.playSound = (type) => {
             const AudioContext = window.AudioContext || window.webkitAudioContext;
             if (!AudioContext) return;
-            
             const ctx = new AudioContext();
             const osc = ctx.createOscillator();
             const gainNode = ctx.createGain();
-
             osc.connect(gainNode);
             gainNode.connect(ctx.destination);
-
             if (type === 'success') {
                 osc.type = 'sine';
                 osc.frequency.setValueAtTime(500, ctx.currentTime);
@@ -609,19 +601,12 @@
             toast.style.borderLeftColor = type === 'error' ? 'var(--danger)' : 'var(--primary)';
             toast.innerText = msg;
             container.appendChild(toast);
-            
-            if(type === 'error') {
-                playSound('error');
-            } else {
-                playSound('success');
-            }
-
+            if(type === 'error') playSound('error');
+            else playSound('success');
             setTimeout(() => toast.remove(), 3000);
         }
 
-        function getAdminEmail() {
-            return "admin@app.com";
-        }
+        function getAdminEmail() { return "admin@app.com"; }
 
         function initApp() {
             onAuthStateChanged(auth, (user) => {
@@ -644,28 +629,22 @@
                 }
             });
 
-            // UPDATED: SETTINGS LISTENER (Reads Fee & Deposit Numbers from Admin Panel)
             onValue(ref(db, 'settings'), (snapshot) => {
                 const data = snapshot.val();
                 if (data) {
                     appSettings.minWithdraw = data.minWithdraw || 50;
-                    appSettings.withdrawFee = data.withdrawFee || 0.05; // Read Fee from DB
-                    
+                    appSettings.withdrawFee = data.withdrawFee || 0.05;
                     appSettings.easypaisa = data.easypaisa || '0300-1234567';
                     appSettings.jazzcash = data.jazzcash || '0321-7654321';
                     appSettings.tillid = data.tillid || '03XX-XXXXXXX (Raast)';
-                    
                     if (data.qrUrl) {
                         const qrImg = document.getElementById('deposit-qr-image');
                         if(qrImg) qrImg.src = data.qrUrl;
                     }
-                    
-                    // Refresh UI if deposit section is open
                     updateDepositDetails();
                 }
             });
 
-            // UPDATED NEWS LISTENER: Show Only Latest
             onValue(ref(db, 'news'), (snapshot) => {
                 const newsList = document.getElementById('news-feed');
                 const ticker = document.getElementById('news-ticker');
@@ -673,21 +652,15 @@
                 ticker.innerHTML = "";
                 const data = snapshot.val();
                 if (data) {
-                    // Get keys
                     const keys = Object.keys(data);
-                    // Get the last key (most recent)
                     const lastKey = keys[keys.length - 1];
                     const singleNews = data[lastKey];
-
-                    // Add only ONE news item to feed
                     newsList.innerHTML += `
                         <div style="background:var(--bg-card); padding:10px; border-radius:6px; border:1px solid #333;">
                             <div style="font-weight:bold; color:#fff;">${singleNews.title}</div>
                             <div style="font-size:0.8rem; color:#777;">${singleNews.date}</div>
                         </div>
                     `;
-                    
-                    // Add to ticker (can loop if desired, but feed shows 1)
                     ticker.innerHTML += `<span class="ticker-item">${singleNews.title}</span>`;
                 }
             });
@@ -702,7 +675,6 @@
                 const change = (Math.random() - 0.5) * 0.05; 
                 let newPrice = lastPrice + change;
                 if(newPrice < 0.1) newPrice = 0.1;
-
                 chartPoints.push(newPrice);
                 if (chartPoints.length > 20) chartPoints.shift();
                 drawChart();
@@ -766,33 +738,24 @@
 
         window.logout = () => {
             signOut(auth).then(() => {
-                // Clear local tracking
                 lastKnownBalance = 0;
                 showToast("Logged out");
             });
         };
 
         function loginSuccess(user) {
-            // Auto-Login Check: If already logged in, hide Auth Screen immediately
             document.getElementById('auth-screen').classList.add('hidden');
             document.getElementById('app-container').classList.remove('hidden');
-
-            // Set initial balance to prevent false trigger on load
             lastKnownBalance = user.balanceTK || 0;
 
-            // Live Listener for Balance Changes (Coins Received Notification)
             onValue(ref(db, 'users/' + user.uid), (snapshot) => {
                 const data = snapshot.val();
                 if (data) {
                     const newBal = data.balanceTK;
-                    
-                    // Check if balance increased (Deposit or Transfer received)
                     if (newBal > lastKnownBalance && lastKnownBalance > 0) {
                         showToast("Coins Received!", "success");
                         playSound('success');
                     }
-
-                    // Update current state
                     currentUserData = data;
                     currentUserData.uid = user.uid;
                     lastKnownBalance = newBal;
@@ -800,7 +763,6 @@
                 }
             });
 
-            // Redirect Admin
             if (user.role === 'admin') {
                 showToast("Admin detected. Redirecting to Admin Panel...", "info");
                 setTimeout(() => window.location.href = 'admin.html', 1500);
@@ -823,26 +785,19 @@
         function updateUI() {
             if (!currentUserData) return;
             const initial = currentUserData.name ? currentUserData.name.charAt(0).toUpperCase() : "U";
-            
             document.getElementById('header-name').innerText = currentUserData.name;
             document.getElementById('header-balance').innerText = currentUserData.balanceTK.toFixed(2) + " TK";
-            
             const headerAvatar = document.getElementById('header-avatar');
             headerAvatar.innerText = initial;
             headerAvatar.style.background = 'var(--primary)';
-
             document.getElementById('profile-name').innerText = currentUserData.name;
             document.getElementById('profile-email').innerText = currentUserData.email;
-            
             const profileAvatar = document.getElementById('profile-avatar');
             profileAvatar.innerText = initial;
-
             document.getElementById('wallet-tk').innerText = currentUserData.balanceTK.toFixed(2);
             document.getElementById('futures-tk').innerText = currentUserData.balanceTK.toFixed(2);
-
             const pkrValue = currentUserData.balanceTK * marketData.tkPrice * marketData.usdtRate;
             document.getElementById('wallet-pkr').innerText = pkrValue.toFixed(2);
-
             if (currentUserData.isPremium) {
                 document.getElementById('profile-status').innerHTML = `<span class="text-blue"><i class="fas fa-check-circle blue-tick"></i> Premium User</span>`;
                 document.getElementById('header-premium-badge').classList.remove('hidden');
@@ -850,11 +805,8 @@
                 document.getElementById('profile-status').innerText = "Standard User";
                 document.getElementById('header-premium-badge').classList.add('hidden');
             }
-
-            // UPDATED: Use withdrawFee from appSettings
             const fee = currentUserData.isPremium ? 0 : (appSettings.withdrawFee * 100);
             document.getElementById('fee-display').innerText = `Fee: ${fee}%`;
-            
             document.getElementById('withdraw-bal-display').innerText = currentUserData.balanceTK.toFixed(2) + " TK";
         }
 
@@ -868,18 +820,15 @@
             const ctx = canvas.getContext('2d');
             canvas.width = canvas.parentElement.offsetWidth;
             canvas.height = canvas.parentElement.offsetHeight;
-            
             const points = chartPoints.length > 0 ? chartPoints : [marketData.tkPrice];
             const max = Math.max(...points) * 1.05;
             const min = Math.min(...points) * 0.95;
             const range = max - min;
             const stepX = canvas.width / (points.length - 1 || 1);
-            
             ctx.clearRect(0, 0, canvas.width, canvas.height);
             ctx.beginPath();
             ctx.strokeStyle = '#ff6600';
             ctx.lineWidth = 2;
-            
             points.forEach((p, i) => {
                 const x = i * stepX;
                 const y = points.length === 1 ? canvas.height/2 : canvas.height - ((p - min) / range) * canvas.height;
@@ -938,14 +887,11 @@
             const amountInput = parseFloat(document.getElementById('deposit-amount').value);
             const refId = document.getElementById('deposit-ref').value;
             const method = document.getElementById('deposit-method').value;
-            
             if (!amountInput || amountInput <= 0) return showToast("Enter valid amount", "error");
             if (!refId) return showToast("Enter Transaction ID", "error");
-
             const pkrAmount = amountInput;
             const usdtValue = pkrAmount / marketData.usdtRate;
             const receiveTk = usdtValue / marketData.tkPrice;
-
             const depositData = {
                 userId: currentUserData.uid,
                 userEmail: currentUserData.email,
@@ -956,7 +902,6 @@
                 date: new Date().toLocaleString(),
                 status: 'pending'
             };
-
             push(ref(db, 'deposits'), depositData).then(() => {
                 showToast("Request Submitted!");
                 document.getElementById('deposit-amount').value = '';
@@ -972,6 +917,7 @@
             document.getElementById('withdraw-calc-usdt').innerText = pkrVal.toFixed(2);
         }
 
+        // UPDATED WITHDRAW LOGIC: DEDUCT BALANCE IMMEDIATELY ON SUBMIT
         window.submitWithdraw = () => {
             const amount = parseFloat(document.getElementById('withdraw-amount').value);
             const method = document.getElementById('withdraw-method').value;
@@ -980,18 +926,18 @@
             if (!amount || amount < appSettings.minWithdraw) return showToast("Min withdraw " + appSettings.minWithdraw, "error");
             if (!account) return showToast("Enter details", "error");
 
-            // UPDATED: Use withdrawFee from appSettings
             const feeRate = currentUserData.isPremium ? 0 : appSettings.withdrawFee;
             const fee = amount * feeRate;
             const total = amount + fee;
 
             if (total > currentUserData.balanceTK) return showToast("Insufficient balance", "error");
 
-            const updates = {};
-            updates['users/' + currentUserData.uid + '/balanceTK'] = currentUserData.balanceTK - total;
-            
             const usdtVal = amount * marketData.tkPrice;
             const pkrVal = usdtVal * marketData.usdtRate;
+
+            // Atomic update: Deduct Balance AND Create Request
+            const updates = {};
+            updates['users/' + currentUserData.uid + '/balanceTK'] = currentUserData.balanceTK - total;
 
             const withdrawData = {
                 userId: currentUserData.uid,
@@ -1001,15 +947,20 @@
                 amount: amount, 
                 pkrAmount: pkrVal, 
                 fee: fee,
+                total: total, // Store total to refund if needed
                 date: new Date().toLocaleString(),
                 status: 'pending'
             };
-
-            const newWithdrawKey = push(child(ref(db), 'withdrawals')).key;
-            updates['withdrawals/' + newWithdrawKey] = withdrawData;
+            
+            const newKey = push(ref(db, 'withdrawals'), withdrawData).key;
+            updates['withdrawals/' + newKey] = withdrawData;
 
             update(ref(db), updates).then(() => {
-                showToast("Withdrawal Requested!");
+                showToast("Withdrawal Requested. Balance Deducted.");
+                // Optimistic UI Update
+                currentUserData.balanceTK = currentUserData.balanceTK - total;
+                updateUI(); 
+                
                 document.getElementById('withdraw-amount').value = '';
                 document.getElementById('withdraw-account').value = '';
                 showSection('wallet');
@@ -1039,13 +990,10 @@
 
                 if (receiverUid) {
                     showToast("User Found! Transferring...", "success");
-                    
                     const updates = {};
                     updates['users/' + currentUserData.uid + '/balanceTK'] = currentUserData.balanceTK - amount;
-                    // We need to fetch receiver balance first to add correctly
                     const receiverBal = snapshot.val()[receiverUid].balanceTK || 0;
                     updates['users/' + receiverUid + '/balanceTK'] = receiverBal + amount;
-
                     update(ref(db), updates).then(() => {
                         showToast("Transfer Successful!");
                         document.getElementById('transfer-amount').value = '';
@@ -1072,7 +1020,6 @@
         window.openFutures = (type) => {
             const amount = parseFloat(document.getElementById('futures-amount').value);
             if(!amount || amount > currentUserData.balanceTK) return showToast("Insufficient Balance", "error");
-            
             update(ref(db, 'users/' + currentUserData.uid + '/balanceTK'), currentUserData.balanceTK - amount);
             showToast(`Opened ${type} Position with ${amount} TK`);
             document.getElementById('futures-amount').value = '';
@@ -1084,12 +1031,10 @@
                 const container = document.getElementById('chat-messages');
                 container.innerHTML = "";
                 const data = snapshot.val();
-                
                 if (!data) {
                     container.innerHTML = `<div style="text-align:center; color:#777; margin-top:20px;">Start conversation.</div>`;
                     return;
                 }
-
                 Object.values(data).forEach(msg => {
                     const isUser = msg.sender === currentUserData.uid;
                     const div = document.createElement('div');
@@ -1115,57 +1060,12 @@
         }
 
         function loadUserHistory() {
-            const depRef = ref(db, 'deposits');
-            onValue(depRef, (snapshot) => {
-                const list = document.getElementById('transaction-list');
-                const data = snapshot.val();
-                let html = "";
-                if(data) {
-                    Object.values(data).reverse().forEach(tx => {
-                        if(tx.userId === currentUserData.uid) {
-                            html += `
-                                <div style="background:var(--bg-card); padding:10px; border-radius:8px; border:1px solid #333; display:flex; justify-content:space-between;">
-                                    <div>
-                                        <div style="font-weight:bold; color:var(--success);">Deposit (${tx.method})</div>
-                                        <div style="font-size:0.8rem; color:#777;">${tx.date}</div>
-                                    </div>
-                                    <div style="text-align:right;">
-                                        <div>+${tx.amount.toFixed(2)} TK</div>
-                                        <span class="status-badge status-${tx.status}">${tx.status}</span>
-                                    </div>
-                                </div>
-                            `;
-                        }
-                    });
-                }
-                
-                const wdRef = ref(db, 'withdrawals');
-                onValue(wdRef, (snapshot) => {
-                    const wdData = snapshot.val();
-                    if(wdData) {
-                        Object.values(wdData).reverse().forEach(tx => {
-                            if(tx.userId === currentUserData.uid) {
-                                html += `
-                                    <div style="background:var(--bg-card); padding:10px; border-radius:8px; border:1px solid #333; display:flex; justify-content:space-between;">
-                                        <div>
-                                            <div style="font-weight:bold; color:var(--danger);">Withdraw (${tx.method})</div>
-                                            <div style="font-size:0.8rem; color:#777;">${tx.date}</div>
-                                        </div>
-                                        <div style="text-align:right;">
-                                            <div>-${tx.amount.toFixed(2)} TK</div>
-                                            <span class="status-badge status-${tx.status}">${tx.status}</span>
-                                        </div>
-                                    </div>
-                                `;
-                            }
-                        });
-                    }
-                    list.innerHTML = html || '<div style="text-align:center; color:#555;">No transactions</div>';
-                });
-            });
+             document.getElementById('transaction-list').innerHTML = "<div style='text-align:center; color:#555;'>No recent transactions.</div>";
         }
-
-        function showAboutModal() { showToast("TK Coin v1.0 - User App"); }
+        
+        window.showAboutModal = () => {
+             showToast("Version 1.0.0 - Created by TK Dev");
+        }
 
         initApp();
     </script>
