@@ -83,6 +83,31 @@
         }
         @keyframes slideIn { from { transform: translateX(100%); } to { transform: translateX(0); } }
 
+        /* Full Screen Popup */
+        #receive-popup {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.95);
+            z-index: 99999;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            backdrop-filter: blur(5px);
+            animation: popIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        @keyframes popIn {
+            0% { transform: scale(0); opacity: 0; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+
         /* Auth */
         #auth-screen {
             display: flex;
@@ -257,6 +282,14 @@
 
     <div id="toast-container"></div>
 
+    <!-- NEW: Full Screen Receive Popup -->
+    <div id="receive-popup" class="hidden">
+        <i class="fas fa-hand-holding-usd" style="font-size: 5rem; color: gold; margin-bottom: 20px; animation: bounce 1s infinite;"></i>
+        <h2 style="color: white;">Coins Received!</h2>
+        <p style="color: #ccc; margin-top: 10px;">You received <span id="popup-amount" class="text-green" style="font-weight: bold;">0</span> TK</p>
+        <button class="btn" style="margin-top: 30px; width: auto; padding: 10px 40px;" onclick="window.closePopup()">OK</button>
+    </div>
+
     <!-- Auth Screen -->
     <div id="auth-screen">
         <div class="auth-box">
@@ -270,7 +303,6 @@
                     <label>Password</label>
                     <input type="password" id="auth-pass" required placeholder="password">
                 </div>
-                <!-- Referral Input (Hidden for Login) -->
                 <div class="input-group hidden" id="ref-group">
                     <label>Referral Code (Optional)</label>
                     <input type="text" id="auth-ref" placeholder="Enter Referral Code">
@@ -529,14 +561,12 @@
                     <div id="profile-status" style="margin-top: 5px; font-size: 0.9rem; color: var(--primary);">Normal User</div>
                 </div>
 
-                <!-- Download App -->
                 <div class="menu-card" onclick="downloadApp()" style="margin-bottom: 15px;">
                     <i class="fab fa-android" style="color: #a4c639; font-size: 2rem; margin-bottom: 5px;"></i>
                     <div style="font-weight: bold;">Download App</div>
                     <small style="color:#888;">For better experience</small>
                 </div>
 
-                <!-- Referral -->
                 <div class="menu-card" onclick="copyReferralLink()" style="margin-bottom: 15px; text-align: left; flex-direction: row; justify-content: space-between; padding: 15px;">
                     <div>
                         <div style="font-weight: bold; font-size: 0.9rem; color: #fff;">Invite & Earn</div>
@@ -548,7 +578,6 @@
                     </div>
                 </div>
 
-                <!-- NEW: Invited Members List -->
                 <div style="margin-bottom: 20px;">
                     <div style="display:flex; justify-content: space-between; margin-bottom: 10px;">
                         <h3>Invited Members</h3>
@@ -592,7 +621,7 @@
         import { initializeApp } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-app.js";
         import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-analytics.js";
         import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-auth.js";
-        import { getDatabase, ref, set, push, onValue, update, get, child } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-database.js";
+        import { getDatabase, ref, set, push, onValue, update, get, child, onChildAdded } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-database.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyCBMk5ED0YNL9MqVThgMhoOuWvGwTgCJCg",
@@ -621,6 +650,7 @@
         };
         let chartPoints = [];
         let lastKnownBalance = 0; 
+        let isTransfersLoaded = false; // To prevent popup on load
 
         window.playSound = (type) => {
             const AudioContext = window.AudioContext || window.webkitAudioContext;
@@ -648,6 +678,10 @@
             }
         }
 
+        window.closePopup = () => {
+            document.getElementById('receive-popup').classList.add('hidden');
+        }
+
         window.showToast = (msg, type = 'success') => {
             const container = document.getElementById('toast-container');
             const toast = document.createElement('div');
@@ -673,9 +707,6 @@
 
         function initApp() {
             checkUrlParams();
-
-            // --- SPEED FIX: Listeners moved to loginSuccess to speed up startup ---
-            // We only listen to Auth here.
             
             onAuthStateChanged(auth, (user) => {
                 if (user) {
@@ -725,8 +756,6 @@
 
                     if (refCode) {
                         newUser.referredBy = refCode;
-                        
-                        // NEW: Add to referral tracker immediately
                         const referralPath = ref(db, `referrals/${refCode}/${firebaseUser.uid}`);
                         set(referralPath, {
                             name: newUser.name,
@@ -765,7 +794,6 @@
             try {
                 if (isSignup) await createUserWithEmailAndPassword(auth, email, pass);
                 else await signInWithEmailAndPassword(auth, email, pass);
-                // Auth state changed listener will handle the rest
             } catch (error) {
                 showToast(error.message, "error");
                 btn.innerText = isSignup ? "Signup" : "Login";
@@ -777,7 +805,7 @@
             signOut(auth).then(() => {
                 lastKnownBalance = 0;
                 showToast("Logged out");
-                window.location.reload(); // Reload to clear all listeners
+                window.location.reload();
             });
         };
 
@@ -785,15 +813,12 @@
             document.getElementById('auth-screen').classList.add('hidden');
             document.getElementById('app-container').classList.remove('hidden');
             
-            // Reset button state if it was stuck
             document.getElementById('auth-btn').innerText = isSignup ? "Signup" : "Login";
             document.getElementById('auth-btn').disabled = false;
 
             lastKnownBalance = user.balanceTK || 0;
 
-            // --- SPEED FIX: Load listeners only after login success ---
-            
-            // 1. User Data Listener
+            // Listeners
             onValue(ref(db, 'users/' + user.uid), (snapshot) => {
                 const data = snapshot.val();
                 if (data) {
@@ -809,7 +834,6 @@
                 }
             });
 
-            // 2. Market Listener
             onValue(ref(db, 'market'), (snapshot) => {
                 const data = snapshot.val();
                 if (data) {
@@ -820,7 +844,6 @@
                 }
             });
 
-            // 3. Settings Listener
             onValue(ref(db, 'settings'), (snapshot) => {
                 const data = snapshot.val();
                 if (data) {
@@ -837,7 +860,6 @@
                 }
             });
 
-            // 4. News Listener
             onValue(ref(db, 'news'), (snapshot) => {
                 const newsList = document.getElementById('news-feed');
                 const ticker = document.getElementById('news-ticker');
@@ -858,10 +880,8 @@
                 }
             });
 
-            // 5. Referral Stats Listener (NEW)
             loadReferralStats(user.uid);
-
-            // Start Animation
+            monitorIncomingTransfers(user.uid); // New Popup Monitor
             startZigzagAnimation();
 
             if (user.role === 'admin') {
@@ -873,7 +893,32 @@
             }
         }
 
-        // NEW: Load Referral List
+        // NEW: Monitor Transfers for Popup
+        function monitorIncomingTransfers(myUid) {
+            const transfersRef = ref(db, 'transfers');
+            
+            // Initial load to mark "loaded" state
+            get(transfersRef).then(() => {
+                isTransfersLoaded = true;
+            });
+
+            onChildAdded(transfersRef, (snapshot) => {
+                if (!isTransfersLoaded) return;
+                
+                const data = snapshot.val();
+                if (data.to === myUid) {
+                    showReceivePopup(data.amount);
+                }
+            });
+        }
+
+        function showReceivePopup(amount) {
+            const popup = document.getElementById('receive-popup');
+            document.getElementById('popup-amount').innerText = amount.toFixed(2);
+            popup.classList.remove('hidden');
+            playSound('success');
+        }
+
         function loadReferralStats(uid) {
             const listContainer = document.getElementById('invited-list');
             const countDisplay = document.getElementById('total-invites-count');
@@ -1132,6 +1177,7 @@
             });
         };
 
+        // UPDATED: Submit Transfer with History
         window.submitTransfer = () => {
             const email = document.getElementById('transfer-email').value.trim();
             const amount = parseFloat(document.getElementById('transfer-amount').value);
@@ -1155,10 +1201,26 @@
 
                 if (receiverUid) {
                     showToast("User Found! Transferring...", "success");
+                    
+                    // 1. Update Balances
                     const updates = {};
                     updates['users/' + currentUserData.uid + '/balanceTK'] = currentUserData.balanceTK - amount;
                     const receiverBal = snapshot.val()[receiverUid].balanceTK || 0;
                     updates['users/' + receiverUid + '/balanceTK'] = receiverBal + amount;
+
+                    // 2. Save Transfer History
+                    const transferRef = push(ref(db, 'transfers'));
+                    const transferData = {
+                        from: currentUserData.uid,
+                        fromName: currentUserData.name,
+                        to: receiverUid,
+                        toName: snapshot.val()[receiverUid].name, // Optimistically get name
+                        amount: amount,
+                        date: new Date().toLocaleString(),
+                        timestamp: Date.now()
+                    };
+                    updates['transfers/' + transferRef.key] = transferData;
+
                     update(ref(db), updates).then(() => {
                         showToast("Transfer Successful!");
                         document.getElementById('transfer-amount').value = '';
@@ -1224,10 +1286,12 @@
             input.value = "";
         }
 
+        // UPDATED: Load History with Transfers
         function loadUserHistory() {
             const list = document.getElementById('transaction-list');
             list.innerHTML = '<div style="text-align:center; color:#777;">Loading...</div>';
             let allTx = [];
+
             const renderHistory = () => {
                 list.innerHTML = "";
                 if(allTx.length === 0) {
@@ -1235,27 +1299,41 @@
                     return;
                 }
                 allTx.sort((a, b) => new Date(b.date) - new Date(a.date));
+
                 allTx.forEach(item => {
                     let statusColor = 'var(--primary)';
-                    if(item.status === 'approved') statusColor = 'var(--success)';
-                    if(item.status === 'rejected') statusColor = 'var(--danger)';
+                    let title = item.type ? item.type.toUpperCase() : 'TRANSFER';
+                    let subtitle = item.method || '';
+                    let amountColor = '#fff';
+
+                    if(item.type === 'Deposit' || item.type === 'Withdraw') {
+                        if(item.status === 'approved') statusColor = 'var(--success)';
+                        if(item.status === 'rejected') statusColor = 'var(--danger)';
+                    } else if (item.type === 'Transfer') {
+                         title = 'TRANSFER';
+                         subtitle = item.direction === 'Sent' ? `Sent to: ${item.peerName}` : `Received from: ${item.peerName}`;
+                         amountColor = item.direction === 'Sent' ? 'var(--danger)' : 'var(--success)';
+                    }
+
                     list.innerHTML += `
                         <div style="background: var(--bg-card); padding: 12px; border-radius: 8px; border: 1px solid #333;">
                             <div style="display:flex; justify-content:space-between; margin-bottom:5px;">
-                                <span style="font-weight:bold; color:#fff;">${item.type.toUpperCase()}</span>
+                                <span style="font-weight:bold; color:#fff;">${title}</span>
                                 <span style="font-size:0.8rem; color:#aaa;">${item.date}</span>
                             </div>
                             <div style="display:flex; justify-content:space-between; align-items:center;">
                                 <div>
-                                    <div style="color:#fff;">${item.amount} TK</div>
-                                    ${item.method ? `<div style="font-size:0.8rem; color:#777;">${item.method}</div>` : ''}
+                                    <div style="color:${amountColor}; font-weight:bold;">${item.amount} TK</div>
+                                    <div style="font-size:0.8rem; color:#777;">${subtitle}</div>
                                 </div>
-                                <div class="status-badge" style="background:${statusColor}; color:${item.status==='pending'?'black':'white'}">${item.status}</div>
+                                ${item.status ? `<div class="status-badge" style="background:${statusColor}; color:${item.status==='pending'?'black':'white'}">${item.status}</div>` : ''}
                             </div>
                         </div>
                     `;
                 });
             };
+
+            // Deposits
             onValue(ref(db, 'deposits'), (snapshot) => {
                 const data = snapshot.val();
                 if(data) {
@@ -1268,6 +1346,8 @@
                 }
                 renderHistory();
             });
+
+            // Withdrawals
             onValue(ref(db, 'withdrawals'), (snapshot) => {
                 const data = snapshot.val();
                 if(data) {
@@ -1276,6 +1356,27 @@
                             w.type = 'Withdraw';
                             w.amount = w.total; 
                             allTx.push(w);
+                        }
+                    });
+                }
+                renderHistory();
+            });
+
+            // Transfers (NEW)
+            onValue(ref(db, 'transfers'), (snapshot) => {
+                const data = snapshot.val();
+                if(data) {
+                    Object.values(data).forEach(t => {
+                        if(t.from === currentUserData.uid) {
+                            t.type = 'Transfer';
+                            t.direction = 'Sent';
+                            t.peerName = t.toName || 'Unknown';
+                            allTx.push(t);
+                        } else if (t.to === currentUserData.uid) {
+                            t.type = 'Transfer';
+                            t.direction = 'Received';
+                            t.peerName = t.fromName || 'Unknown';
+                            allTx.push(t);
                         }
                     });
                 }
