@@ -236,6 +236,20 @@
         .trade-buttons { display: flex; gap: 10px; margin-top: 10px; }
         .btn-long { background: var(--success); flex: 1; }
         .btn-short { background: var(--danger); flex: 1; }
+
+        /* Invited List Style */
+        .invited-item {
+            background: var(--bg-card);
+            padding: 10px;
+            border-radius: 6px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+            border: 1px solid #333;
+        }
+        .invited-name { font-weight: bold; color: #fff; font-size: 0.9rem; }
+        .invited-date { font-size: 0.7rem; color: #777; }
     </style>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
@@ -256,7 +270,7 @@
                     <label>Password</label>
                     <input type="password" id="auth-pass" required placeholder="password">
                 </div>
-                <!-- New Referral Input (Hidden for Login) -->
+                <!-- Referral Input (Hidden for Login) -->
                 <div class="input-group hidden" id="ref-group">
                     <label>Referral Code (Optional)</label>
                     <input type="text" id="auth-ref" placeholder="Enter Referral Code">
@@ -515,14 +529,14 @@
                     <div id="profile-status" style="margin-top: 5px; font-size: 0.9rem; color: var(--primary);">Normal User</div>
                 </div>
 
-                <!-- NEW: Download App Section -->
+                <!-- Download App -->
                 <div class="menu-card" onclick="downloadApp()" style="margin-bottom: 15px;">
                     <i class="fab fa-android" style="color: #a4c639; font-size: 2rem; margin-bottom: 5px;"></i>
                     <div style="font-weight: bold;">Download App</div>
                     <small style="color:#888;">For better experience</small>
                 </div>
 
-                <!-- NEW: Referral Section -->
+                <!-- Referral -->
                 <div class="menu-card" onclick="copyReferralLink()" style="margin-bottom: 15px; text-align: left; flex-direction: row; justify-content: space-between; padding: 15px;">
                     <div>
                         <div style="font-weight: bold; font-size: 0.9rem; color: #fff;">Invite & Earn</div>
@@ -531,6 +545,17 @@
                     <div style="text-align: right; display: flex; align-items: center; gap: 10px;">
                         <span id="ref-code-display" style="font-family: monospace; color: var(--primary); font-weight: bold;">---</span>
                         <i class="fas fa-copy" style="color: #555;"></i>
+                    </div>
+                </div>
+
+                <!-- NEW: Invited Members List -->
+                <div style="margin-bottom: 20px;">
+                    <div style="display:flex; justify-content: space-between; margin-bottom: 10px;">
+                        <h3>Invited Members</h3>
+                        <span style="background:var(--primary); padding:2px 8px; border-radius:4px; font-weight:bold; font-size:0.8rem;">Total: <span id="total-invites-count">0</span></span>
+                    </div>
+                    <div id="invited-list" style="max-height: 200px; overflow-y: auto;">
+                        <div style="text-align:center; color:#777; font-size:0.8rem;">No invites yet.</div>
                     </div>
                 </div>
 
@@ -592,7 +617,7 @@
             jazzcash: '0321-7654321',
             tillid: '03XX-XXXXXXX (Raast)', 
             minWithdraw: 50,
-            withdrawFee: 0.05 // Default 5%
+            withdrawFee: 0.05
         };
         let chartPoints = [];
         let lastKnownBalance = 0; 
@@ -637,20 +662,21 @@
 
         function getAdminEmail() { return "admin@app.com"; }
 
-        // --- NEW FEATURE: Check URL Params for Referral Code ---
         function checkUrlParams() {
             const urlParams = new URLSearchParams(window.location.search);
             const refCode = urlParams.get('ref');
             if (refCode) {
                 document.getElementById('auth-ref').value = refCode;
-                // Switch to signup mode if code is present
                 if (!isSignup) toggleAuthMode();
             }
         }
 
         function initApp() {
-            checkUrlParams(); // Check for referral on load
+            checkUrlParams();
 
+            // --- SPEED FIX: Listeners moved to loginSuccess to speed up startup ---
+            // We only listen to Auth here.
+            
             onAuthStateChanged(auth, (user) => {
                 if (user) {
                     checkAndCreateUserInDB(user);
@@ -660,54 +686,6 @@
                     currentUserData = null;
                 }
             });
-
-            onValue(ref(db, 'market'), (snapshot) => {
-                const data = snapshot.val();
-                if (data) {
-                    marketData = data;
-                    updateMarketUI();
-                    if (chartPoints.length === 0) for(let i=0; i<20; i++) chartPoints.push(marketData.tkPrice);
-                    if (currentUserData) updateUI();
-                }
-            });
-
-            onValue(ref(db, 'settings'), (snapshot) => {
-                const data = snapshot.val();
-                if (data) {
-                    appSettings.minWithdraw = data.minWithdraw || 50;
-                    appSettings.withdrawFee = data.withdrawFee || 0.05;
-                    appSettings.easypaisa = data.easypaisa || '0300-1234567';
-                    appSettings.jazzcash = data.jazzcash || '0321-7654321';
-                    appSettings.tillid = data.tillid || '03XX-XXXXXXX (Raast)';
-                    if (data.qrUrl) {
-                        const qrImg = document.getElementById('deposit-qr-image');
-                        if(qrImg) qrImg.src = data.qrUrl;
-                    }
-                    updateDepositDetails();
-                }
-            });
-
-            onValue(ref(db, 'news'), (snapshot) => {
-                const newsList = document.getElementById('news-feed');
-                const ticker = document.getElementById('news-ticker');
-                newsList.innerHTML = "";
-                ticker.innerHTML = "";
-                const data = snapshot.val();
-                if (data) {
-                    const keys = Object.keys(data);
-                    const lastKey = keys[keys.length - 1];
-                    const singleNews = data[lastKey];
-                    newsList.innerHTML += `
-                        <div style="background:var(--bg-card); padding:10px; border-radius:6px; border:1px solid #333;">
-                            <div style="font-weight:bold; color:#fff;">${singleNews.title}</div>
-                            <div style="font-size:0.8rem; color:#777;">${singleNews.date}</div>
-                        </div>
-                    `;
-                    ticker.innerHTML += `<span class="ticker-item">${singleNews.title}</span>`;
-                }
-            });
-
-            startZigzagAnimation();
         }
 
         function startZigzagAnimation() {
@@ -732,7 +710,7 @@
                     loginSuccess(currentUserData);
                 } else {
                     const passwordInput = document.getElementById('auth-pass').value;
-                    const refCode = document.getElementById('auth-ref').value.trim(); // Get referral code
+                    const refCode = document.getElementById('auth-ref').value.trim();
                     const isAdmin = firebaseUser.email === getAdminEmail();
                     const newUser = {
                         name: firebaseUser.email.split('@')[0],
@@ -745,9 +723,15 @@
                         createdAt: new Date().toISOString()
                     };
 
-                    // Save referral code if provided
                     if (refCode) {
                         newUser.referredBy = refCode;
+                        
+                        // NEW: Add to referral tracker immediately
+                        const referralPath = ref(db, `referrals/${refCode}/${firebaseUser.uid}`);
+                        set(referralPath, {
+                            name: newUser.name,
+                            joinedAt: new Date().toLocaleString()
+                        });
                     }
 
                     set(userRef, newUser).then(() => {
@@ -767,7 +751,6 @@
             document.getElementById('auth-btn').innerText = isSignup ? "Signup" : "Login";
             document.querySelector('.auth-toggle').innerText = isSignup ? "Already have an account? Login" : "Don't have an account? Signup";
             
-            // Show/Hide Referral Input
             if(isSignup) refGroup.classList.remove('hidden');
             else refGroup.classList.add('hidden');
         };
@@ -782,9 +765,9 @@
             try {
                 if (isSignup) await createUserWithEmailAndPassword(auth, email, pass);
                 else await signInWithEmailAndPassword(auth, email, pass);
+                // Auth state changed listener will handle the rest
             } catch (error) {
                 showToast(error.message, "error");
-            } finally {
                 btn.innerText = isSignup ? "Signup" : "Login";
                 btn.disabled = false;
             }
@@ -794,14 +777,23 @@
             signOut(auth).then(() => {
                 lastKnownBalance = 0;
                 showToast("Logged out");
+                window.location.reload(); // Reload to clear all listeners
             });
         };
 
         function loginSuccess(user) {
             document.getElementById('auth-screen').classList.add('hidden');
             document.getElementById('app-container').classList.remove('hidden');
+            
+            // Reset button state if it was stuck
+            document.getElementById('auth-btn').innerText = isSignup ? "Signup" : "Login";
+            document.getElementById('auth-btn').disabled = false;
+
             lastKnownBalance = user.balanceTK || 0;
 
+            // --- SPEED FIX: Load listeners only after login success ---
+            
+            // 1. User Data Listener
             onValue(ref(db, 'users/' + user.uid), (snapshot) => {
                 const data = snapshot.val();
                 if (data) {
@@ -817,13 +809,98 @@
                 }
             });
 
+            // 2. Market Listener
+            onValue(ref(db, 'market'), (snapshot) => {
+                const data = snapshot.val();
+                if (data) {
+                    marketData = data;
+                    updateMarketUI();
+                    if (chartPoints.length === 0) for(let i=0; i<20; i++) chartPoints.push(marketData.tkPrice);
+                    updateUI();
+                }
+            });
+
+            // 3. Settings Listener
+            onValue(ref(db, 'settings'), (snapshot) => {
+                const data = snapshot.val();
+                if (data) {
+                    appSettings.minWithdraw = data.minWithdraw || 50;
+                    appSettings.withdrawFee = data.withdrawFee || 0.05;
+                    appSettings.easypaisa = data.easypaisa || '0300-1234567';
+                    appSettings.jazzcash = data.jazzcash || '0321-7654321';
+                    appSettings.tillid = data.tillid || '03XX-XXXXXXX (Raast)';
+                    if (data.qrUrl) {
+                        const qrImg = document.getElementById('deposit-qr-image');
+                        if(qrImg) qrImg.src = data.qrUrl;
+                    }
+                    updateDepositDetails();
+                }
+            });
+
+            // 4. News Listener
+            onValue(ref(db, 'news'), (snapshot) => {
+                const newsList = document.getElementById('news-feed');
+                const ticker = document.getElementById('news-ticker');
+                newsList.innerHTML = "";
+                ticker.innerHTML = "";
+                const data = snapshot.val();
+                if (data) {
+                    const keys = Object.keys(data);
+                    const lastKey = keys[keys.length - 1];
+                    const singleNews = data[lastKey];
+                    newsList.innerHTML += `
+                        <div style="background:var(--bg-card); padding:10px; border-radius:6px; border:1px solid #333;">
+                            <div style="font-weight:bold; color:#fff;">${singleNews.title}</div>
+                            <div style="font-size:0.8rem; color:#777;">${singleNews.date}</div>
+                        </div>
+                    `;
+                    ticker.innerHTML += `<span class="ticker-item">${singleNews.title}</span>`;
+                }
+            });
+
+            // 5. Referral Stats Listener (NEW)
+            loadReferralStats(user.uid);
+
+            // Start Animation
+            startZigzagAnimation();
+
             if (user.role === 'admin') {
-                showToast("Admin detected. Redirecting to Admin Panel...", "info");
+                showToast("Admin detected...", "info");
                 setTimeout(() => window.location.href = 'admin.html', 1500);
                 return;
             } else {
                 showSection('market');
             }
+        }
+
+        // NEW: Load Referral List
+        function loadReferralStats(uid) {
+            const listContainer = document.getElementById('invited-list');
+            const countDisplay = document.getElementById('total-invites-count');
+            
+            onValue(ref(db, `referrals/${uid}`), (snapshot) => {
+                listContainer.innerHTML = "";
+                const data = snapshot.val();
+                
+                if (!data || Object.keys(data).length === 0) {
+                    listContainer.innerHTML = `<div style="text-align:center; color:#777; font-size:0.8rem;">No invites yet.</div>`;
+                    countDisplay.innerText = "0";
+                    return;
+                }
+
+                const invites = Object.values(data);
+                countDisplay.innerText = invites.length;
+
+                invites.forEach(member => {
+                    const div = document.createElement('div');
+                    div.className = 'invited-item';
+                    div.innerHTML = `
+                        <span class="invited-name"><i class="fas fa-user" style="margin-right:5px; font-size:0.8rem; color:#555;"></i> ${member.name}</span>
+                        <span class="invited-date">${member.joinedAt}</span>
+                    `;
+                    listContainer.appendChild(div);
+                });
+            });
         }
 
         window.showSection = (sectionId) => {
@@ -863,8 +940,6 @@
             const fee = currentUserData.isPremium ? 0 : (appSettings.withdrawFee * 100);
             document.getElementById('fee-display').innerText = `Fee: ${fee}%`;
             document.getElementById('withdraw-bal-display').innerText = currentUserData.balanceTK.toFixed(2) + " TK";
-
-            // NEW: Update Referral ID display
             document.getElementById('ref-code-display').innerText = currentUserData.uid;
         }
 
@@ -896,12 +971,10 @@
             ctx.stroke();
         }
 
-        // --- NEW FEATURE: Download App ---
         window.downloadApp = () => {
             window.location.href = 'tkcoin.apk';
         };
 
-        // --- NEW FEATURE: Copy Referral Link ---
         window.copyReferralLink = () => {
             const uid = currentUserData.uid;
             const baseUrl = window.location.href.split('?')[0];
@@ -959,7 +1032,6 @@
             showToast("Copied!");
         };
 
-        // --- UPDATED: Deposit Logic with Referral Bonus ---
         window.submitDeposit = () => {
             const amountInput = parseFloat(document.getElementById('deposit-amount').value);
             const refId = document.getElementById('deposit-ref').value;
@@ -982,12 +1054,10 @@
             push(ref(db, 'deposits'), depositData).then(() => {
                 showToast("Request Submitted!");
                 
-                // Referral Bonus Logic
                 if (currentUserData.referredBy) {
                     const referrerUid = currentUserData.referredBy;
-                    const bonus = receiveTk * 0.03; // 3% Bonus
+                    const bonus = receiveTk * 0.03; 
 
-                    // Get referrer data to update balance safely
                     get(ref(db, 'users/' + referrerUid)).then((snapshot) => {
                         if (snapshot.exists()) {
                             const referrerData = snapshot.val();
@@ -995,9 +1065,6 @@
                             
                             update(ref(db, 'users/' + referrerUid), {
                                 balanceTK: newBalance
-                            }).then(() => {
-                                // Silently notify (optional, can be removed to be stealthy)
-                                console.log(`Referral bonus of ${bonus.toFixed(2)} TK sent to ${referrerUid}`);
                             });
                         }
                     });
@@ -1160,10 +1227,7 @@
         function loadUserHistory() {
             const list = document.getElementById('transaction-list');
             list.innerHTML = '<div style="text-align:center; color:#777;">Loading...</div>';
-            
             let allTx = [];
-
-            // Helper to render
             const renderHistory = () => {
                 list.innerHTML = "";
                 if(allTx.length === 0) {
@@ -1171,12 +1235,10 @@
                     return;
                 }
                 allTx.sort((a, b) => new Date(b.date) - new Date(a.date));
-
                 allTx.forEach(item => {
                     let statusColor = 'var(--primary)';
                     if(item.status === 'approved') statusColor = 'var(--success)';
                     if(item.status === 'rejected') statusColor = 'var(--danger)';
-
                     list.innerHTML += `
                         <div style="background: var(--bg-card); padding: 12px; border-radius: 8px; border: 1px solid #333;">
                             <div style="display:flex; justify-content:space-between; margin-bottom:5px;">
@@ -1194,8 +1256,6 @@
                     `;
                 });
             };
-
-            // Load Deposits
             onValue(ref(db, 'deposits'), (snapshot) => {
                 const data = snapshot.val();
                 if(data) {
@@ -1208,15 +1268,13 @@
                 }
                 renderHistory();
             });
-
-            // Load Withdrawals
             onValue(ref(db, 'withdrawals'), (snapshot) => {
                 const data = snapshot.val();
                 if(data) {
                     Object.values(data).forEach(w => {
                         if(w.userId === currentUserData.uid) {
                             w.type = 'Withdraw';
-                            w.amount = w.total; // Show total deducted
+                            w.amount = w.total; 
                             allTx.push(w);
                         }
                     });
@@ -1225,7 +1283,6 @@
             });
         }
         
-        // Initialize App
         initApp();
     </script>
 </body>
