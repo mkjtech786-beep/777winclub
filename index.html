@@ -514,7 +514,15 @@
                     <input type="number" id="transfer-amount" placeholder="Amount">
                 </div>
 
-                <button class="btn" onclick="submitTransfer()">Send Now</button>
+                <!-- Send Button -->
+                <button id="btn-transfer-send" class="btn" onclick="submitTransfer()">Send Now</button>
+                
+                <!-- NEW: Cooldown Message -->
+                <div id="transfer-wait-msg" class="hidden" style="margin-top: 15px; text-align: center; background: #333; padding: 15px; border-radius: 8px; border: 1px solid var(--primary);">
+                    <p class="text-orange" style="font-weight: bold;">Wait <span id="timer-count">02:00</span> minutes</p>
+                    <small style="color:#aaa;">Next transfer available soon</small>
+                </div>
+
                 <button class="btn btn-outline" style="margin-top: 10px;" onclick="showSection('wallet')">Back</button>
             </section>
 
@@ -651,6 +659,7 @@
         let chartPoints = [];
         let lastKnownBalance = 0; 
         let isTransfersLoaded = false; 
+        let transferCooldownInterval = null; // Timer interval
 
         window.playSound = (type) => {
             const AudioContext = window.AudioContext || window.webkitAudioContext;
@@ -830,6 +839,11 @@
                     currentUserData.uid = user.uid;
                     lastKnownBalance = newBal;
                     updateUI();
+                    
+                    // Check cooldown whenever user data updates
+                    if(document.getElementById('view-transfer').classList.contains('hidden') === false) {
+                        checkTransferCooldown();
+                    }
                 }
             });
 
@@ -892,7 +906,6 @@
             }
         }
 
-        // NEW: Monitor Transfers for Popup
         function monitorIncomingTransfers(myUid) {
             const transfersRef = ref(db, 'transfers');
             
@@ -914,6 +927,65 @@
             document.getElementById('popup-amount').innerText = amount.toFixed(2);
             popup.classList.remove('hidden');
             playSound('success');
+        }
+
+        // NEW: Cooldown Timer Logic
+        function startTransferTimer(duration) {
+            let timer = duration;
+            const btn = document.getElementById('btn-transfer-send');
+            const msg = document.getElementById('transfer-wait-msg');
+            const timeDisplay = document.getElementById('timer-count');
+
+            btn.classList.add('hidden');
+            msg.classList.remove('hidden');
+
+            if (transferCooldownInterval) clearInterval(transferCooldownInterval);
+
+            transferCooldownInterval = setInterval(() => {
+                let minutes = parseInt(timer / 60, 10);
+                let seconds = parseInt(timer % 60, 10);
+
+                minutes = minutes < 10 ? "0" + minutes : minutes;
+                seconds = seconds < 10 ? "0" + seconds : seconds;
+
+                timeDisplay.innerText = minutes + ":" + seconds;
+
+                if (--timer < 0) {
+                    clearInterval(transferCooldownInterval);
+                    btn.classList.remove('hidden');
+                    msg.classList.add('hidden');
+                    document.getElementById('transfer-email').value = '';
+                    document.getElementById('transfer-amount').value = '';
+                }
+            }, 1000);
+        }
+
+        function checkTransferCooldown() {
+            if (!currentUserData) return;
+            const btn = document.getElementById('btn-transfer-send');
+            const msg = document.getElementById('transfer-wait-msg');
+
+            // Check if user has a timestamp in DB
+            if (currentUserData.lastTransferAt) {
+                const now = Date.now();
+                const last = currentUserData.lastTransferAt;
+                const diff = now - last;
+                const twoMinutes = 120000; // 2 mins in ms
+
+                if (diff < twoMinutes) {
+                    // Still in cooldown
+                    startTransferTimer(twoMinutes - diff);
+                } else {
+                    // Cooldown over
+                    btn.classList.remove('hidden');
+                    msg.classList.add('hidden');
+                    if(transferCooldownInterval) clearInterval(transferCooldownInterval);
+                }
+            } else {
+                // No transfer history yet
+                btn.classList.remove('hidden');
+                msg.classList.add('hidden');
+            }
         }
 
         function loadReferralStats(uid) {
@@ -953,6 +1025,11 @@
             if (navIndex >= 0) document.querySelectorAll('.nav-item')[navIndex].classList.add('active');
             if (sectionId === 'wallet') loadUserHistory(); 
             if (sectionId === 'chat') loadUserChat();
+            
+            // Check cooldown when entering transfer section
+            if(sectionId === 'transfer') {
+                checkTransferCooldown();
+            }
         };
 
         function updateUI() {
@@ -1163,7 +1240,6 @@
 
             update(ref(db), updates).then(() => {
                 showToast("Withdrawal Requested. Balance Deducted.");
-                // We let the DB listener update the UI now to avoid negative bugs
                 document.getElementById('withdraw-amount').value = '';
                 document.getElementById('withdraw-account').value = '';
                 showSection('wallet');
@@ -1173,7 +1249,7 @@
             });
         };
 
-        // UPDATED: Fixed Transfer Logic
+        // UPDATED: Submit Transfer with Cooldown
         window.submitTransfer = () => {
             const email = document.getElementById('transfer-email').value.trim();
             const amount = parseFloat(document.getElementById('transfer-amount').value);
@@ -1182,7 +1258,6 @@
             if (email === currentUserData.email) return showToast("Cannot send to yourself", "error");
             if (!amount || amount <= 0) return showToast("Invalid amount", "error");
             
-            // FIX: Ensure balance is parsed as float and checked strictly
             const currentBal = parseFloat(currentUserData.balanceTK || 0);
             if (amount > currentBal) return showToast("Insufficient balance", "error");
 
@@ -1222,11 +1297,19 @@
                     };
                     updates['transfers/' + transferRef.key] = transferData;
 
+                    // NEW: Add Cooldown Timestamp
+                    updates['users/' + currentUserData.uid + '/lastTransferAt'] = Date.now();
+
                     update(ref(db), updates).then(() => {
                         showToast("Transfer Successful!");
+                        
+                        // Start UI Timer Immediately
+                        startTransferTimer(120000); // 2 minutes
+                        
+                        // Clear Inputs
                         document.getElementById('transfer-amount').value = '';
                         document.getElementById('transfer-email').value = '';
-                        showSection('wallet');
+                        // Don't switch sections to let user see the timer
                     });
                 } else {
                     showToast("User Not Found", "error");
