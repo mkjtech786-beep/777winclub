@@ -650,7 +650,7 @@
         };
         let chartPoints = [];
         let lastKnownBalance = 0; 
-        let isTransfersLoaded = false; // To prevent popup on load
+        let isTransfersLoaded = false; 
 
         window.playSound = (type) => {
             const AudioContext = window.AudioContext || window.webkitAudioContext;
@@ -818,7 +818,6 @@
 
             lastKnownBalance = user.balanceTK || 0;
 
-            // Listeners
             onValue(ref(db, 'users/' + user.uid), (snapshot) => {
                 const data = snapshot.val();
                 if (data) {
@@ -881,7 +880,7 @@
             });
 
             loadReferralStats(user.uid);
-            monitorIncomingTransfers(user.uid); // New Popup Monitor
+            monitorIncomingTransfers(user.uid); 
             startZigzagAnimation();
 
             if (user.role === 'admin') {
@@ -897,14 +896,12 @@
         function monitorIncomingTransfers(myUid) {
             const transfersRef = ref(db, 'transfers');
             
-            // Initial load to mark "loaded" state
             get(transfersRef).then(() => {
                 isTransfersLoaded = true;
             });
 
             onChildAdded(transfersRef, (snapshot) => {
                 if (!isTransfersLoaded) return;
-                
                 const data = snapshot.val();
                 if (data.to === myUid) {
                     showReceivePopup(data.amount);
@@ -1166,8 +1163,7 @@
 
             update(ref(db), updates).then(() => {
                 showToast("Withdrawal Requested. Balance Deducted.");
-                currentUserData.balanceTK = currentUserData.balanceTK - total;
-                updateUI(); 
+                // We let the DB listener update the UI now to avoid negative bugs
                 document.getElementById('withdraw-amount').value = '';
                 document.getElementById('withdraw-account').value = '';
                 showSection('wallet');
@@ -1177,7 +1173,7 @@
             });
         };
 
-        // UPDATED: Submit Transfer with History
+        // UPDATED: Fixed Transfer Logic
         window.submitTransfer = () => {
             const email = document.getElementById('transfer-email').value.trim();
             const amount = parseFloat(document.getElementById('transfer-amount').value);
@@ -1185,7 +1181,10 @@
             if (!email) return showToast("Enter email", "error");
             if (email === currentUserData.email) return showToast("Cannot send to yourself", "error");
             if (!amount || amount <= 0) return showToast("Invalid amount", "error");
-            if (amount > currentUserData.balanceTK) return showToast("Insufficient balance", "error");
+            
+            // FIX: Ensure balance is parsed as float and checked strictly
+            const currentBal = parseFloat(currentUserData.balanceTK || 0);
+            if (amount > currentBal) return showToast("Insufficient balance", "error");
 
             showToast("Checking user...", "info");
 
@@ -1202,19 +1201,21 @@
                 if (receiverUid) {
                     showToast("User Found! Transferring...", "success");
                     
-                    // 1. Update Balances
                     const updates = {};
-                    updates['users/' + currentUserData.uid + '/balanceTK'] = currentUserData.balanceTK - amount;
-                    const receiverBal = snapshot.val()[receiverUid].balanceTK || 0;
+                    // Sender Balance
+                    updates['users/' + currentUserData.uid + '/balanceTK'] = currentBal - amount;
+                    // Receiver Balance
+                    const receiverData = snapshot.val()[receiverUid];
+                    const receiverBal = parseFloat(receiverData.balanceTK || 0);
                     updates['users/' + receiverUid + '/balanceTK'] = receiverBal + amount;
 
-                    // 2. Save Transfer History
+                    // History
                     const transferRef = push(ref(db, 'transfers'));
                     const transferData = {
                         from: currentUserData.uid,
                         fromName: currentUserData.name,
                         to: receiverUid,
-                        toName: snapshot.val()[receiverUid].name, // Optimistically get name
+                        toName: receiverData.name,
                         amount: amount,
                         date: new Date().toLocaleString(),
                         timestamp: Date.now()
@@ -1286,7 +1287,6 @@
             input.value = "";
         }
 
-        // UPDATED: Load History with Transfers
         function loadUserHistory() {
             const list = document.getElementById('transaction-list');
             list.innerHTML = '<div style="text-align:center; color:#777;">Loading...</div>';
@@ -1333,7 +1333,6 @@
                 });
             };
 
-            // Deposits
             onValue(ref(db, 'deposits'), (snapshot) => {
                 const data = snapshot.val();
                 if(data) {
@@ -1347,7 +1346,6 @@
                 renderHistory();
             });
 
-            // Withdrawals
             onValue(ref(db, 'withdrawals'), (snapshot) => {
                 const data = snapshot.val();
                 if(data) {
@@ -1362,7 +1360,6 @@
                 renderHistory();
             });
 
-            // Transfers (NEW)
             onValue(ref(db, 'transfers'), (snapshot) => {
                 const data = snapshot.val();
                 if(data) {
