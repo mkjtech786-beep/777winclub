@@ -286,6 +286,35 @@
         .status-approved { background: #00c853; color: white; }
         .status-rejected { background: #ff3d00; color: white; }
 
+        /* Transaction History Styles */
+        .transaction-item {
+            background: var(--bg-card);
+            padding: 12px;
+            border-radius: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+            border: 1px solid #333;
+        }
+        .tx-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: #333;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1rem;
+            margin-right: 15px;
+        }
+        .tx-details { flex: 1; }
+        .tx-title { font-weight: bold; font-size: 0.9rem; color: #fff; }
+        .tx-date { font-size: 0.75rem; color: #777; margin-top: 2px; }
+        .tx-amount { font-weight: bold; font-size: 0.95rem; }
+        .tx-amount.positive { color: var(--success); }
+        .tx-amount.negative { color: var(--danger); }
+
         /* Futures Styles */
         .trade-buttons { display: flex; gap: 10px; margin-top: 10px; }
         .btn-long { background: var(--success); flex: 1; }
@@ -325,7 +354,7 @@
             margin-bottom: 5px;
             text-transform: uppercase;
         }
-        .lvl-bronze { background: var(--bronze); color: #000; }
+        .lvl-basic { background: #555; color: #fff; } /* New Basic Level */
         .lvl-silver { background: var(--silver); color: #000; }
         .lvl-gold { background: var(--gold); color: #000; }
         .lvl-diamond { background: linear-gradient(45deg, #b9f2ff, #1da1f2); color: #000; box-shadow: 0 0 10px #1da1f2; }
@@ -342,6 +371,12 @@
             background: var(--primary);
             width: 0%;
             transition: width 0.5s ease;
+        }
+        .level-info-text {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            margin-top: 5px;
+            display: block;
         }
 
         /* Notifications */
@@ -413,7 +448,7 @@
 
     <div id="toast-container"></div>
 
-    <!-- NEW: Full Screen Receive Popup -->
+    <!-- Full Screen Receive Popup -->
     <div id="receive-popup" class="hidden">
         <i class="fas fa-hand-holding-usd" style="font-size: 5rem; color: gold; margin-bottom: 20px; animation: bounce 1s infinite;"></i>
         <h2 style="color: white;">Coins Received!</h2>
@@ -460,7 +495,7 @@
                 <span id="header-premium-badge" class="hidden blue-tick"><i class="fas fa-check-circle"></i></span>
             </div>
             <div style="display: flex; align-items: center;">
-                <!-- NEW Notification Bell -->
+                <!-- Notification Bell -->
                 <div class="notification-bell" onclick="showSection('notifications')">
                     <i class="fas fa-bell"></i>
                     <div id="notif-badge" class="badge-count hidden">0</div>
@@ -732,11 +767,14 @@
                     <p id="profile-email" style="color: #aaa;">user@email.com</p>
                     
                     <!-- NEW Level Badge -->
-                    <div id="level-display" class="level-badge lvl-bronze" style="margin-top: 10px;">Bronze</div>
-                    <div class="progress-bar-bg" style="width: 80%; margin: 10px auto;">
-                        <div id="level-progress" class="progress-bar-fill"></div>
+                    <div id="level-display" class="level-badge lvl-basic" style="margin-top: 10px;">Basic</div>
+                    
+                    <div class="level-container" style="background:transparent; padding:0; margin-top:10px;">
+                        <div class="progress-bar-bg">
+                            <div id="level-progress" class="progress-bar-fill"></div>
+                        </div>
+                        <span id="level-info-text" class="level-info-text">Deposit 10,000 PKR to reach Silver</span>
                     </div>
-                    <small style="color:#777;">Level Progress</small>
                 </div>
 
                 <div class="menu-card" onclick="downloadApp()" style="margin-bottom: 15px;">
@@ -835,6 +873,14 @@
         let lastKnownBalance = 0; 
         let isTransfersLoaded = false; 
         let transferCooldownInterval = null;
+
+        // --- Level Configuration (Based on Deposit PKR) ---
+        const LEVELS = {
+            0: { name: 'Basic', threshold: 0, reward: 0, class: 'lvl-basic' },
+            1: { name: 'Silver', threshold: 10000, reward: 10, class: 'lvl-silver' },
+            2: { name: 'Gold', threshold: 25000, reward: 50, class: 'lvl-gold' },
+            3: { name: 'Diamond', threshold: 50000, reward: 200, class: 'lvl-diamond' }
+        };
 
         // --- Fake Leaderboard Data ---
         const fakeLeaderboard = {
@@ -959,6 +1005,7 @@
                         isBanned: false,
                         isPremium: isAdmin ? true : false,
                         balanceTK: isAdmin ? 10000 : 0,
+                        levelTier: 0, // 0=Basic, 1=Silver, etc.
                         createdAt: new Date().toISOString()
                     };
 
@@ -1093,7 +1140,7 @@
 
             loadReferralStats(user.uid); 
             monitorIncomingTransfers(user.uid); 
-            monitorNotifications(user.uid); // NEW: Monitor Notifications
+            monitorNotifications(user.uid); 
             startZigzagAnimation();
 
             if (user.role === 'admin') {
@@ -1158,12 +1205,100 @@
             });
         }
 
-        // --- Level System Logic ---
-        function calculateLevel(balance) {
-            if (balance >= 10000) return { name: 'Diamond', class: 'lvl-diamond', percent: 100 };
-            if (balance >= 5000) return { name: 'Gold', class: 'lvl-gold', percent: 90 };
-            if (balance >= 1000) return { name: 'Silver', class: 'lvl-silver', percent: 60 };
-            return { name: 'Bronze', class: 'lvl-bronze', percent: (balance / 1000) * 100 };
+        // --- UPDATED: Level System Logic (PKR Based) ---
+        function calculateLevel(totalPKR) {
+            // Find highest tier achieved based on PKR
+            let tier = 0;
+            if (totalPKR >= LEVELS[3].threshold) tier = 3;
+            else if (totalPKR >= LEVELS[2].threshold) tier = 2;
+            else if (totalPKR >= LEVELS[1].threshold) tier = 1;
+
+            const currentConfig = LEVELS[tier];
+            const nextConfig = LEVELS[tier + 1];
+
+            let percent = 100;
+            let nextGoal = "Max Level";
+
+            if (nextConfig) {
+                // Calculate progress between current and next level
+                const range = nextConfig.threshold - currentConfig.threshold;
+                const progress = totalPKR - currentConfig.threshold;
+                percent = (progress / range) * 100;
+                if (percent < 0) percent = 0;
+                if (percent > 100) percent = 100;
+                nextGoal = `${(nextConfig.threshold - totalPKR).toLocaleString()} PKR to ${nextConfig.name}`;
+            }
+
+            return {
+                tier: tier,
+                name: currentConfig.name,
+                class: currentConfig.class,
+                percent: percent,
+                info: nextGoal
+            };
+        }
+
+        // --- Reward Logic on Admin Approval ---
+        function checkLevelUpAndReward(uid) {
+            // Get all transactions to sum approved deposits
+            const txRef = ref(db, `users/${uid}/transactions`);
+            get(txRef).then((snapshot) => {
+                if (!snapshot.exists()) return;
+
+                const transactions = snapshot.val();
+                let totalDepositedPKR = 0;
+                let lastProcessedLevel = currentUserData.levelTier || 0;
+
+                // Sum only approved deposits
+                Object.values(transactions).forEach(tx => {
+                    if (tx.type === 'deposit' && tx.status === 'approved') {
+                        totalDepositedPKR += parseFloat(tx.amount);
+                    }
+                });
+
+                // Calculate new level tier based on PKR
+                const levelData = calculateLevel(totalDepositedPKR);
+                const newTier = levelData.tier;
+
+                // If user leveled up and hasn't been rewarded for this tier yet
+                if (newTier > lastProcessedLevel) {
+                    const reward = LEVELS[newTier].reward;
+                    
+                    // Update Balance and Tier
+                    const updates = {};
+                    updates[`users/${uid}/balanceTK`] = currentUserData.balanceTK + reward;
+                    updates[`users/${uid}/levelTier`] = newTier;
+                    
+                    update(ref(db), updates).then(() => {
+                        showToast(`🎉 Level Up! You reached ${LEVELS[newTier].name} and got ${reward} TK!`);
+                        
+                        // Send Notification
+                        push(ref(db, `notifications/${uid}`), {
+                            title: "Level Up!",
+                            message: `Congratulations! You reached ${LEVELS[newTier].name}. Reward: ${reward} TK.`,
+                            type: 'bonus',
+                            time: new Date().toLocaleTimeString()
+                        });
+                        
+                        // Play sound
+                        playSound('success');
+                    });
+                }
+
+                // Update UI with progress regardless of level up
+                updateLevelUI(totalDepositedPKR, levelData);
+            });
+        }
+
+        function updateLevelUI(totalPKR, levelData) {
+            const badge = document.getElementById('level-display');
+            const progress = document.getElementById('level-progress');
+            const info = document.getElementById('level-info-text');
+
+            badge.className = `level-badge ${levelData.class}`;
+            badge.innerText = levelData.name;
+            progress.style.width = `${levelData.percent}%`;
+            info.innerText = levelData.info;
         }
 
         // --- Leaderboard Logic ---
@@ -1308,6 +1443,90 @@
             });
         }
 
+        // --- UPDATED: Transaction History Logic ---
+        function loadUserHistory(uid) {
+            const listEl = document.getElementById('transaction-list');
+            const historyRef = ref(db, `users/${uid}/transactions`);
+
+            onValue(historyRef, (snapshot) => {
+                listEl.innerHTML = "";
+                const data = snapshot.val();
+
+                if (!data || Object.keys(data).length === 0) {
+                    listEl.innerHTML = `<div style="text-align:center; color:#777; padding:20px;">No transactions yet</div>`;
+                    // Initialize level UI if no history
+                    updateLevelUI(0, calculateLevel(0));
+                    return;
+                }
+
+                // Convert object to array and reverse to show newest first
+                const txArray = Object.entries(data).reverse();
+                let totalPKR = 0; // Calculate current approved total for UI
+
+                txArray.forEach(([key, tx]) => {
+                    const isPositive = tx.type === 'deposit' || tx.type === 'receive' || tx.type === 'bonus';
+                    const icon = isPositive ? '<i class="fas fa-arrow-down text-green"></i>' : '<i class="fas fa-arrow-up text-orange"></i>';
+                    const amountClass = isPositive ? 'positive' : 'negative';
+                    const amountSign = isPositive ? '+' : '-';
+                    
+                    // If deposit and approved, add to total PKR for level check
+                    if(tx.type === 'deposit' && tx.status === 'approved') {
+                        totalPKR += parseFloat(tx.amount);
+                    }
+
+                    const statusBadge = tx.status ? `<span class="status-badge status-${tx.status}">${tx.status.toUpperCase()}</span>` : '';
+
+                    const div = document.createElement('div');
+                    div.className = 'transaction-item';
+                    div.innerHTML = `
+                        <div class="tx-icon">${icon}</div>
+                        <div class="tx-details">
+                            <div class="tx-title">${tx.title || tx.type.charAt(0).toUpperCase() + tx.type.slice(1)}</div>
+                            <div class="tx-date">${new Date(tx.date).toLocaleDateString()} ${new Date(tx.date).toLocaleTimeString()} ${statusBadge}</div>
+                        </div>
+                        <div class="tx-amount ${amountClass}">${amountSign}${tx.amount} TK</div>
+                    `;
+                    listEl.appendChild(div);
+                });
+
+                // Trigger Level Check every time history loads (e.g., when Admin approves)
+                checkLevelUpAndReward(uid);
+            });
+        }
+
+        // --- FIXED: Chat to Admin Logic ---
+        function loadUserChat(uid) {
+            const chatList = document.getElementById('chat-messages');
+            const chatRef = ref(db, `chats/${uid}`);
+
+            onChildAdded(chatRef, (snapshot) => {
+                const msg = snapshot.val();
+                const div = document.createElement('div');
+                div.className = msg.sender === 'user' ? 'message msg-user' : 'message msg-admin';
+                div.innerText = msg.text;
+                chatList.appendChild(div);
+                chatList.scrollTop = chatList.scrollHeight;
+            });
+        }
+
+        window.sendChatMessage = () => {
+            const input = document.getElementById('chat-input');
+            const msg = input.value.trim();
+            if(!msg || !currentUserData) return;
+
+            const chatRef = ref(db, `chats/${currentUserData.uid}`);
+            push(chatRef, {
+                text: msg,
+                sender: 'user',
+                senderName: currentUserData.name,
+                timestamp: Date.now()
+            }).then(() => {
+                input.value = "";
+            }).catch((err) => {
+                showToast("Error sending message", "error");
+            });
+        }
+
         window.showSection = (sectionId) => {
             document.querySelectorAll('#user-views .section').forEach(el => el.classList.add('hidden'));
             document.getElementById(`view-${sectionId}`).classList.remove('hidden');
@@ -1315,10 +1534,10 @@
             const navIndex = ['market', 'wallet', 'leaderboard', 'chat', 'profile'].indexOf(sectionId);
             if (navIndex >= 0) document.querySelectorAll('.nav-item')[navIndex].classList.add('active');
             
-            if (sectionId === 'wallet') loadUserHistory(); 
-            if (sectionId === 'chat') loadUserChat();
+            if (sectionId === 'wallet') loadUserHistory(currentUserData.uid);
+            if (sectionId === 'chat') loadUserChat(currentUserData.uid);
             if(sectionId === 'transfer') checkTransferCooldown();
-            if(sectionId === 'leaderboard') renderLeaderboard('balance'); // Load default tab
+            if(sectionId === 'leaderboard') renderLeaderboard('balance'); 
         };
 
         function updateUI() {
@@ -1338,16 +1557,15 @@
             const pkrValue = currentUserData.balanceTK * marketData.tkPrice * marketData.usdtRate;
             document.getElementById('wallet-pkr').innerText = pkrValue.toFixed(2);
             
-            // Update Level UI
-            const balance = currentUserData.balanceTK || 0;
-            const lvlData = calculateLevel(balance);
-            const lvlBadge = document.getElementById('level-display');
-            lvlBadge.className = `level-badge ${lvlData.class}`;
-            lvlBadge.innerText = lvlData.name;
-            document.getElementById('level-progress').style.width = `${lvlData.percent}%`;
+            // Update Level Badge based on stored Tier
+            const tier = currentUserData.levelTier || 0;
+            const levelConfig = LEVELS[tier];
+            const badge = document.getElementById('level-display');
+            badge.className = `level-badge ${levelConfig.class}`;
+            badge.innerText = levelConfig.name;
 
             // Update Fake Leaderboard "You" value
-            fakeLeaderboard.balance[5].val = balance.toFixed(0) + " TK";
+            fakeLeaderboard.balance[5].val = currentUserData.balanceTK.toFixed(0) + " TK";
             
             if (currentUserData.isPremium) {
                 document.getElementById('profile-status').innerHTML = `<span class="text-blue"><i class="fas fa-check-circle blue-tick"></i> Premium User</span>`;
@@ -1450,12 +1668,18 @@
                 return;
             }
 
-            // Simulate submission
             showToast("Deposit request submitted!");
             
-            // In a real app, push to database here. 
-            // Example: push(ref(db, 'deposits'), { uid: currentUserData.uid, amount, method, ref, status: 'pending' });
-            
+            // Save to Transaction History with PENDING status
+            const txRef = ref(db, `users/${currentUserData.uid}/transactions`);
+            push(txRef, {
+                type: 'deposit',
+                amount: amount, // This is PKR
+                title: `Deposit via ${method}`,
+                status: 'pending', // IMPORTANT: Initial status is pending
+                date: Date.now()
+            });
+
             setTimeout(() => showSection('wallet'), 1000);
         };
 
@@ -1486,7 +1710,16 @@
             }
 
             showToast("Withdrawal requested!");
-            // In a real app: deduct balance and push to DB
+            
+            const txRef = ref(db, `users/${currentUserData.uid}/transactions`);
+            push(txRef, {
+                type: 'withdraw',
+                amount: amount,
+                title: `Withdraw to ${method}`,
+                status: 'pending',
+                date: Date.now()
+            });
+
             showSection('wallet');
         };
 
@@ -1504,11 +1737,18 @@
                 return;
             }
 
-            // Simulate logic
             const updates = {};
             updates['users/' + currentUserData.uid + '/balanceTK'] = currentUserData.balanceTK - amount;
             updates['users/' + currentUserData.uid + '/lastTransferAt'] = Date.now();
             
+            const txRef = ref(db, `users/${currentUserData.uid}/transactions`);
+            push(txRef, {
+                type: 'transfer',
+                amount: amount,
+                title: `Transfer to ${email}`,
+                date: Date.now()
+            });
+
             update(ref(db), updates).then(() => {
                 showToast("Transfer Sent!");
                 checkTransferCooldown();
@@ -1531,48 +1771,9 @@
             if(!amount) return showToast("Enter amount", "error");
             if(amount > currentUserData.balanceTK) return showToast("Insufficient balance", "error");
             
-            // Mock trade opening
             showToast(`${type.toUpperCase()} position opened!`);
             showSection('wallet');
         };
-
-        window.sendChatMessage = () => {
-            const input = document.getElementById('chat-input');
-            const msg = input.value;
-            if(!msg) return;
-
-            const chatList = document.getElementById('chat-messages');
-            const div = document.createElement('div');
-            div.className = 'message msg-user';
-            div.innerText = msg;
-            chatList.appendChild(div);
-            input.value = "";
-            chatList.scrollTop = chatList.scrollHeight;
-
-            // Auto reply
-            setTimeout(() => {
-                const reply = document.createElement('div');
-                reply.className = 'message msg-admin';
-                reply.innerText = "Thanks for contacting support. We will reply shortly.";
-                chatList.appendChild(reply);
-                chatList.scrollTop = chatList.scrollHeight;
-            }, 1000);
-        };
-
-        function loadUserHistory() {
-            const list = document.getElementById('transaction-list');
-            list.innerHTML = '<div style="text-align:center; color:#777; font-size:0.8rem;">Recent transactions appear here.</div>';
-            // Add dummy history
-            const history = [
-                { type: 'Deposit', amount: '+500 TK', status: 'Approved', color: 'text-green' },
-                { type: 'Withdraw', amount: '-100 TK', status: 'Pending', color: 'text-orange' },
-            ];
-            // Render logic...
-        }
-
-        function loadUserChat() {
-            // Load chat from DB if exists
-        }
 
         window.showAboutModal = () => {
             showToast("TK Coin v1.0 - Built for Holders.");
