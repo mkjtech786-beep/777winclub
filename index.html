@@ -873,7 +873,7 @@
         let lastKnownBalance = 0; 
         let isTransfersLoaded = false; 
         let transferCooldownInterval = null;
-        let chatUnsubscribe = null; // FIXED: Variable to store chat listener
+        let chatUnsubscribe = null;
 
         // --- Level Configuration (Based on Deposit PKR) ---
         const LEVELS = {
@@ -1208,7 +1208,6 @@
 
         // --- UPDATED: Level System Logic (PKR Based) ---
         function calculateLevel(totalPKR) {
-            // Find highest tier achieved based on PKR
             let tier = 0;
             if (totalPKR >= LEVELS[3].threshold) tier = 3;
             else if (totalPKR >= LEVELS[2].threshold) tier = 2;
@@ -1221,7 +1220,6 @@
             let nextGoal = "Max Level";
 
             if (nextConfig) {
-                // Calculate progress between current and next level
                 const range = nextConfig.threshold - currentConfig.threshold;
                 const progress = totalPKR - currentConfig.threshold;
                 percent = (progress / range) * 100;
@@ -1241,8 +1239,7 @@
 
         // --- Reward Logic on Admin Approval ---
         function checkLevelUpAndReward(uid) {
-            // Get all transactions to sum approved deposits
-            const txRef = ref(db, `users/${uid}/transactions`);
+            const txRef = ref(db, `transactions/${uid}`);
             get(txRef).then((snapshot) => {
                 if (!snapshot.exists()) return;
 
@@ -1250,22 +1247,18 @@
                 let totalDepositedPKR = 0;
                 let lastProcessedLevel = currentUserData.levelTier || 0;
 
-                // Sum only approved deposits
                 Object.values(transactions).forEach(tx => {
                     if (tx.type === 'deposit' && tx.status === 'approved') {
                         totalDepositedPKR += parseFloat(tx.amount);
                     }
                 });
 
-                // Calculate new level tier based on PKR
                 const levelData = calculateLevel(totalDepositedPKR);
                 const newTier = levelData.tier;
 
-                // If user leveled up and hasn't been rewarded for this tier yet
                 if (newTier > lastProcessedLevel) {
                     const reward = LEVELS[newTier].reward;
                     
-                    // Update Balance and Tier
                     const updates = {};
                     updates[`users/${uid}/balanceTK`] = currentUserData.balanceTK + reward;
                     updates[`users/${uid}/levelTier`] = newTier;
@@ -1273,7 +1266,6 @@
                     update(ref(db), updates).then(() => {
                         showToast(`🎉 Level Up! You reached ${LEVELS[newTier].name} and got ${reward} TK!`);
                         
-                        // Send Notification
                         push(ref(db, `notifications/${uid}`), {
                             title: "Level Up!",
                             message: `Congratulations! You reached ${LEVELS[newTier].name}. Reward: ${reward} TK.`,
@@ -1281,12 +1273,10 @@
                             time: new Date().toLocaleTimeString()
                         });
                         
-                        // Play sound
                         playSound('success');
                     });
                 }
 
-                // Update UI with progress regardless of level up
                 updateLevelUI(totalDepositedPKR, levelData);
             });
         }
@@ -1444,10 +1434,10 @@
             });
         }
 
-        // --- UPDATED: Transaction History Logic ---
+        // --- UPDATED: Transaction History & Admin Request Logic ---
         function loadUserHistory(uid) {
             const listEl = document.getElementById('transaction-list');
-            const historyRef = ref(db, `users/${uid}/transactions`);
+            const historyRef = ref(db, `transactions/${uid}`);
 
             onValue(historyRef, (snapshot) => {
                 listEl.innerHTML = "";
@@ -1455,14 +1445,12 @@
 
                 if (!data || Object.keys(data).length === 0) {
                     listEl.innerHTML = `<div style="text-align:center; color:#777; padding:20px;">No transactions yet</div>`;
-                    // Initialize level UI if no history
                     updateLevelUI(0, calculateLevel(0));
                     return;
                 }
 
-                // Convert object to array and reverse to show newest first
                 const txArray = Object.entries(data).reverse();
-                let totalPKR = 0; // Calculate current approved total for UI
+                let totalPKR = 0;
 
                 txArray.forEach(([key, tx]) => {
                     const isPositive = tx.type === 'deposit' || tx.type === 'receive' || tx.type === 'bonus';
@@ -1470,7 +1458,6 @@
                     const amountClass = isPositive ? 'positive' : 'negative';
                     const amountSign = isPositive ? '+' : '-';
                     
-                    // If deposit and approved, add to total PKR for level check
                     if(tx.type === 'deposit' && tx.status === 'approved') {
                         totalPKR += parseFloat(tx.amount);
                     }
@@ -1490,24 +1477,21 @@
                     listEl.appendChild(div);
                 });
 
-                // Trigger Level Check every time history loads (e.g., when Admin approves)
                 checkLevelUpAndReward(uid);
             });
         }
 
         // --- FIXED: Chat Logic (No duplicates) ---
         function loadUserChat(uid) {
-            // 1. Unsubscribe old listener to prevent duplicates
             if (chatUnsubscribe) {
                 chatUnsubscribe();
             }
 
             const chatList = document.getElementById('chat-messages');
-            chatList.innerHTML = ''; // Clear DOM
+            chatList.innerHTML = '';
 
             const chatRef = ref(db, `chats/${uid}`);
             
-            // 2. Attach new listener and save its reference
             chatUnsubscribe = onChildAdded(chatRef, (snapshot) => {
                 const msg = snapshot.val();
                 const div = document.createElement('div');
@@ -1566,14 +1550,12 @@
             const pkrValue = currentUserData.balanceTK * marketData.tkPrice * marketData.usdtRate;
             document.getElementById('wallet-pkr').innerText = pkrValue.toFixed(2);
             
-            // Update Level Badge based on stored Tier
             const tier = currentUserData.levelTier || 0;
             const levelConfig = LEVELS[tier];
             const badge = document.getElementById('level-display');
             badge.className = `level-badge ${levelConfig.class}`;
             badge.innerText = levelConfig.name;
 
-            // Update Fake Leaderboard "You" value
             fakeLeaderboard.balance[5].val = currentUserData.balanceTK.toFixed(0) + " TK";
             
             if (currentUserData.isPremium) {
@@ -1667,6 +1649,7 @@
             }
         };
 
+        // --- FIX: Deposit Logic (Save to User History AND Admin Requests) ---
         window.submitDeposit = () => {
             const amount = parseFloat(document.getElementById('deposit-amount').value);
             const ref = document.getElementById('deposit-ref').value;
@@ -1679,14 +1662,25 @@
 
             showToast("Deposit request submitted!");
             
-            // Save to Transaction History with PENDING status
-            const txRef = ref(db, `users/${currentUserData.uid}/transactions`);
-            push(txRef, {
+            const txData = {
                 type: 'deposit',
-                amount: amount, // This is PKR
+                amount: amount,
                 title: `Deposit via ${method}`,
-                status: 'pending', // IMPORTANT: Initial status is pending
+                status: 'pending',
                 date: Date.now()
+            };
+
+            // 1. Save to User History
+            const userTxRef = ref(db, `transactions/${currentUserData.uid}`);
+            push(userTxRef, txData);
+
+            // 2. Save to Admin Dashboard (Global Request List)
+            const adminRef = ref(db, 'adminRequests');
+            push(adminRef, {
+                ...txData,
+                uid: currentUserData.uid,
+                userName: currentUserData.name,
+                userEmail: currentUserData.email
             });
 
             setTimeout(() => showSection('wallet'), 1000);
@@ -1703,6 +1697,7 @@
             }
         };
 
+        // --- FIX: Withdraw Logic (Save to User History AND Admin Requests) ---
         window.submitWithdraw = () => {
             const amount = parseFloat(document.getElementById('withdraw-amount').value);
             const account = document.getElementById('withdraw-account').value;
@@ -1720,13 +1715,25 @@
 
             showToast("Withdrawal requested!");
             
-            const txRef = ref(db, `users/${currentUserData.uid}/transactions`);
-            push(txRef, {
+            const txData = {
                 type: 'withdraw',
                 amount: amount,
-                title: `Withdraw to ${method}`,
+                title: `Withdraw to ${method} (${account})`,
                 status: 'pending',
                 date: Date.now()
+            };
+
+            // 1. Save to User History
+            const userTxRef = ref(db, `transactions/${currentUserData.uid}`);
+            push(userTxRef, txData);
+
+            // 2. Save to Admin Dashboard
+            const adminRef = ref(db, 'adminRequests');
+            push(adminRef, {
+                ...txData,
+                uid: currentUserData.uid,
+                userName: currentUserData.name,
+                userEmail: currentUserData.email
             });
 
             showSection('wallet');
@@ -1750,7 +1757,7 @@
             updates['users/' + currentUserData.uid + '/balanceTK'] = currentUserData.balanceTK - amount;
             updates['users/' + currentUserData.uid + '/lastTransferAt'] = Date.now();
             
-            const txRef = ref(db, `users/${currentUserData.uid}/transactions`);
+            const txRef = ref(db, `transactions/${currentUserData.uid}`);
             push(txRef, {
                 type: 'transfer',
                 amount: amount,
