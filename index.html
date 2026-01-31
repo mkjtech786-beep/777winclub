@@ -56,7 +56,7 @@
         .btn-sm { padding: 5px 10px; font-size: 0.8rem; width: auto; }
         
         .input-group { margin-bottom: 15px; }
-        .input-group label { display: block; margin-bottom: 5px; color: var(--text-muted); font-size: 0.9rem; }
+        .input-group label { display: block; margin-bottom:5px; color: var(--text-muted); font-size: 0.9rem; }
         .input-group input, .input-group select {
             width: 100%;
             padding: 12px;
@@ -354,7 +354,7 @@
             margin-bottom: 5px;
             text-transform: uppercase;
         }
-        .lvl-bronze { background: var(--bronze); color: #000; }
+        .lvl-basic { background: #555; color: #fff; }
         .lvl-silver { background: var(--silver); color: #000; }
         .lvl-gold { background: var(--gold); color: #000; }
         .lvl-diamond { background: linear-gradient(45deg, #b9f2ff, #1da1f2); color: #000; box-shadow: 0 0 10px #1da1f2; }
@@ -371,6 +371,12 @@
             background: var(--primary);
             width: 0%;
             transition: width 0.5s ease;
+        }
+        .level-info-text {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            margin-top: 5px;
+            display: block;
         }
 
         /* Notifications */
@@ -442,7 +448,7 @@
 
     <div id="toast-container"></div>
 
-    <!-- NEW: Full Screen Receive Popup -->
+    <!-- Full Screen Receive Popup -->
     <div id="receive-popup" class="hidden">
         <i class="fas fa-hand-holding-usd" style="font-size: 5rem; color: gold; margin-bottom: 20px; animation: bounce 1s infinite;"></i>
         <h2 style="color: white;">Coins Received!</h2>
@@ -489,7 +495,7 @@
                 <span id="header-premium-badge" class="hidden blue-tick"><i class="fas fa-check-circle"></i></span>
             </div>
             <div style="display: flex; align-items: center;">
-                <!-- NEW Notification Bell -->
+                <!-- Notification Bell -->
                 <div class="notification-bell" onclick="showSection('notifications')">
                     <i class="fas fa-bell"></i>
                     <div id="notif-badge" class="badge-count hidden">0</div>
@@ -761,11 +767,14 @@
                     <p id="profile-email" style="color: #aaa;">user@email.com</p>
                     
                     <!-- NEW Level Badge -->
-                    <div id="level-display" class="level-badge lvl-bronze" style="margin-top: 10px;">Bronze</div>
-                    <div class="progress-bar-bg" style="width: 80%; margin: 10px auto;">
-                        <div id="level-progress" class="progress-bar-fill"></div>
+                    <div id="level-display" class="level-badge lvl-basic" style="margin-top: 10px;">Basic</div>
+                    
+                    <div class="level-container" style="background:transparent; padding:0; margin-top:10px;">
+                        <div class="progress-bar-bg">
+                            <div id="level-progress" class="progress-bar-fill"></div>
+                        </div>
+                        <span id="level-info-text" class="level-info-text">Deposit 10,000 PKR to reach Silver</span>
                     </div>
-                    <small style="color:#777;">Level Progress</small>
                 </div>
 
                 <div class="menu-card" onclick="downloadApp()" style="margin-bottom: 15px;">
@@ -864,6 +873,15 @@
         let lastKnownBalance = 0; 
         let isTransfersLoaded = false; 
         let transferCooldownInterval = null;
+        let chatUnsubscribe = null;
+
+        // --- Level Configuration (Based on Deposit PKR) ---
+        const LEVELS = {
+            0: { name: 'Basic', threshold: 0, reward: 0, class: 'lvl-basic' },
+            1: { name: 'Silver', threshold: 10000, reward: 10, class: 'lvl-silver' },
+            2: { name: 'Gold', threshold: 25000, reward: 50, class: 'lvl-gold' },
+            3: { name: 'Diamond', threshold: 50000, reward: 200, class: 'lvl-diamond' }
+        };
 
         // --- Fake Leaderboard Data ---
         const fakeLeaderboard = {
@@ -988,6 +1006,7 @@
                         isBanned: false,
                         isPremium: isAdmin ? true : false,
                         balanceTK: isAdmin ? 10000 : 0,
+                        levelTier: 0,
                         createdAt: new Date().toISOString()
                     };
 
@@ -1187,12 +1206,90 @@
             });
         }
 
-        // --- Level System Logic ---
-        function calculateLevel(balance) {
-            if (balance >= 10000) return { name: 'Diamond', class: 'lvl-diamond', percent: 100 };
-            if (balance >= 5000) return { name: 'Gold', class: 'lvl-gold', percent: 90 };
-            if (balance >= 1000) return { name: 'Silver', class: 'lvl-silver', percent: 60 };
-            return { name: 'Bronze', class: 'lvl-bronze', percent: (balance / 1000) * 100 };
+        // --- UPDATED: Level System Logic (PKR Based) ---
+        function calculateLevel(totalPKR) {
+            let tier = 0;
+            if (totalPKR >= LEVELS[3].threshold) tier = 3;
+            else if (totalPKR >= LEVELS[2].threshold) tier = 2;
+            else if (totalPKR >= LEVELS[1].threshold) tier = 1;
+
+            const currentConfig = LEVELS[tier];
+            const nextConfig = LEVELS[tier + 1];
+
+            let percent = 100;
+            let nextGoal = "Max Level";
+
+            if (nextConfig) {
+                const range = nextConfig.threshold - currentConfig.threshold;
+                const progress = totalPKR - currentConfig.threshold;
+                percent = (progress / range) * 100;
+                if (percent < 0) percent = 0;
+                if (percent > 100) percent = 100;
+                nextGoal = `${(nextConfig.threshold - totalPKR).toLocaleString()} PKR to ${nextConfig.name}`;
+            }
+
+            return {
+                tier: tier,
+                name: currentConfig.name,
+                class: currentConfig.class,
+                percent: percent,
+                info: nextGoal
+            };
+        }
+
+        // --- Reward Logic on Admin Approval ---
+        function checkLevelUpAndReward(uid) {
+            const txRef = ref(db, `transactions/${uid}`);
+            get(txRef).then((snapshot) => {
+                if (!snapshot.exists()) return;
+
+                const transactions = snapshot.val();
+                let totalDepositedPKR = 0;
+                let lastProcessedLevel = currentUserData.levelTier || 0;
+
+                Object.values(transactions).forEach(tx => {
+                    if (tx.type === 'deposit' && tx.status === 'approved') {
+                        totalDepositedPKR += parseFloat(tx.amount);
+                    }
+                });
+
+                const levelData = calculateLevel(totalDepositedPKR);
+                const newTier = levelData.tier;
+
+                if (newTier > lastProcessedLevel) {
+                    const reward = LEVELS[newTier].reward;
+                    
+                    const updates = {};
+                    updates[`users/${uid}/balanceTK`] = currentUserData.balanceTK + reward;
+                    updates[`users/${uid}/levelTier`] = newTier;
+                    
+                    update(ref(db), updates).then(() => {
+                        showToast(`🎉 Level Up! You reached ${LEVELS[newTier].name} and got ${reward} TK!`);
+                        
+                        push(ref(db, `notifications/${uid}`), {
+                            title: "Level Up!",
+                            message: `Congratulations! You reached ${LEVELS[newTier].name}. Reward: ${reward} TK.`,
+                            type: 'bonus',
+                            time: new Date().toLocaleTimeString()
+                        });
+                        
+                        playSound('success');
+                    });
+                }
+
+                updateLevelUI(totalDepositedPKR, levelData);
+            });
+        }
+
+        function updateLevelUI(totalPKR, levelData) {
+            const badge = document.getElementById('level-display');
+            const progress = document.getElementById('level-progress');
+            const info = document.getElementById('level-info-text');
+
+            badge.className = `level-badge ${levelData.class}`;
+            badge.innerText = levelData.name;
+            progress.style.width = `${levelData.percent}%`;
+            info.innerText = levelData.info;
         }
 
         // --- Leaderboard Logic ---
@@ -1337,10 +1434,10 @@
             });
         }
 
-        // --- FIXED: Transaction History Logic ---
+        // --- UPDATED: Transaction History Logic ---
         function loadUserHistory(uid) {
             const listEl = document.getElementById('transaction-list');
-            const historyRef = ref(db, `users/${uid}/transactions`);
+            const historyRef = ref(db, `transactions/${uid}`);
 
             onValue(historyRef, (snapshot) => {
                 listEl.innerHTML = "";
@@ -1348,17 +1445,24 @@
 
                 if (!data || Object.keys(data).length === 0) {
                     listEl.innerHTML = `<div style="text-align:center; color:#777; padding:20px;">No transactions yet</div>`;
+                    updateLevelUI(0, calculateLevel(0));
                     return;
                 }
 
-                // Convert object to array and reverse to show newest first
                 const txArray = Object.entries(data).reverse();
+                let totalPKR = 0;
 
                 txArray.forEach(([key, tx]) => {
                     const isPositive = tx.type === 'deposit' || tx.type === 'receive' || tx.type === 'bonus';
                     const icon = isPositive ? '<i class="fas fa-arrow-down text-green"></i>' : '<i class="fas fa-arrow-up text-orange"></i>';
                     const amountClass = isPositive ? 'positive' : 'negative';
                     const amountSign = isPositive ? '+' : '-';
+                    
+                    if(tx.type === 'deposit' && tx.status === 'approved') {
+                        totalPKR += parseFloat(tx.amount);
+                    }
+
+                    const statusBadge = tx.status ? `<span class="status-badge status-${tx.status}">${tx.status.toUpperCase()}</span>` : '';
 
                     const div = document.createElement('div');
                     div.className = 'transaction-item';
@@ -1366,22 +1470,29 @@
                         <div class="tx-icon">${icon}</div>
                         <div class="tx-details">
                             <div class="tx-title">${tx.title || tx.type.charAt(0).toUpperCase() + tx.type.slice(1)}</div>
-                            <div class="tx-date">${new Date(tx.date).toLocaleDateString()} ${new Date(tx.date).toLocaleTimeString()}</div>
+                            <div class="tx-date">${new Date(tx.date).toLocaleDateString()} ${new Date(tx.date).toLocaleTimeString()} ${statusBadge}</div>
                         </div>
                         <div class="tx-amount ${amountClass}">${amountSign}${tx.amount} TK</div>
                     `;
                     listEl.appendChild(div);
                 });
+
+                checkLevelUpAndReward(uid);
             });
         }
 
-        // --- FIXED: Chat to Admin Logic ---
+        // --- FIXED: Chat Logic (No duplicates) ---
         function loadUserChat(uid) {
-            const chatList = document.getElementById('chat-messages');
-            // Listen to the user's specific chat node in Firebase
-            const chatRef = ref(db, `chats/${uid}`);
+            if (chatUnsubscribe) {
+                chatUnsubscribe();
+            }
 
-            onChildAdded(chatRef, (snapshot) => {
+            const chatList = document.getElementById('chat-messages');
+            chatList.innerHTML = '';
+
+            const chatRef = ref(db, `chats/${uid}`);
+            
+            chatUnsubscribe = onChildAdded(chatRef, (snapshot) => {
                 const msg = snapshot.val();
                 const div = document.createElement('div');
                 div.className = msg.sender === 'user' ? 'message msg-user' : 'message msg-admin';
@@ -1396,7 +1507,6 @@
             const msg = input.value.trim();
             if(!msg || !currentUserData) return;
 
-            // Save to Firebase so Admin can see it
             const chatRef = ref(db, `chats/${currentUserData.uid}`);
             push(chatRef, {
                 text: msg,
@@ -1405,7 +1515,6 @@
                 timestamp: Date.now()
             }).then(() => {
                 input.value = "";
-                // Optimistic UI update is handled by the listener above (loadUserChat)
             }).catch((err) => {
                 showToast("Error sending message", "error");
             });
@@ -1418,8 +1527,8 @@
             const navIndex = ['market', 'wallet', 'leaderboard', 'chat', 'profile'].indexOf(sectionId);
             if (navIndex >= 0) document.querySelectorAll('.nav-item')[navIndex].classList.add('active');
             
-            if (sectionId === 'wallet') loadUserHistory(currentUserData.uid); // Pass UID
-            if (sectionId === 'chat') loadUserChat(currentUserData.uid); // Pass UID
+            if (sectionId === 'wallet') loadUserHistory(currentUserData.uid);
+            if (sectionId === 'chat') loadUserChat(currentUserData.uid);
             if(sectionId === 'transfer') checkTransferCooldown();
             if(sectionId === 'leaderboard') renderLeaderboard('balance'); 
         };
@@ -1441,16 +1550,13 @@
             const pkrValue = currentUserData.balanceTK * marketData.tkPrice * marketData.usdtRate;
             document.getElementById('wallet-pkr').innerText = pkrValue.toFixed(2);
             
-            // Update Level UI
-            const balance = currentUserData.balanceTK || 0;
-            const lvlData = calculateLevel(balance);
-            const lvlBadge = document.getElementById('level-display');
-            lvlBadge.className = `level-badge ${lvlData.class}`;
-            lvlBadge.innerText = lvlData.name;
-            document.getElementById('level-progress').style.width = `${lvlData.percent}%`;
+            const tier = currentUserData.levelTier || 0;
+            const levelConfig = LEVELS[tier];
+            const badge = document.getElementById('level-display');
+            badge.className = `level-badge ${levelConfig.class}`;
+            badge.innerText = levelConfig.name;
 
-            // Update Fake Leaderboard "You" value
-            fakeLeaderboard.balance[5].val = balance.toFixed(0) + " TK";
+            fakeLeaderboard.balance[5].val = currentUserData.balanceTK.toFixed(0) + " TK";
             
             if (currentUserData.isPremium) {
                 document.getElementById('profile-status').innerHTML = `<span class="text-blue"><i class="fas fa-check-circle blue-tick"></i> Premium User</span>`;
@@ -1486,7 +1592,7 @@
             ctx.lineWidth = 2;
             points.forEach((p, i) => {
                 const x = i * stepX;
-                const y = points.length === 1 ? canvas.height/2 : canvas.height - ((p - min) / range) * canvas.height;
+                const y = points.length ===1 ? canvas.height/2 : canvas.height - ((p - min) / range) * canvas.height;
                 if(i===0) ctx.moveTo(x, y);
                 else ctx.lineTo(x, y);
             });
@@ -1543,6 +1649,7 @@
             }
         };
 
+        // --- FIX: Deposit Logic (Save to User History AND Admin Requests) ---
         window.submitDeposit = () => {
             const amount = parseFloat(document.getElementById('deposit-amount').value);
             const ref = document.getElementById('deposit-ref').value;
@@ -1555,13 +1662,25 @@
 
             showToast("Deposit request submitted!");
             
-            // Save to Transaction History
-            const txRef = ref(db, `users/${currentUserData.uid}/transactions`);
-            push(txRef, {
+            const txData = {
                 type: 'deposit',
-                amount: amount, // This is PKR, usually stored as requested
+                amount: amount,
                 title: `Deposit via ${method}`,
+                status: 'pending',
                 date: Date.now()
+            };
+
+            // 1. Save to User History
+            const userTxRef = ref(db, `transactions/${currentUserData.uid}`);
+            push(userTxRef, txData);
+
+            // 2. Save to Admin Requests (Standard 'requests' node)
+            const adminRef = ref(db, 'requests');
+            push(adminRef, {
+                ...txData,
+                uid: currentUserData.uid,
+                userName: currentUserData.name,
+                userEmail: currentUserData.email
             });
 
             setTimeout(() => showSection('wallet'), 1000);
@@ -1578,6 +1697,7 @@
             }
         };
 
+        // --- FIX: Withdraw Logic (Deduct Balance + Save Requests) ---
         window.submitWithdraw = () => {
             const amount = parseFloat(document.getElementById('withdraw-amount').value);
             const account = document.getElementById('withdraw-account').value;
@@ -1595,16 +1715,36 @@
 
             showToast("Withdrawal requested!");
             
-            // Save to Transaction History
-            const txRef = ref(db, `users/${currentUserData.uid}/transactions`);
-            push(txRef, {
+            const txData = {
                 type: 'withdraw',
                 amount: amount,
-                title: `Withdraw to ${method}`,
+                title: `Withdraw to ${method} (${account})`,
+                status: 'pending',
                 date: Date.now()
+            };
+
+            // 1. DEDUCT BALANCE IMMEDIATELY (Fixed Issue)
+            const updates = {};
+            updates[`users/${currentUserData.uid}/balanceTK`] = currentUserData.balanceTK - amount;
+            
+            // 2. Save to User History
+            const userTxRef = ref(db, `transactions/${currentUserData.uid}`);
+            push(userTxRef, txData);
+
+            // 3. Save to Admin Requests (Standard 'requests' node)
+            const adminRef = ref(db, 'requests');
+            push(adminRef, {
+                ...txData,
+                uid: currentUserData.uid,
+                userName: currentUserData.name,
+                userEmail: currentUserData.email,
+                accountNumber: account
             });
 
-            showSection('wallet');
+            // Execute Balance Update
+            update(ref(db), updates).then(() => {
+                showSection('wallet');
+            });
         };
 
         window.submitTransfer = () => {
@@ -1625,8 +1765,7 @@
             updates['users/' + currentUserData.uid + '/balanceTK'] = currentUserData.balanceTK - amount;
             updates['users/' + currentUserData.uid + '/lastTransferAt'] = Date.now();
             
-            // Add to history
-            const txRef = ref(db, `users/${currentUserData.uid}/transactions`);
+            const txRef = ref(db, `transactions/${currentUserData.uid}`);
             push(txRef, {
                 type: 'transfer',
                 amount: amount,
