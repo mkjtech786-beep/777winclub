@@ -354,7 +354,7 @@
             margin-bottom: 5px;
             text-transform: uppercase;
         }
-        .lvl-basic { background: #555; color: #fff; } /* New Basic Level */
+        .lvl-basic { background: #555; color: #fff; }
         .lvl-silver { background: var(--silver); color: #000; }
         .lvl-gold { background: var(--gold); color: #000; }
         .lvl-diamond { background: linear-gradient(45deg, #b9f2ff, #1da1f2); color: #000; box-shadow: 0 0 10px #1da1f2; }
@@ -873,6 +873,7 @@
         let lastKnownBalance = 0; 
         let isTransfersLoaded = false; 
         let transferCooldownInterval = null;
+        let chatUnsubscribe = null; // FIXED: Variable to store chat listener
 
         // --- Level Configuration (Based on Deposit PKR) ---
         const LEVELS = {
@@ -1005,7 +1006,7 @@
                         isBanned: false,
                         isPremium: isAdmin ? true : false,
                         balanceTK: isAdmin ? 10000 : 0,
-                        levelTier: 0, // 0=Basic, 1=Silver, etc.
+                        levelTier: 0,
                         createdAt: new Date().toISOString()
                     };
 
@@ -1494,12 +1495,20 @@
             });
         }
 
-        // --- FIXED: Chat to Admin Logic ---
+        // --- FIXED: Chat Logic (No duplicates) ---
         function loadUserChat(uid) {
-            const chatList = document.getElementById('chat-messages');
-            const chatRef = ref(db, `chats/${uid}`);
+            // 1. Unsubscribe old listener to prevent duplicates
+            if (chatUnsubscribe) {
+                chatUnsubscribe();
+            }
 
-            onChildAdded(chatRef, (snapshot) => {
+            const chatList = document.getElementById('chat-messages');
+            chatList.innerHTML = ''; // Clear DOM
+
+            const chatRef = ref(db, `chats/${uid}`);
+            
+            // 2. Attach new listener and save its reference
+            chatUnsubscribe = onChildAdded(chatRef, (snapshot) => {
                 const msg = snapshot.val();
                 const div = document.createElement('div');
                 div.className = msg.sender === 'user' ? 'message msg-user' : 'message msg-admin';
