@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="dark">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -10,14 +10,27 @@
             --primary-dark: #cc5200;
             --bg-dark: #121212;
             --bg-card: #1e1e1e;
+            --bg-input: #2a2a2a;
             --text-light: #e0e0e0;
             --text-muted: #a0a0a0;
             --success: #00c853;
             --danger: #ff3d00;
             --blue: #2979ff;
-            --gold: #ffd700;
-            --silver: #c0c0c0;
-            --bronze: #cd7f32;
+            --border: #333;
+        }
+
+        [data-theme="light"] {
+            --primary: #ff6600;
+            --primary-dark: #cc5200;
+            --bg-dark: #f4f4f4;
+            --bg-card: #ffffff;
+            --bg-input: #e0e0e0;
+            --text-light: #121212;
+            --text-muted: #666666;
+            --success: #00c853;
+            --danger: #ff3d00;
+            --blue: #2979ff;
+            --border: #ddd;
         }
 
         * {
@@ -25,6 +38,7 @@
             margin: 0;
             padding: 0;
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            transition: background-color 0.3s, color 0.3s;
         }
 
         body {
@@ -38,7 +52,6 @@
         .text-orange { color: var(--primary); }
         .text-blue { color: var(--blue); }
         .text-green { color: var(--success); }
-        .text-gold { color: var(--gold); }
         .btn {
             background: var(--primary);
             color: white;
@@ -56,13 +69,13 @@
         .btn-sm { padding: 5px 10px; font-size: 0.8rem; width: auto; }
         
         .input-group { margin-bottom: 15px; }
-        .input-group label { display: block; margin-bottom:5px; color: var(--text-muted); font-size: 0.9rem; }
+        .input-group label { display: block; margin-bottom: 5px; color: var(--text-muted); font-size: 0.9rem; }
         .input-group input, .input-group select {
             width: 100%;
             padding: 12px;
-            background: #2a2a2a;
-            border: 1px solid #333;
-            color: white;
+            background: var(--bg-input);
+            border: 1px solid var(--border);
+            color: var(--text-light);
             border-radius: 6px;
             outline: none;
         }
@@ -78,7 +91,7 @@
         .toast {
             background: var(--bg-card);
             border-left: 4px solid var(--primary);
-            color: white;
+            color: var(--text-light);
             padding: 15px 20px;
             margin-bottom: 10px;
             border-radius: 4px;
@@ -127,6 +140,7 @@
             width: 90%;
             max-width: 400px;
             border-top: 3px solid var(--primary);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.5);
         }
         .auth-toggle { text-align: center; margin-top: 15px; font-size: 0.9rem; cursor: pointer; color: var(--primary); }
 
@@ -137,7 +151,7 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            border-bottom: 1px solid #333;
+            border-bottom: 1px solid var(--border);
             position: sticky;
             top: 0;
             z-index: 100;
@@ -145,13 +159,11 @@
         .logo { font-size: 1.2rem; font-weight: bold; color: var(--primary); display: flex; align-items: center; gap: 5px; }
         .user-info { display: flex; align-items: center; gap: 10px; font-size: 0.9rem; cursor: pointer; }
         
-        /* Notification Bell */
-        .notification-bell {
-            position: relative;
-            cursor: pointer;
-            margin-right: 15px;
-            color: var(--text-light);
-            font-size: 1.2rem;
+        /* NEW: Theme Toggle & Bell */
+        .header-actions { display: flex; gap: 15px; align-items: center; }
+        .icon-btn { 
+            background: none; border: none; color: var(--text-light); 
+            font-size: 1.2rem; cursor: pointer; position: relative; 
         }
         .badge-count {
             position: absolute;
@@ -160,12 +172,8 @@
             background: var(--danger);
             color: white;
             font-size: 0.6rem;
-            width: 16px;
-            height: 16px;
+            padding: 2px 5px;
             border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
             font-weight: bold;
         }
 
@@ -193,7 +201,7 @@
             display: flex;
             justify-content: space-around;
             padding: 10px 0;
-            border-top: 1px solid #333;
+            border-top: 1px solid var(--border);
             z-index: 100;
         }
         .nav-item {
@@ -204,7 +212,6 @@
             flex-direction: column;
             align-items: center;
             cursor: pointer;
-            flex: 1;
         }
         .nav-item.active { color: var(--primary); }
         .nav-item i { font-size: 1.2rem; margin-bottom: 2px; }
@@ -219,7 +226,7 @@
             margin-top: 15px;
             position: relative;
             height: 200px;
-            border: 1px solid #333;
+            border: 1px solid var(--border);
         }
         #marketCanvas { width: 100%; height: 100%; }
         .ticker-wrap {
@@ -254,7 +261,7 @@
             text-align: center;
             cursor: pointer;
             transition: 0.2s;
-            border: 1px solid #333;
+            border: 1px solid var(--border);
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -270,50 +277,13 @@
             border-radius: 10px;
             display: flex;
             flex-direction: column;
-            border: 1px solid #333;
+            border: 1px solid var(--border);
         }
         .chat-messages { flex: 1; overflow-y: auto; padding: 10px; display: flex; flex-direction: column; gap: 10px; }
         .message { max-width: 80%; padding: 8px 12px; border-radius: 10px; font-size: 0.9rem; word-wrap: break-word;}
         .msg-admin { align-self: flex-start; background: #333; color: white; }
         .msg-user { align-self: flex-end; background: var(--primary); color: white; }
-        .chat-input-area { padding: 10px; display: flex; gap: 10px; border-top: 1px solid #333; }
-
-        /* Premium Badge */
-        .badge-premium { color: var(--blue); margin-left: 5px; }
-        .blue-tick { color: #1da1f2; margin-left: 2px; }
-        .status-badge { padding: 2px 6px; border-radius: 4px; font-size: 0.7rem; }
-        .status-pending { background: #ff9800; color: black; }
-        .status-approved { background: #00c853; color: white; }
-        .status-rejected { background: #ff3d00; color: white; }
-
-        /* Transaction History Styles */
-        .transaction-item {
-            background: var(--bg-card);
-            padding: 12px;
-            border-radius: 8px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 8px;
-            border: 1px solid #333;
-        }
-        .tx-icon {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            background: #333;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1rem;
-            margin-right: 15px;
-        }
-        .tx-details { flex: 1; }
-        .tx-title { font-weight: bold; font-size: 0.9rem; color: #fff; }
-        .tx-date { font-size: 0.75rem; color: #777; margin-top: 2px; }
-        .tx-amount { font-weight: bold; font-size: 0.95rem; }
-        .tx-amount.positive { color: var(--success); }
-        .tx-amount.negative { color: var(--danger); }
+        .chat-input-area { padding: 10px; display: flex; gap: 10px; border-top: 1px solid var(--border); }
 
         /* Futures Styles */
         .trade-buttons { display: flex; gap: 10px; margin-top: 10px; }
@@ -329,118 +299,75 @@
             justify-content: space-between;
             align-items: center;
             margin-bottom: 8px;
-            border: 1px solid #333;
+            border: 1px solid var(--border);
         }
-        .invited-name { font-weight: bold; color: #fff; font-size: 0.9rem; }
+        .invited-name { font-weight: bold; color: var(--text-light); font-size: 0.9rem; }
         .invited-date { font-size: 0.7rem; color: #777; }
 
-        /* --- NEW FEATURES STYLES --- */
+        /* Notification Panel */
+        #notification-panel {
+            position: absolute;
+            top: 60px;
+            right: 15px;
+            width: 300px;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.5);
+            z-index: 200;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        .notif-item {
+            padding: 12px;
+            border-bottom: 1px solid var(--border);
+            font-size: 0.85rem;
+        }
+        .notif-item:last-child { border-bottom: none; }
+        .notif-title { font-weight: bold; margin-bottom: 3px; color: var(--primary); }
+        .notif-time { font-size: 0.7rem; color: var(--text-muted); }
 
         /* Level System */
-        .level-container {
-            background: var(--bg-card);
-            padding: 15px;
-            border-radius: 10px;
-            margin-bottom: 20px;
-            border: 1px solid #333;
-            text-align: center;
-        }
         .level-badge {
             display: inline-block;
-            padding: 5px 15px;
+            padding: 4px 12px;
             border-radius: 20px;
+            font-size: 0.8rem;
             font-weight: bold;
-            font-size: 1.1rem;
-            margin-bottom: 5px;
-            text-transform: uppercase;
+            color: #fff;
+            margin-top: 5px;
+            background: #555;
         }
-        .lvl-basic { background: #555; color: #fff; }
-        .lvl-silver { background: var(--silver); color: #000; }
-        .lvl-gold { background: var(--gold); color: #000; }
-        .lvl-diamond { background: linear-gradient(45deg, #b9f2ff, #1da1f2); color: #000; box-shadow: 0 0 10px #1da1f2; }
-        
-        .progress-bar-bg {
+        .level-bronze { background: linear-gradient(45deg, #cd7f32, #a0522d); }
+        .level-silver { background: linear-gradient(45deg, #C0C0C0, #a0a0a0); }
+        .level-gold { background: linear-gradient(45deg, #FFD700, #daa520); }
+        .level-diamond { background: linear-gradient(45deg, #b9f2ff, #00bfff); color: #000; }
+
+        .level-progress-bar {
+            height: 6px;
             background: #333;
-            height: 8px;
-            border-radius: 4px;
+            border-radius: 3px;
+            margin: 10px 0;
             overflow: hidden;
-            margin-top: 10px;
         }
-        .progress-bar-fill {
+        .level-progress-fill {
             height: 100%;
             background: var(--primary);
             width: 0%;
-            transition: width 0.5s ease;
+            transition: width 0.5s;
         }
-        .level-info-text {
-            font-size: 0.75rem;
-            color: var(--text-muted);
-            margin-top: 5px;
-            display: block;
-        }
-
-        /* Notifications */
-        .notification-item {
-            background: var(--bg-card);
-            padding: 12px;
-            border-radius: 8px;
-            margin-bottom: 10px;
-            border-left: 3px solid var(--primary);
-            display: flex;
-            align-items: start;
-            gap: 12px;
-        }
-        .notif-icon {
-            font-size: 1.2rem;
-            margin-top: 2px;
-        }
-        .notif-content h4 { font-size: 0.95rem; margin-bottom: 3px; color: #fff; }
-        .notif-content p { font-size: 0.8rem; color: var(--text-muted); }
-        .notif-time { font-size: 0.7rem; color: #666; margin-top: 5px; display: block; }
 
         /* Leaderboard */
-        .leaderboard-tabs {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 15px;
-            overflow-x: auto;
-            padding-bottom: 5px;
+        .leaderboard-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.9rem;
         }
-        .lb-tab {
-            background: #333;
-            color: #aaa;
-            padding: 8px 16px;
-            border-radius: 20px;
-            font-size: 0.85rem;
-            white-space: nowrap;
-            cursor: pointer;
-            border: 1px solid #444;
-        }
-        .lb-tab.active {
-            background: var(--primary);
-            color: white;
-            border-color: var(--primary);
-        }
-        
-        .leaderboard-row {
-            background: var(--bg-card);
-            padding: 12px;
-            border-radius: 8px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            margin-bottom: 8px;
-            border: 1px solid #333;
-        }
-        .rank { width: 30px; font-weight: bold; font-style: italic; }
-        .rank-1 { color: var(--gold); font-size: 1.2rem; }
-        .rank-2 { color: var(--silver); font-size: 1.1rem; }
-        .rank-3 { color: var(--bronze); font-size: 1.1rem; }
-        
-        .user-info-lb { flex: 1; margin-left: 10px; }
-        .user-name-lb { font-weight: bold; font-size: 0.9rem; }
-        .user-val-lb { color: var(--success); font-size: 0.8rem; }
-
+        .leaderboard-table th { text-align: left; color: var(--text-muted); padding: 8px; border-bottom: 1px solid var(--border); }
+        .leaderboard-table td { padding: 10px 8px; border-bottom: 1px solid var(--border); }
+        .rank-1 { color: gold; }
+        .rank-2 { color: silver; }
+        .rank-3 { color: #cd7f32; }
     </style>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
@@ -448,7 +375,7 @@
 
     <div id="toast-container"></div>
 
-    <!-- Full Screen Receive Popup -->
+    <!-- NEW: Full Screen Receive Popup -->
     <div id="receive-popup" class="hidden">
         <i class="fas fa-hand-holding-usd" style="font-size: 5rem; color: gold; margin-bottom: 20px; animation: bounce 1s infinite;"></i>
         <h2 style="color: white;">Coins Received!</h2>
@@ -478,7 +405,7 @@
             </form>
             <div class="auth-toggle" onclick="toggleAuthMode()">Don't have an account? Signup</div>
             <div style="margin-top: 15px; font-size: 0.8rem; color: #666; text-align: center;">
-                For your security, make sure your login details are correct. Never share your password with anyone.
+                For your security, make sure your login details are correct. Never share your password with anyone..
             </div>
         </div>
     </div>
@@ -494,13 +421,29 @@
                 <i class="fas fa-coins"></i> TK Coin
                 <span id="header-premium-badge" class="hidden blue-tick"><i class="fas fa-check-circle"></i></span>
             </div>
-            <div style="display: flex; align-items: center;">
-                <!-- Notification Bell -->
-                <div class="notification-bell" onclick="showSection('notifications')">
-                    <i class="fas fa-bell"></i>
-                    <div id="notif-badge" class="badge-count hidden">0</div>
+            
+            <div style="display: flex; align-items: center; gap: 10px;">
+                <div class="header-actions">
+                    <!-- Theme Toggle -->
+                    <button class="icon-btn" onclick="toggleTheme()">
+                        <i class="fas fa-adjust" id="theme-icon"></i>
+                    </button>
+                    
+                    <!-- Notification Bell -->
+                    <button class="icon-btn" onclick="toggleNotifications()">
+                        <i class="fas fa-bell"></i>
+                        <span id="notif-badge" class="badge-count hidden">0</span>
+                    </button>
+
+                    <!-- Notification Panel -->
+                    <div id="notification-panel" class="hidden">
+                        <div style="padding: 10px; border-bottom: 1px solid var(--border); font-weight: bold;">Notifications</div>
+                        <div id="notif-list">
+                            <div style="padding: 15px; text-align: center; color: var(--text-muted);">No notifications</div>
+                        </div>
+                    </div>
                 </div>
-                
+
                 <div class="user-info" onclick="showSection('profile')">
                     <div style="text-align: right;">
                         <div id="header-name">User</div>
@@ -611,7 +554,7 @@
                     </select>
                 </div>
 
-                <div style="background: var(--bg-card); padding: 15px; border-radius: 8px; margin-bottom: 20px; border: 1px solid #333; min-height: 85px; display:flex; align-items:center; justify-content:space-between;">
+                <div style="background: var(--bg-card); padding: 15px; border-radius: 8px; margin-bottom: 20px; border: 1px solid var(--border); min-height: 85px; display:flex; align-items:center; justify-content:space-between;">
                     <div id="text-info" style="flex:1;">
                         <div style="font-size: 0.8rem; color: #aaa;">Deposit To:</div>
                         <div style="font-weight: bold; font-size: 1.1rem;" id="deposit-number">Select Method</div>
@@ -688,8 +631,10 @@
                     <input type="number" id="transfer-amount" placeholder="Amount">
                 </div>
 
+                <!-- Send Button -->
                 <button id="btn-transfer-send" class="btn" onclick="submitTransfer()">Send Now</button>
                 
+                <!-- NEW: Cooldown Message -->
                 <div id="transfer-wait-msg" class="hidden" style="margin-top: 15px; text-align: center; background: #333; padding: 15px; border-radius: 8px; border: 1px solid var(--primary);">
                     <p class="text-orange" style="font-weight: bold;">Wait <span id="timer-count">02:00</span> minutes</p>
                     <small style="color:#aaa;">Next transfer available soon</small>
@@ -732,33 +677,6 @@
                 </div>
             </section>
 
-            <!-- NEW: Notifications Section -->
-            <section id="view-notifications" class="section hidden">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
-                    <h2>Notifications</h2>
-                    <button class="btn-sm btn-outline" onclick="clearNotifications()">Clear All</button>
-                </div>
-                
-                <div id="notifications-list">
-                    <div style="text-align:center; color:#777; padding: 20px;">No new notifications</div>
-                </div>
-            </section>
-
-            <!-- NEW: Leaderboard Section -->
-            <section id="view-leaderboard" class="section hidden">
-                <h2 class="text-orange"><i class="fas fa-trophy"></i> Leaderboard</h2>
-                
-                <div class="leaderboard-tabs">
-                    <div class="lb-tab active" onclick="switchLeaderboard('balance', this)">Top Balance</div>
-                    <div class="lb-tab" onclick="switchLeaderboard('ref', this)">Top Invites</div>
-                    <div class="lb-tab" onclick="switchLeaderboard('trader', this)">Top Traders</div>
-                </div>
-
-                <div id="leaderboard-content">
-                    <!-- Fake Data Injected via JS -->
-                </div>
-            </section>
-
             <!-- Profile -->
             <section id="view-profile" class="section hidden">
                 <div style="text-align: center; margin-bottom: 20px;">
@@ -766,15 +684,24 @@
                     <h2 id="profile-name">User Name</h2>
                     <p id="profile-email" style="color: #aaa;">user@email.com</p>
                     
-                    <!-- NEW Level Badge -->
-                    <div id="level-display" class="level-badge lvl-basic" style="margin-top: 10px;">Basic</div>
-                    
-                    <div class="level-container" style="background:transparent; padding:0; margin-top:10px;">
-                        <div class="progress-bar-bg">
-                            <div id="level-progress" class="progress-bar-fill"></div>
-                        </div>
-                        <span id="level-info-text" class="level-info-text">Deposit 10,000 PKR to reach Silver</span>
+                    <!-- NEW: Level System Display -->
+                    <div style="margin-top: 10px;">
+                        <span id="profile-level-badge" class="level-badge level-bronze">Bronze</span>
                     </div>
+                    <div style="text-align: left; max-width: 300px; margin: 10px auto;">
+                        <small style="display: block; color: var(--text-muted);">Hold Value: <span id="profile-hold-val">0</span> PKR</small>
+                        <div class="level-progress-bar">
+                            <div id="level-progress" class="level-progress-fill"></div>
+                        </div>
+                        <small style="color: var(--text-muted); font-size: 0.7rem;">Next Level: <span id="next-level-req">10000 PKR</span></small>
+                    </div>
+
+                    <!-- Claim Reward Button -->
+                    <button id="btn-claim-reward" class="btn hidden" style="margin-top: 10px; background: var(--success);" onclick="claimLevelReward()">
+                        Claim Reward (<span id="reward-amount">0</span> TK)
+                    </button>
+
+                    <div id="profile-status" style="margin-top: 5px; font-size: 0.9rem; color: var(--primary);">Normal User</div>
                 </div>
 
                 <div class="menu-card" onclick="downloadApp()" style="margin-bottom: 15px;">
@@ -785,13 +712,22 @@
 
                 <div class="menu-card" onclick="copyReferralLink()" style="margin-bottom: 15px; text-align: left; flex-direction: row; justify-content: space-between; padding: 15px;">
                     <div>
-                        <div style="font-weight: bold; font-size: 0.9rem; color: #fff;">Invite & Earn</div>
+                        <div style="font-weight: bold; font-size: 0.9rem; color: var(--text-light);">Invite & Earn</div>
                         <small style="color: var(--text-muted); display: block; margin-top: 2px;">Share your ID to get 3% bonus</small>
                     </div>
                     <div style="text-align: right; display: flex; align-items: center; gap: 10px;">
                         <span id="ref-code-display" style="font-family: monospace; color: var(--primary); font-weight: bold;">---</span>
                         <i class="fas fa-copy" style="color: #555;"></i>
                     </div>
+                </div>
+
+                <!-- NEW: Leaderboard Button -->
+                <div class="menu-card" onclick="showSection('leaderboard')" style="margin-bottom: 15px; flex-direction: row; justify-content: space-between; padding: 15px; border-color: gold;">
+                    <div style="display:flex; align-items:center; gap:10px;">
+                        <i class="fas fa-trophy" style="color: gold; font-size: 1.5rem;"></i>
+                        <div style="font-weight: bold;">Leaderboard</div>
+                    </div>
+                    <i class="fas fa-chevron-right" style="color: var(--text-muted);"></i>
                 </div>
 
                 <div style="margin-bottom: 20px;">
@@ -810,6 +746,26 @@
                 </div>
                 <button class="btn" style="background: #333;" onclick="logout()">Logout</button>
             </section>
+
+            <!-- NEW: Leaderboard Section -->
+            <section id="view-leaderboard" class="section hidden">
+                <div style="display:flex; align-items:center; gap:15px; margin-bottom: 20px;">
+                    <button class="btn-sm btn-outline" onclick="showSection('profile')"><i class="fas fa-arrow-left"></i></button>
+                    <h2>Leaderboard 🏆</h2>
+                </div>
+
+                <div style="display:flex; gap:10px; margin-bottom: 20px; overflow-x: auto; padding-bottom: 5px;">
+                    <button class="btn-sm" style="background:var(--primary);" onclick="loadLeaderboard('balance')">Top Balance</button>
+                    <button class="btn-sm btn-outline" onclick="loadLeaderboard('referrals')">Top Referrals</button>
+                    <button class="btn-sm btn-outline" onclick="loadLeaderboard('traders')">Top Traders</button>
+                </div>
+
+                <div class="balance-card" style="padding: 15px;">
+                    <table class="leaderboard-table" id="lb-table">
+                        <!-- Fake data injected here -->
+                    </table>
+                </div>
+            </section>
         </main>
 
         <nav class="bottom-nav" id="user-nav">
@@ -820,11 +776,6 @@
             <a class="nav-item" onclick="showSection('wallet')">
                 <i class="fas fa-wallet"></i>
                 <span>Wallet</span>
-            </a>
-            <!-- Added Leaderboard -->
-            <a class="nav-item" onclick="showSection('leaderboard')">
-                <i class="fas fa-trophy"></i>
-                <span>Rank</span>
             </a>
             <a class="nav-item" onclick="showSection('chat')">
                 <i class="fas fa-comment-dots"></i>
@@ -842,7 +793,7 @@
         import { initializeApp } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-app.js";
         import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-analytics.js";
         import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-auth.js";
-        import { getDatabase, ref, set, push, onValue, update, get, child, onChildAdded, remove } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-database.js";
+        import { getDatabase, ref, set, push, onValue, update, get, child, onChildAdded } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-database.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyCBMk5ED0YNL9MqVThgMhoOuWvGwTgCJCg",
@@ -860,6 +811,7 @@
         const auth = getAuth(app);
         const db = getDatabase(app);
 
+        // --- State ---
         let currentUserData = null; 
         let marketData = { tkPrice: 1.50, usdtRate: 280 };
         let appSettings = {
@@ -872,41 +824,10 @@
         let chartPoints = [];
         let lastKnownBalance = 0; 
         let isTransfersLoaded = false; 
-        let transferCooldownInterval = null;
-        let chatUnsubscribe = null;
+        let transferCooldownInterval = null; 
+        let unprocessedTransactions = {}; // To track status changes for notifications
 
-        // --- Level Configuration (Based on Deposit PKR) ---
-        const LEVELS = {
-            0: { name: 'Basic', threshold: 0, reward: 0, class: 'lvl-basic' },
-            1: { name: 'Silver', threshold: 10000, reward: 10, class: 'lvl-silver' },
-            2: { name: 'Gold', threshold: 25000, reward: 50, class: 'lvl-gold' },
-            3: { name: 'Diamond', threshold: 50000, reward: 200, class: 'lvl-diamond' }
-        };
-
-        // --- Fake Leaderboard Data ---
-        const fakeLeaderboard = {
-            balance: [
-                { name: "CryptoKing", val: "55,000 TK" },
-                { name: "PakTrader", val: "42,500 TK" },
-                { name: "AliBaba", val: "38,200 TK" },
-                { name: "SaraKhan", val: "25,100 TK" },
-                { name: "BTCMaster", val: "12,000 TK" },
-                { name: "You", val: "0 TK", isMe: true }
-            ],
-            ref: [
-                { name: "MarketingPro", val: "1,200 Refs" },
-                { name: "Networker", val: "950 Refs" },
-                { name: "ViralBoy", val: "800 Refs" },
-                { name: "You", val: "0 Refs", isMe: true }
-            ],
-            trader: [
-                { name: "WhaleHunter", val: "PNL: 500%" },
-                { name: "RiskTaker", val: "PNL: 320%" },
-                { name: "Scalper01", val: "PNL: 150%" },
-                { name: "You", val: "PNL: 0%", isMe: true }
-            ]
-        };
-
+        // --- Audio & UI Helpers ---
         window.playSound = (type) => {
             const AudioContext = window.AudioContext || window.webkitAudioContext;
             if (!AudioContext) return;
@@ -951,6 +872,41 @@
 
         function getAdminEmail() { return "admin@app.com"; }
 
+        // --- Theme & Notifications UI ---
+        window.toggleTheme = () => {
+            const body = document.body;
+            const current = body.getAttribute('data-theme');
+            const next = current === 'dark' ? 'light' : 'dark';
+            body.setAttribute('data-theme', next);
+            localStorage.setItem('theme', next);
+            
+            const icon = document.getElementById('theme-icon');
+            icon.className = next === 'dark' ? 'fas fa-moon' : 'fas fa-sun';
+        };
+
+        // Load saved theme
+        const savedTheme = localStorage.getItem('theme') || 'dark';
+        document.body.setAttribute('data-theme', savedTheme);
+        document.getElementById('theme-icon').className = savedTheme === 'dark' ? 'fas fa-moon' : 'fas fa-sun';
+
+        window.toggleNotifications = () => {
+            const panel = document.getElementById('notification-panel');
+            panel.classList.toggle('hidden');
+        };
+
+        function pushNotification(title, message) {
+            if(!currentUserData) return;
+            const notifRef = ref(db, `users/${currentUserData.uid}/notifications`);
+            const newNotif = push(notifRef);
+            set(newNotif, {
+                title: title,
+                msg: message,
+                time: new Date().toLocaleString(),
+                read: false
+            });
+        }
+
+        // --- Init ---
         function checkUrlParams() {
             const urlParams = new URLSearchParams(window.location.search);
             const refCode = urlParams.get('ref');
@@ -974,6 +930,7 @@
             });
         }
 
+        // --- Chart & Market ---
         function startZigzagAnimation() {
             setInterval(() => {
                 if(!marketData) return;
@@ -987,6 +944,7 @@
             }, 1000); 
         }
 
+        // --- Auth & User Logic ---
         function checkAndCreateUserInDB(firebaseUser) {
             const userRef = ref(db, 'users/' + firebaseUser.uid);
             get(userRef).then((snapshot) => {
@@ -1006,7 +964,8 @@
                         isBanned: false,
                         isPremium: isAdmin ? true : false,
                         balanceTK: isAdmin ? 10000 : 0,
-                        levelTier: 0,
+                        level: 'Bronze', // Default level
+                        pendingReward: 0,
                         createdAt: new Date().toISOString()
                     };
 
@@ -1017,6 +976,9 @@
                             name: newUser.name,
                             joinedAt: new Date().toLocaleString()
                         });
+                        
+                        // Notification to referrer
+                        pushNotification("New Referral", `${newUser.name} joined using your code!`);
                     }
 
                     set(userRef, newUser).then(() => {
@@ -1065,6 +1027,110 @@
             });
         };
 
+        // --- LEVEL SYSTEM LOGIC ---
+        function checkLevelLogic(pkrBalance) {
+            const levels = [
+                { name: 'Bronze', limit: 10000, reward: 30 },
+                { name: 'Silver', limit: 20000, reward: 50 },
+                { name: 'Gold', limit: 27000, reward: 100 },
+                { name: 'Diamond', limit: 55000, reward: 300 }
+            ];
+
+            // Find highest level reached
+            let currentLevelObj = levels[0];
+            for(let l of levels) {
+                if(pkrBalance >= l.limit) {
+                    currentLevelObj = l;
+                }
+            }
+            return currentLevelObj;
+        }
+
+        function updateLevelStatus() {
+            if(!currentUserData) return;
+            // Calculate Hold Value in PKR
+            const pkrValue = currentUserData.balanceTK * marketData.tkPrice * marketData.usdtRate;
+            const levelObj = checkLevelLogic(pkrValue);
+            
+            const badge = document.getElementById('profile-level-badge');
+            const progress = document.getElementById('level-progress');
+            const holdVal = document.getElementById('profile-hold-val');
+            const nextReq = document.getElementById('next-level-req');
+            
+            holdVal.innerText = Math.floor(pkrValue).toLocaleString();
+
+            // Update Badge
+            badge.innerText = levelObj.name;
+            badge.className = `level-badge level-${levelObj.name.toLowerCase()}`;
+
+            // Progress Bar (Simple calculation towards next limit)
+            // Find next level
+            const levels = [
+                { name: 'Bronze', limit: 10000 },
+                { name: 'Silver', limit: 20000 },
+                { name: 'Gold', limit: 27000 },
+                { name: 'Diamond', limit: 55000 }
+            ];
+            let nextLevel = levels.find(l => l.limit > pkrValue);
+            
+            if(nextLevel) {
+                nextReq.innerText = `${nextLevel.limit.toLocaleString()} PKR`;
+                // Calculate percentage from previous level to next
+                // Simplified for UI: just % of next level
+                let pct = (pkrValue / nextLevel.limit) * 100;
+                progress.style.width = pct + '%';
+            } else {
+                // Max level
+                nextReq.innerText = "Max Level Reached";
+                progress.style.width = '100%';
+            }
+
+            // DB Update Logic (Level Down/Up)
+            // Only update DB if level changed or pending reward needs update
+            if (currentUserData.level !== levelObj.name) {
+                const uid = currentUserData.uid;
+                const userRef = ref(db, 'users/' + uid);
+                
+                // If we leveled UP
+                if (levels.findIndex(l => l.name === currentUserData.level) < levels.findIndex(l => l.name === levelObj.name)) {
+                    update(userRef, {
+                        level: levelObj.name,
+                        pendingReward: levelObj.reward
+                    });
+                    showToast(`Level Up! You are now ${levelObj.name}`, 'success');
+                    pushNotification("Level Up!", `Congratulations! You reached ${levelObj.name}. Claim ${levelObj.reward} TK now.`);
+                    document.getElementById('btn-claim-reward').classList.remove('hidden');
+                    document.getElementById('reward-amount').innerText = levelObj.reward;
+                } 
+                // If we leveled DOWN
+                else if (levels.findIndex(l => l.name === currentUserData.level) > levels.findIndex(l => l.name === levelObj.name)) {
+                    update(userRef, {
+                        level: levelObj.name,
+                        pendingReward: 0 // Reset reward if dropped level
+                    });
+                    document.getElementById('btn-claim-reward').classList.add('hidden');
+                }
+            } else if (currentUserData.pendingReward > 0) {
+                document.getElementById('btn-claim-reward').classList.remove('hidden');
+                document.getElementById('reward-amount').innerText = currentUserData.pendingReward;
+            } else {
+                document.getElementById('btn-claim-reward').classList.add('hidden');
+            }
+        }
+
+        window.claimLevelReward = () => {
+            if(!currentUserData || currentUserData.pendingReward <= 0) return;
+            const uid = currentUserData.uid;
+            const amount = currentUserData.pendingReward;
+            
+            update(ref(db, 'users/' + uid), {
+                balanceTK: currentUserData.balanceTK + amount,
+                pendingReward: 0
+            });
+            showToast(`Claimed ${amount} TK!`);
+        };
+
+        // --- Core App Functions ---
         function loginSuccess(user) {
             document.getElementById('auth-screen').classList.add('hidden');
             document.getElementById('app-container').classList.remove('hidden');
@@ -1074,35 +1140,40 @@
 
             lastKnownBalance = user.balanceTK || 0;
 
+            // Listen for User Data Changes
             onValue(ref(db, 'users/' + user.uid), (snapshot) => {
                 const data = snapshot.val();
                 if (data) {
                     const newBal = data.balanceTK;
                     if (newBal > lastKnownBalance && lastKnownBalance > 0) {
-                        showToast("Coins Received!", "success");
-                        playSound('success');
+                        // Only popup if it's a direct credit (deposit/transfer/reward), not just market fluctuation calc
+                        // But since we can't easily distinguish here without flags, we skip auto-popup on DB update 
+                        // and rely on specific listeners (Transfers/Deposit status) for popups to avoid spam.
                     }
                     currentUserData = data;
                     currentUserData.uid = user.uid;
                     lastKnownBalance = newBal;
                     updateUI();
                     
+                    // Check Cooldown
                     if(document.getElementById('view-transfer').classList.contains('hidden') === false) {
                         checkTransferCooldown();
                     }
                 }
             });
 
+            // Listen for Market Data
             onValue(ref(db, 'market'), (snapshot) => {
                 const data = snapshot.val();
                 if (data) {
                     marketData = data;
                     updateMarketUI();
                     if (chartPoints.length === 0) for(let i=0; i<20; i++) chartPoints.push(marketData.tkPrice);
-                    updateUI();
+                    updateUI(); // Update PKR value
                 }
             });
 
+            // Listen for Settings
             onValue(ref(db, 'settings'), (snapshot) => {
                 const data = snapshot.val();
                 if (data) {
@@ -1119,6 +1190,7 @@
                 }
             });
 
+            // Listen for News
             onValue(ref(db, 'news'), (snapshot) => {
                 const newsList = document.getElementById('news-feed');
                 const ticker = document.getElementById('news-ticker');
@@ -1130,8 +1202,8 @@
                     const lastKey = keys[keys.length - 1];
                     const singleNews = data[lastKey];
                     newsList.innerHTML += `
-                        <div style="background:var(--bg-card); padding:10px; border-radius:6px; border:1px solid #333;">
-                            <div style="font-weight:bold; color:#fff;">${singleNews.title}</div>
+                        <div style="background:var(--bg-card); padding:10px; border-radius:6px; border:1px solid var(--border);">
+                            <div style="font-weight:bold; color:var(--text-light);">${singleNews.title}</div>
                             <div style="font-size:0.8rem; color:#777;">${singleNews.date}</div>
                         </div>
                     `;
@@ -1139,9 +1211,47 @@
                 }
             });
 
-            loadReferralStats(user.uid); 
+            // Listen for Notifications
+            onValue(ref(db, `users/${user.uid}/notifications`), (snapshot) => {
+                const list = document.getElementById('notif-list');
+                const badge = document.getElementById('notif-badge');
+                const data = snapshot.val();
+                list.innerHTML = "";
+                let unreadCount = 0;
+
+                if(data) {
+                    const notifs = Object.values(data).reverse(); // Newest first
+                    notifs.forEach(n => {
+                        if(!n.read) unreadCount++;
+                        const div = document.createElement('div');
+                        div.className = 'notif-item';
+                        div.innerHTML = `
+                            <div class="notif-title">${n.title}</div>
+                            <div>${n.msg}</div>
+                            <div class="notif-time">${n.time}</div>
+                        `;
+                        list.appendChild(div);
+                    });
+                } else {
+                    list.innerHTML = `<div style="padding: 15px; text-align: center; color: var(--text-muted);">No notifications</div>`;
+                }
+
+                if(unreadCount > 0) {
+                    badge.innerText = unreadCount;
+                    badge.classList.remove('hidden');
+                } else {
+                    badge.classList.add('hidden');
+                }
+                
+                // Mark all as read on open (optional, doing here implies auto-read)
+                if(data && unreadCount > 0) {
+                   // Ideally update on click, but for simplicity:
+                }
+            });
+
+            loadReferralStats(user.uid);
             monitorIncomingTransfers(user.uid); 
-            monitorNotifications(user.uid); 
+            monitorTransactionsForNotifications(user.uid);
             startZigzagAnimation();
 
             if (user.role === 'admin') {
@@ -1153,178 +1263,43 @@
             }
         }
 
-        // --- Notification Center Logic ---
-        function monitorNotifications(uid) {
-            const notifRef = ref(db, `notifications/${uid}`);
-            const listEl = document.getElementById('notifications-list');
-            const badgeEl = document.getElementById('notif-badge');
-            let count = 0;
-
-            onChildAdded(notifRef, (snapshot) => {
-                const data = snapshot.val();
-                count++;
-                badgeEl.innerText = count;
-                badgeEl.classList.remove('hidden');
+        // Monitor transactions to trigger "Approved" or "Completed" notifications
+        function monitorTransactionsForNotifications(uid) {
+            const txRef = ref(db, `users/${uid}/transactions`);
+            onChildAdded(txRef, (snapshot) => {
+                const tx = snapshot.val();
+                const key = snapshot.key;
                 
-                addNotificationToDOM(data, snapshot.key);
-                playSound('success');
-            });
-        }
+                // Store initial state
+                unprocessedTransactions[key] = tx;
 
-        function addNotificationToDOM(data, key) {
-            const listEl = document.getElementById('notifications-list');
-            if(listEl.innerText.includes("No new notifications")) listEl.innerHTML = "";
-
-            const iconMap = {
-                'deposit': '<i class="fas fa-wallet text-green"></i>',
-                'withdraw': '<i class="fas fa-money-bill text-orange"></i>',
-                'bonus': '<i class="fas fa-gift text-gold"></i>',
-                'system': '<i class="fas fa-info-circle text-blue"></i>'
-            };
-
-            const div = document.createElement('div');
-            div.className = 'notification-item';
-            div.dataset.key = key;
-            div.innerHTML = `
-                <div class="notif-icon">${iconMap[data.type] || iconMap['system']}</div>
-                <div class="notif-content">
-                    <h4>${data.title}</h4>
-                    <p>${data.message}</p>
-                    <span class="notif-time">${data.time || new Date().toLocaleTimeString()}</span>
-                </div>
-            `;
-            listEl.prepend(div);
-        }
-
-        window.clearNotifications = () => {
-            if(!currentUserData) return;
-            const notifRef = ref(db, `notifications/${currentUserData.uid}`);
-            remove(notifRef).then(() => {
-                document.getElementById('notifications-list').innerHTML = '<div style="text-align:center; color:#777; padding: 20px;">No new notifications</div>';
-                document.getElementById('notif-badge').classList.add('hidden');
-                showToast("Notifications cleared");
-            });
-        }
-
-        // --- UPDATED: Level System Logic (PKR Based) ---
-        function calculateLevel(totalPKR) {
-            let tier = 0;
-            if (totalPKR >= LEVELS[3].threshold) tier = 3;
-            else if (totalPKR >= LEVELS[2].threshold) tier = 2;
-            else if (totalPKR >= LEVELS[1].threshold) tier = 1;
-
-            const currentConfig = LEVELS[tier];
-            const nextConfig = LEVELS[tier + 1];
-
-            let percent = 100;
-            let nextGoal = "Max Level";
-
-            if (nextConfig) {
-                const range = nextConfig.threshold - currentConfig.threshold;
-                const progress = totalPKR - currentConfig.threshold;
-                percent = (progress / range) * 100;
-                if (percent < 0) percent = 0;
-                if (percent > 100) percent = 100;
-                nextGoal = `${(nextConfig.threshold - totalPKR).toLocaleString()} PKR to ${nextConfig.name}`;
-            }
-
-            return {
-                tier: tier,
-                name: currentConfig.name,
-                class: currentConfig.class,
-                percent: percent,
-                info: nextGoal
-            };
-        }
-
-        // --- Reward Logic on Admin Approval ---
-        function checkLevelUpAndReward(uid) {
-            const txRef = ref(db, `transactions/${uid}`);
-            get(txRef).then((snapshot) => {
-                if (!snapshot.exists()) return;
-
-                const transactions = snapshot.val();
-                let totalDepositedPKR = 0;
-                let lastProcessedLevel = currentUserData.levelTier || 0;
-
-                Object.values(transactions).forEach(tx => {
-                    if (tx.type === 'deposit' && tx.status === 'approved') {
-                        totalDepositedPKR += parseFloat(tx.amount);
-                    }
-                });
-
-                const levelData = calculateLevel(totalDepositedPKR);
-                const newTier = levelData.tier;
-
-                if (newTier > lastProcessedLevel) {
-                    const reward = LEVELS[newTier].reward;
-                    
-                    const updates = {};
-                    updates[`users/${uid}/balanceTK`] = currentUserData.balanceTK + reward;
-                    updates[`users/${uid}/levelTier`] = newTier;
-                    
-                    update(ref(db), updates).then(() => {
-                        showToast(`🎉 Level Up! You reached ${LEVELS[newTier].name} and got ${reward} TK!`);
-                        
-                        push(ref(db, `notifications/${uid}`), {
-                            title: "Level Up!",
-                            message: `Congratulations! You reached ${LEVELS[newTier].name}. Reward: ${reward} TK.`,
-                            type: 'bonus',
-                            time: new Date().toLocaleTimeString()
-                        });
-                        
-                        playSound('success');
-                    });
+                // If it's already approved when we load (e.g. after refresh)
+                if(tx.status === 'approved' && tx.type === 'deposit') {
+                    // Check if we already notified (needs persistent read flag on tx ideally, 
+                    // but for now we'll just check local storage or skip to avoid spam on reload)
                 }
-
-                updateLevelUI(totalDepositedPKR, levelData);
             });
-        }
 
-        function updateLevelUI(totalPKR, levelData) {
-            const badge = document.getElementById('level-display');
-            const progress = document.getElementById('level-progress');
-            const info = document.getElementById('level-info-text');
+            onValue(txRef, (snapshot) => {
+                const data = snapshot.val();
+                if(!data) return;
 
-            badge.className = `level-badge ${levelData.class}`;
-            badge.innerText = levelData.name;
-            progress.style.width = `${levelData.percent}%`;
-            info.innerText = levelData.info;
-        }
+                Object.keys(data).forEach(key => {
+                    const tx = data[key];
+                    const prev = unprocessedTransactions[key];
 
-        // --- Leaderboard Logic ---
-        window.switchLeaderboard = (type, element) => {
-            document.querySelectorAll('.lb-tab').forEach(el => el.classList.remove('active'));
-            element.classList.add('active');
-            renderLeaderboard(type);
-        }
-
-        function renderLeaderboard(type) {
-            const container = document.getElementById('leaderboard-content');
-            container.innerHTML = "";
-            
-            const data = fakeLeaderboard[type];
-            if(!data) return;
-
-            data.forEach((item, index) => {
-                const rank = index + 1;
-                let rankClass = '';
-                if(rank === 1) rankClass = 'rank-1';
-                else if(rank === 2) rankClass = 'rank-2';
-                else if(rank === 3) rankClass = 'rank-3';
-
-                const row = document.createElement('div');
-                row.className = 'leaderboard-row';
-                if(item.isMe) row.style.borderColor = 'var(--primary)';
-                
-                row.innerHTML = `
-                    <div class="rank ${rankClass}">#${rank}</div>
-                    <div class="user-info-lb">
-                        <div class="user-name-lb">${item.name}</div>
-                    </div>
-                    <div class="user-val-lb">${item.val}</div>
-                `;
-                container.appendChild(row);
+                    if(prev && prev.status !== tx.status) {
+                        // Status changed
+                        if(tx.status === 'approved' && tx.type === 'deposit') {
+                            pushNotification("Deposit Approved", `Your deposit of ${tx.amount} PKR has been approved!`);
+                            playSound('success');
+                        }
+                        else if(tx.status === 'completed' && tx.type === 'withdraw') {
+                            pushNotification("Withdraw Completed", `Your withdrawal of ${tx.amount} PKR was sent.`);
+                        }
+                    }
+                    unprocessedTransactions[key] = tx;
+                });
             });
         }
 
@@ -1340,6 +1315,7 @@
                 const data = snapshot.val();
                 if (data.to === myUid) {
                     showReceivePopup(data.amount);
+                    pushNotification("Coins Received", `You received ${data.amount} TK from a user.`);
                 }
             });
         }
@@ -1351,6 +1327,7 @@
             playSound('success');
         }
 
+        // --- Transfer Cooldown ---
         function startTransferTimer(duration) {
             let timer = duration;
             const btn = document.getElementById('btn-transfer-send');
@@ -1434,103 +1411,18 @@
             });
         }
 
-        // --- UPDATED: Transaction History Logic ---
-        function loadUserHistory(uid) {
-            const listEl = document.getElementById('transaction-list');
-            const historyRef = ref(db, `transactions/${uid}`);
-
-            onValue(historyRef, (snapshot) => {
-                listEl.innerHTML = "";
-                const data = snapshot.val();
-
-                if (!data || Object.keys(data).length === 0) {
-                    listEl.innerHTML = `<div style="text-align:center; color:#777; padding:20px;">No transactions yet</div>`;
-                    updateLevelUI(0, calculateLevel(0));
-                    return;
-                }
-
-                const txArray = Object.entries(data).reverse();
-                let totalPKR = 0;
-
-                txArray.forEach(([key, tx]) => {
-                    const isPositive = tx.type === 'deposit' || tx.type === 'receive' || tx.type === 'bonus';
-                    const icon = isPositive ? '<i class="fas fa-arrow-down text-green"></i>' : '<i class="fas fa-arrow-up text-orange"></i>';
-                    const amountClass = isPositive ? 'positive' : 'negative';
-                    const amountSign = isPositive ? '+' : '-';
-                    
-                    if(tx.type === 'deposit' && tx.status === 'approved') {
-                        totalPKR += parseFloat(tx.amount);
-                    }
-
-                    const statusBadge = tx.status ? `<span class="status-badge status-${tx.status}">${tx.status.toUpperCase()}</span>` : '';
-
-                    const div = document.createElement('div');
-                    div.className = 'transaction-item';
-                    div.innerHTML = `
-                        <div class="tx-icon">${icon}</div>
-                        <div class="tx-details">
-                            <div class="tx-title">${tx.title || tx.type.charAt(0).toUpperCase() + tx.type.slice(1)}</div>
-                            <div class="tx-date">${new Date(tx.date).toLocaleDateString()} ${new Date(tx.date).toLocaleTimeString()} ${statusBadge}</div>
-                        </div>
-                        <div class="tx-amount ${amountClass}">${amountSign}${tx.amount} TK</div>
-                    `;
-                    listEl.appendChild(div);
-                });
-
-                checkLevelUpAndReward(uid);
-            });
-        }
-
-        // --- FIXED: Chat Logic (No duplicates) ---
-        function loadUserChat(uid) {
-            if (chatUnsubscribe) {
-                chatUnsubscribe();
-            }
-
-            const chatList = document.getElementById('chat-messages');
-            chatList.innerHTML = '';
-
-            const chatRef = ref(db, `chats/${uid}`);
-            
-            chatUnsubscribe = onChildAdded(chatRef, (snapshot) => {
-                const msg = snapshot.val();
-                const div = document.createElement('div');
-                div.className = msg.sender === 'user' ? 'message msg-user' : 'message msg-admin';
-                div.innerText = msg.text;
-                chatList.appendChild(div);
-                chatList.scrollTop = chatList.scrollHeight;
-            });
-        }
-
-        window.sendChatMessage = () => {
-            const input = document.getElementById('chat-input');
-            const msg = input.value.trim();
-            if(!msg || !currentUserData) return;
-
-            const chatRef = ref(db, `chats/${currentUserData.uid}`);
-            push(chatRef, {
-                text: msg,
-                sender: 'user',
-                senderName: currentUserData.name,
-                timestamp: Date.now()
-            }).then(() => {
-                input.value = "";
-            }).catch((err) => {
-                showToast("Error sending message", "error");
-            });
-        }
-
         window.showSection = (sectionId) => {
             document.querySelectorAll('#user-views .section').forEach(el => el.classList.add('hidden'));
             document.getElementById(`view-${sectionId}`).classList.remove('hidden');
             document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
-            const navIndex = ['market', 'wallet', 'leaderboard', 'chat', 'profile'].indexOf(sectionId);
+            const navIndex = ['market', 'wallet', 'chat', 'profile'].indexOf(sectionId);
             if (navIndex >= 0) document.querySelectorAll('.nav-item')[navIndex].classList.add('active');
-            
-            if (sectionId === 'wallet') loadUserHistory(currentUserData.uid);
-            if (sectionId === 'chat') loadUserChat(currentUserData.uid);
+            if (sectionId === 'wallet') loadUserHistory(); 
+            if (sectionId === 'chat') loadUserChat();
             if(sectionId === 'transfer') checkTransferCooldown();
-            if(sectionId === 'leaderboard') renderLeaderboard('balance'); 
+            
+            // Hide notification panel when switching tabs
+            document.getElementById('notification-panel').classList.add('hidden');
         };
 
         function updateUI() {
@@ -1550,14 +1442,6 @@
             const pkrValue = currentUserData.balanceTK * marketData.tkPrice * marketData.usdtRate;
             document.getElementById('wallet-pkr').innerText = pkrValue.toFixed(2);
             
-            const tier = currentUserData.levelTier || 0;
-            const levelConfig = LEVELS[tier];
-            const badge = document.getElementById('level-display');
-            badge.className = `level-badge ${levelConfig.class}`;
-            badge.innerText = levelConfig.name;
-
-            fakeLeaderboard.balance[5].val = currentUserData.balanceTK.toFixed(0) + " TK";
-            
             if (currentUserData.isPremium) {
                 document.getElementById('profile-status').innerHTML = `<span class="text-blue"><i class="fas fa-check-circle blue-tick"></i> Premium User</span>`;
                 document.getElementById('header-premium-badge').classList.remove('hidden');
@@ -1569,6 +1453,9 @@
             document.getElementById('fee-display').innerText = `Fee: ${fee}%`;
             document.getElementById('withdraw-bal-display').innerText = currentUserData.balanceTK.toFixed(2) + " TK";
             document.getElementById('ref-code-display').innerText = currentUserData.uid;
+
+            // Update Level UI
+            updateLevelStatus();
         }
 
         function updateMarketUI() {
@@ -1592,7 +1479,7 @@
             ctx.lineWidth = 2;
             points.forEach((p, i) => {
                 const x = i * stepX;
-                const y = points.length ===1 ? canvas.height/2 : canvas.height - ((p - min) / range) * canvas.height;
+                const y = points.length === 1 ? canvas.height/2 : canvas.height - ((p - min) / range) * canvas.height;
                 if(i===0) ctx.moveTo(x, y);
                 else ctx.lineTo(x, y);
             });
@@ -1609,141 +1496,104 @@
             const link = baseUrl + "?ref=" + uid;
             
             navigator.clipboard.writeText(link).then(() => {
-                showToast("Referral link copied!");
+                showToast("Link copied!");
             });
         };
 
+        // --- Transaction Logic ---
         window.updateDepositDetails = () => {
             const method = document.getElementById('deposit-method').value;
-            const numDisplay = document.getElementById('deposit-number');
-            const nameDisplay = document.getElementById('deposit-name');
+            const numberEl = document.getElementById('deposit-number');
+            const nameEl = document.getElementById('deposit-name');
             const qrImg = document.getElementById('deposit-qr-image');
 
-            qrImg.style.display = 'none';
             if(method === 'easypaisa') {
-                numDisplay.innerText = appSettings.easypaisa;
-                nameDisplay.innerText = "Easypaisa Account";
-            } else if(method === 'jazzcash') {
-                numDisplay.innerText = appSettings.jazzcash;
-                nameDisplay.innerText = "JazzCash Account";
-            } else if(method === 'tillid') {
-                numDisplay.innerText = appSettings.tillid;
-                nameDisplay.innerText = "Till ID (Raast)";
-            } else {
-                numDisplay.innerText = "Scan QR";
-                nameDisplay.innerText = "QR Payment";
+                numberEl.innerText = appSettings.easypaisa;
+                nameEl.innerText = "EasyPaisa Account";
+                qrImg.style.display = 'none';
+            } else if (method === 'jazzcash') {
+                numberEl.innerText = appSettings.jazzcash;
+                nameEl.innerText = "JazzCash Account";
+                qrImg.style.display = 'none';
+            } else if (method === 'tillid') {
+                numberEl.innerText = appSettings.tillid;
+                nameEl.innerText = "Raast / Till ID";
+                qrImg.style.display = 'none';
+            } else if (method === 'qrpay') {
+                numberEl.innerText = "Scan QR Code";
+                nameEl.innerText = "All Banks / QR";
                 qrImg.style.display = 'block';
+                qrImg.src = appSettings.qrUrl || './qr.png';
             }
         };
 
         window.copyDepositNumber = () => {
-            const text = document.getElementById('deposit-number').innerText;
-            navigator.clipboard.writeText(text).then(() => showToast("Number copied!"));
+            const txt = document.getElementById('deposit-number').innerText;
+            navigator.clipboard.writeText(txt).then(() => showToast("Number copied!"));
         };
 
         window.calculateDeposit = () => {
-            const pkr = parseFloat(document.getElementById('deposit-amount').value);
+            const pkr = parseFloat(document.getElementById('deposit-amount').value) || 0;
             const rate = marketData.tkPrice * marketData.usdtRate;
-            if(pkr > 0) {
-                document.getElementById('deposit-calc-receive').innerText = (pkr / rate).toFixed(2);
-            }
+            const tk = pkr / rate;
+            document.getElementById('deposit-calc-receive').innerText = tk.toFixed(2);
         };
 
-        // --- FIX: Deposit Logic (Save to User History AND Admin Requests) ---
         window.submitDeposit = () => {
-            const amount = parseFloat(document.getElementById('deposit-amount').value);
-            const ref = document.getElementById('deposit-ref').value;
+            const amount = document.getElementById('deposit-amount').value;
             const method = document.getElementById('deposit-method').value;
+            const refId = document.getElementById('deposit-ref').value;
 
-            if(!amount || !ref) {
-                showToast("Please fill all fields", "error");
-                return;
-            }
-
-            showToast("Deposit request submitted!");
+            if(!amount || !refId) { showToast("Please fill all fields", "error"); return; }
             
-            const txData = {
+            const newTx = {
                 type: 'deposit',
-                amount: amount,
-                title: `Deposit via ${method}`,
+                method: method,
+                amount: parseFloat(amount),
+                refId: refId,
                 status: 'pending',
-                date: Date.now()
+                date: new Date().toLocaleString()
             };
 
-            // 1. Save to User History
-            const userTxRef = ref(db, `transactions/${currentUserData.uid}`);
-            push(userTxRef, txData);
-
-            // 2. Save to Admin Requests (Standard 'requests' node)
-            const adminRef = ref(db, 'requests');
-            push(adminRef, {
-                ...txData,
-                uid: currentUserData.uid,
-                userName: currentUserData.name,
-                userEmail: currentUserData.email
+            push(ref(db, `users/${currentUserData.uid}/transactions`), newTx).then(() => {
+                showToast("Deposit submitted for review");
+                showSection('wallet');
             });
-
-            setTimeout(() => showSection('wallet'), 1000);
         };
 
         window.calculateWithdraw = () => {
-            const tk = parseFloat(document.getElementById('withdraw-amount').value);
-            const rate = marketData.tkPrice * marketData.usdtRate;
+            const tk = parseFloat(document.getElementById('withdraw-amount').value) || 0;
             const fee = currentUserData.isPremium ? 0 : appSettings.withdrawFee;
-            
-            if(tk > 0) {
-                const net = tk * (1 - fee);
-                document.getElementById('withdraw-calc-usdt').innerText = (net * rate).toFixed(2);
-            }
+            const afterFee = tk - (tk * fee);
+            const rate = marketData.tkPrice * marketData.usdtRate;
+            const pkr = afterFee * rate;
+            document.getElementById('withdraw-calc-usdt').innerText = pkr.toFixed(2);
         };
 
-        // --- FIX: Withdraw Logic (Deduct Balance + Save Requests) ---
         window.submitWithdraw = () => {
             const amount = parseFloat(document.getElementById('withdraw-amount').value);
-            const account = document.getElementById('withdraw-account').value;
             const method = document.getElementById('withdraw-method').value;
+            const account = document.getElementById('withdraw-account').value;
 
-            if(!amount || !account) {
-                showToast("Missing details", "error");
-                return;
-            }
+            if(!amount || !account) { showToast("Invalid details", "error"); return; }
+            if(amount > currentUserData.balanceTK) { showToast("Insufficient balance", "error"); return; }
 
-            if(amount > currentUserData.balanceTK) {
-                showToast("Insufficient balance", "error");
-                return;
-            }
-
-            showToast("Withdrawal requested!");
-            
-            const txData = {
-                type: 'withdraw',
-                amount: amount,
-                title: `Withdraw to ${method} (${account})`,
-                status: 'pending',
-                date: Date.now()
-            };
-
-            // 1. DEDUCT BALANCE IMMEDIATELY (Fixed Issue)
-            const updates = {};
-            updates[`users/${currentUserData.uid}/balanceTK`] = currentUserData.balanceTK - amount;
-            
-            // 2. Save to User History
-            const userTxRef = ref(db, `transactions/${currentUserData.uid}`);
-            push(userTxRef, txData);
-
-            // 3. Save to Admin Requests (Standard 'requests' node)
-            const adminRef = ref(db, 'requests');
-            push(adminRef, {
-                ...txData,
-                uid: currentUserData.uid,
-                userName: currentUserData.name,
-                userEmail: currentUserData.email,
-                accountNumber: account
-            });
-
-            // Execute Balance Update
-            update(ref(db), updates).then(() => {
-                showSection('wallet');
+            // Deduct balance immediately (Escrow)
+            update(ref(db, `users/${currentUserData.uid}`), {
+                balanceTK: currentUserData.balanceTK - amount
+            }).then(() => {
+                const newTx = {
+                    type: 'withdraw',
+                    method: method,
+                    account: account,
+                    amount: amount,
+                    status: 'pending', // Pending admin approval
+                    date: new Date().toLocaleString()
+                };
+                push(ref(db, `users/${currentUserData.uid}/transactions`), newTx).then(() => {
+                    showToast("Withdrawal requested");
+                    showSection('wallet');
+                });
             });
         };
 
@@ -1751,59 +1601,148 @@
             const email = document.getElementById('transfer-email').value;
             const amount = parseFloat(document.getElementById('transfer-amount').value);
 
-            if(!email || !amount) {
-                showToast("Enter details", "error");
-                return;
-            }
+            if(!email || !amount) { showToast("Invalid input", "error"); return; }
+            if(amount > currentUserData.balanceTK) { showToast("Insufficient balance", "error"); return; }
+            if(email === currentUserData.email) { showToast("Cannot send to self", "error"); return; }
 
-            if(amount > currentUserData.balanceTK) {
-                showToast("Insufficient balance", "error");
-                return;
-            }
-
-            const updates = {};
-            updates['users/' + currentUserData.uid + '/balanceTK'] = currentUserData.balanceTK - amount;
-            updates['users/' + currentUserData.uid + '/lastTransferAt'] = Date.now();
-            
-            const txRef = ref(db, `transactions/${currentUserData.uid}`);
-            push(txRef, {
-                type: 'transfer',
-                amount: amount,
-                title: `Transfer to ${email}`,
-                date: Date.now()
-            });
-
-            update(ref(db), updates).then(() => {
-                showToast("Transfer Sent!");
-                checkTransferCooldown();
+            // Deduct
+            update(ref(db, `users/${currentUserData.uid}`), {
+                balanceTK: currentUserData.balanceTK - amount,
+                lastTransferAt: Date.now()
+            }).then(() => {
+                // Create Transfer Record
+                const transferData = {
+                    from: currentUserData.email,
+                    fromUid: currentUserData.uid,
+                    to: email, // In real app, resolve UID first. Keeping simple string search for logic simplicity or assume admin resolves.
+                    amount: amount,
+                    date: new Date().toLocaleString()
+                };
+                push(ref(db, 'transfers'), transferData);
+                
+                showToast("Transfer sent successfully!");
+                checkTransferCooldown(); // Start timer
             });
         };
 
         window.upgradePremium = () => {
             if(currentUserData.balanceTK >= 100) {
-                const updates = {};
-                updates['users/' + currentUserData.uid + '/balanceTK'] = currentUserData.balanceTK - 100;
-                updates['users/' + currentUserData.uid + '/isPremium'] = true;
-                update(ref(db), updates).then(() => showToast("Upgraded to Premium!"));
+                update(ref(db, `users/${currentUserData.uid}`), {
+                    balanceTK: currentUserData.balanceTK - 100,
+                    isPremium: true
+                }).then(() => showToast("Upgraded to Premium!"));
             } else {
-                showToast("Insufficient Balance", "error");
+                showToast("Insufficient Balance (Need 100 TK)", "error");
             }
         };
 
-        window.openFutures = (type) => {
-            const amount = parseFloat(document.getElementById('futures-amount').value);
-            if(!amount) return showToast("Enter amount", "error");
-            if(amount > currentUserData.balanceTK) return showToast("Insufficient balance", "error");
+        function loadUserHistory() {
+            const list = document.getElementById('transaction-list');
+            onValue(ref(db, `users/${currentUserData.uid}/transactions`), (snapshot) => {
+                const data = snapshot.val();
+                list.innerHTML = "";
+                if(data) {
+                    Object.values(data).reverse().forEach(tx => {
+                        let color = tx.type === 'deposit' ? 'text-green' : 'text-orange';
+                        if(tx.status === 'pending') color = 'text-muted';
+                        
+                        list.innerHTML += `
+                            <div style="background:var(--bg-card); padding:10px; border-radius:6px; border:1px solid var(--border); display:flex; justify-content:space-between;">
+                                <div>
+                                    <div style="font-weight:bold; color:var(--text-light); text-transform:capitalize;">${tx.type} (${tx.method || tx.account || 'Transfer'})</div>
+                                    <div style="font-size:0.8rem; color:var(--text-muted);">${tx.date}</div>
+                                </div>
+                                <div style="text-align:right;">
+                                    <div class="${color}" style="font-weight:bold;">${tx.amount} ${tx.type === 'withdraw' ? 'TK' : 'PKR'}</div>
+                                    <div style="font-size:0.7rem; color:${tx.status==='approved'?'var(--success)':'var(--text-muted)'}">${tx.status.toUpperCase()}</div>
+                                </div>
+                            </div>
+                        `;
+                    });
+                } else {
+                    list.innerHTML = `<div style="text-align:center; color:#555;">No transactions</div>`;
+                }
+            });
+        }
+
+        // --- Chat ---
+        function loadUserChat() {
+            const msgs = document.getElementById('chat-messages');
+            onValue(ref(db, 'chats'), (snap) => {
+                msgs.innerHTML = "";
+                const data = snap.val();
+                if(data) {
+                    Object.values(data).forEach(c => {
+                        const isMe = c.sender === currentUserData.email;
+                        msgs.innerHTML += `
+                            <div class="message ${isMe ? 'msg-user' : 'msg-admin'}">
+                                ${c.msg}
+                            </div>
+                        `;
+                    });
+                    msgs.scrollTop = msgs.scrollHeight;
+                }
+            });
+        }
+        window.sendChatMessage = () => {
+            const inp = document.getElementById('chat-input');
+            if(!inp.value) return;
+            push(ref(db, 'chats'), {
+                sender: currentUserData.email,
+                msg: inp.value
+            });
+            inp.value = "";
+        };
+
+        // --- FAKE LEADERBOARD GENERATOR ---
+        window.loadLeaderboard = (type) => {
+            const table = document.getElementById('lb-table');
+            table.innerHTML = `<tr><th>Rank</th><th>User</th><th>Value</th></tr>`;
             
-            showToast(`${type.toUpperCase()} position opened!`);
-            showSection('wallet');
+            // Generate Fake Data
+            const fakeUsers = [];
+            for(let i=1; i<=10; i++) {
+                let val = 0;
+                if(type === 'balance') val = Math.floor(Math.random() * 100000) + 10000;
+                if(type === 'referrals') val = Math.floor(Math.random() * 500);
+                if(type === 'traders') val = Math.floor(Math.random() * 50);
+                
+                fakeUsers.push({
+                    name: `User_${Math.random().toString(36).substring(7)}`,
+                    val: val,
+                    rank: i
+                });
+            }
+            
+            // Sort desc
+            fakeUsers.sort((a,b) => b.val - a.val);
+
+            fakeUsers.forEach(u => {
+                let rankClass = '';
+                if(u.rank === 1) rankClass = 'rank-1';
+                if(u.rank === 2) rankClass = 'rank-2';
+                if(u.rank === 3) rankClass = 'rank-3';
+
+                const suffix = type === 'balance' ? ' PKR' : (type === 'referrals' ? ' Refs' : ' Trades');
+                
+                const row = `
+                    <tr>
+                        <td class="${rankClass}">#${u.rank}</td>
+                        <td style="font-weight:bold; color:var(--text-light);">${u.name}</td>
+                        <td>${u.val.toLocaleString()}${suffix}</td>
+                    </tr>
+                `;
+                table.innerHTML += row;
+            });
         };
 
         window.showAboutModal = () => {
-            showToast("TK Coin v1.0 - Built for Holders.");
-        }
+            showToast("TK Coin v1.0 - Simulation");
+        };
 
+        // Initialize App
         initApp();
+
     </script>
 </body>
 </html>
