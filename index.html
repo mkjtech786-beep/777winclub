@@ -169,6 +169,7 @@
             z-index: 100;
         }
         .nav-item {
+            position: relative; /* For badge positioning */
             color: var(--text-muted);
             text-decoration: none;
             font-size: 0.8rem;
@@ -179,6 +180,19 @@
         }
         .nav-item.active { color: var(--primary); }
         .nav-item i { font-size: 1.2rem; margin-bottom: 2px; }
+
+        /* NEW: Chat Unread Badge */
+        .chat-unread-badge {
+            position: absolute;
+            top: 5px;
+            right: 10px;
+            width: 10px;
+            height: 10px;
+            background: #ff0000;
+            border-radius: 50%;
+            box-shadow: 0 0 5px rgba(255, 0, 0, 0.5);
+            animation: pulse 1.5s infinite;
+        }
 
         .section { padding: 15px; max-width: 600px; margin: 0 auto; }
         
@@ -276,7 +290,7 @@
         .invited-name { font-weight: bold; color: #fff; font-size: 0.9rem; }
         .invited-date { font-size: 0.7rem; color: #777; }
 
-        /* NEW: Buyer/Seller Percentage Indicator */
+        /* Buyer/Seller Percentage Indicator */
         .market-pressure-card {
             background: var(--bg-card);
             padding: 15px;
@@ -318,6 +332,12 @@
             justify-content: space-between;
             font-size: 0.8rem;
             color: var(--text-muted);
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(255, 0, 0, 0.7); }
+            70% { transform: scale(1); box-shadow: 0 0 0 10px rgba(255, 0, 0, 0); }
+            100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(255, 0, 0, 0); }
         }
     </style>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
@@ -390,7 +410,7 @@
                     <small style="opacity: 0.8;">Total Hold TK: 1M+ Coins</small>
                 </div>
 
-                <!-- NEW: Buyer/Seller Pressure Indicator -->
+                <!-- Buyer/Seller Pressure Indicator -->
                 <div class="market-pressure-card">
                     <h3 style="margin-bottom: 10px; color: var(--primary);">Market Pressure</h3>
                     <div class="pressure-bar-container" id="pressure-bar">
@@ -572,10 +592,8 @@
                     <input type="number" id="transfer-amount" placeholder="Amount">
                 </div>
 
-                <!-- Send Button -->
                 <button id="btn-transfer-send" class="btn" onclick="submitTransfer()">Send Now</button>
                 
-                <!-- Cooldown Message -->
                 <div id="transfer-wait-msg" class="hidden" style="margin-top: 15px; text-align: center; background: #333; padding: 15px; border-radius: 8px; border: 1px solid var(--primary);">
                     <p class="text-orange" style="font-weight: bold;">Wait <span id="timer-count">02:00</span> minutes</p>
                     <small style="color:#aaa;">Next transfer available soon</small>
@@ -662,6 +680,7 @@
             </section>
         </main>
 
+        <!-- Bottom Navigation with Chat Badge -->
         <nav class="bottom-nav" id="user-nav">
             <a class="nav-item active" onclick="showSection('market')">
                 <i class="fas fa-chart-line"></i>
@@ -671,9 +690,11 @@
                 <i class="fas fa-wallet"></i>
                 <span>Wallet</span>
             </a>
-            <a class="nav-item" onclick="showSection('chat')">
+            <a class="nav-item" onclick="showSection('chat')" id="chat-nav-item">
                 <i class="fas fa-comment-dots"></i>
-                <span> live Chat</span>
+                <span>Live Chat</span>
+                <!-- NEW: Unread badge (hidden by default) -->
+                <span id="chat-unread-badge" class="chat-unread-badge hidden"></span>
             </a>
             <a class="nav-item" onclick="showSection('profile')">
                 <i class="fas fa-user"></i>
@@ -718,10 +739,9 @@
         let lastKnownBalance = 0; 
         let isTransfersLoaded = false; 
         let transferCooldownInterval = null;
-
-        // NEW: Buyer/Seller Pressure Variables
         let pressureData = { buy: 50, sell: 50 };
         let pressureInterval = null;
+        let lastReadMessageTimestamp = 0; // Track last read message
 
         window.playSound = (type) => {
             const AudioContext = window.AudioContext || window.webkitAudioContext;
@@ -805,23 +825,34 @@
 
         // NEW: Update Buyer/Seller Pressure
         function updateMarketPressure() {
-            // Generate realistic random percentages (30-70% range)
-            const buyPercent = Math.floor(Math.random() * 40) + 30; // 30-70%
+            const buyPercent = Math.floor(Math.random() * 40) + 30;
             const sellPercent = 100 - buyPercent;
             
             pressureData = { buy: buyPercent, sell: sellPercent };
             
-            // Update UI
             document.getElementById('buy-percentage').style.width = buyPercent + '%';
             document.getElementById('buy-percentage').innerText = buyPercent + '%';
             document.getElementById('sell-percentage').style.width = sellPercent + '%';
             document.getElementById('sell-percentage').innerText = sellPercent + '%';
             document.getElementById('last-updated').innerText = 'Updated now';
             
-            // Update timestamp
             setTimeout(() => {
                 document.getElementById('last-updated').innerText = 'Updated 1 min ago';
             }, 60000);
+        }
+
+        // NEW: Show unread badge on chat icon
+        function showChatUnreadBadge() {
+            document.getElementById('chat-unread-badge').classList.remove('hidden');
+        }
+
+        // NEW: Hide unread badge when chat opened
+        function hideChatUnreadBadge() {
+            document.getElementById('chat-unread-badge').classList.add('hidden');
+            // Mark all messages as read by updating last read timestamp
+            if (currentUserData && currentUserData.uid) {
+                lastReadMessageTimestamp = Date.now();
+            }
         }
 
         function checkAndCreateUserInDB(firebaseUser) {
@@ -932,6 +963,9 @@
                 }
             });
 
+            // NEW: Monitor chat for unread admin messages
+            monitorChatForUnreadMessages(user.uid);
+
             onValue(ref(db, 'market'), (snapshot) => {
                 const data = snapshot.val();
                 if (data) {
@@ -982,9 +1016,9 @@
             monitorIncomingTransfers(user.uid); 
             startZigzagAnimation();
 
-            // NEW: Start pressure updater
-            updateMarketPressure(); // Initial update
-            pressureInterval = setInterval(updateMarketPressure, 600000); // Every 10 minutes
+            // Start pressure updater
+            updateMarketPressure();
+            pressureInterval = setInterval(updateMarketPressure, 600000);
 
             if (user.role === 'admin') {
                 showToast("Admin detected...", "info");
@@ -993,6 +1027,23 @@
             } else {
                 showSection('market');
             }
+        }
+
+        // NEW: Monitor chat for unread admin messages
+        function monitorChatForUnreadMessages(uid) {
+            const chatRef = ref(db, 'chats/' + uid);
+            onValue(chatRef, (snapshot) => {
+                const data = snapshot.val();
+                if (!data) return;
+
+                const messages = Object.values(data);
+                const lastMessage = messages[messages.length - 1];
+                
+                // Check if last message is from admin and newer than last read
+                if (lastMessage.sender === 'admin' && lastMessage.timestamp > lastReadMessageTimestamp) {
+                    showChatUnreadBadge();
+                }
+            });
         }
 
         function monitorIncomingTransfers(myUid) {
@@ -1108,8 +1159,10 @@
             const navIndex = ['market', 'wallet', 'chat', 'profile'].indexOf(sectionId);
             if (navIndex >= 0) document.querySelectorAll('.nav-item')[navIndex].classList.add('active');
             if (sectionId === 'wallet') loadUserHistory(); 
-            if (sectionId === 'chat') loadUserChat();
-            
+            if (sectionId === 'chat') {
+                loadUserChat();
+                hideChatUnreadBadge(); // Hide badge when opening chat
+            }
             if(sectionId === 'transfer') {
                 checkTransferCooldown();
             }
@@ -1171,6 +1224,23 @@
                 else ctx.lineTo(x, y);
             });
             ctx.stroke();
+        }
+
+        function updateMarketPressure() {
+            const buyPercent = Math.floor(Math.random() * 40) + 30;
+            const sellPercent = 100 - buyPercent;
+            
+            pressureData = { buy: buyPercent, sell: sellPercent };
+            
+            document.getElementById('buy-percentage').style.width = buyPercent + '%';
+            document.getElementById('buy-percentage').innerText = buyPercent + '%';
+            document.getElementById('sell-percentage').style.width = sellPercent + '%';
+            document.getElementById('sell-percentage').innerText = sellPercent + '%';
+            document.getElementById('last-updated').innerText = 'Updated now';
+            
+            setTimeout(() => {
+                document.getElementById('last-updated').innerText = 'Updated 1 min ago';
+            }, 60000);
         }
 
         window.downloadApp = () => {
@@ -1512,6 +1582,7 @@
                         }
                     });
                 }
+```html
                 renderHistory();
             });
 
