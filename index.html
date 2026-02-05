@@ -169,7 +169,6 @@
             z-index: 100;
         }
         .nav-item {
-            position: relative; /* For badge positioning */
             color: var(--text-muted);
             text-decoration: none;
             font-size: 0.8rem;
@@ -177,21 +176,26 @@
             flex-direction: column;
             align-items: center;
             cursor: pointer;
+            position: relative; /* For badge positioning */
         }
         .nav-item.active { color: var(--primary); }
         .nav-item i { font-size: 1.2rem; margin-bottom: 2px; }
 
-        /* NEW: Chat Unread Badge */
-        .chat-unread-badge {
+        /* Chat Badge */
+        #chat-badge {
             position: absolute;
-            top: 5px;
-            right: 10px;
-            width: 10px;
-            height: 10px;
-            background: #ff0000;
+            top: 2px;
+            right: 8px;
+            background: var(--danger);
+            color: white;
             border-radius: 50%;
-            box-shadow: 0 0 5px rgba(255, 0, 0, 0.5);
-            animation: pulse 1.5s infinite;
+            width: 18px;
+            height: 18px;
+            font-size: 0.7rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
         }
 
         .section { padding: 15px; max-width: 600px; margin: 0 auto; }
@@ -289,56 +293,6 @@
         }
         .invited-name { font-weight: bold; color: #fff; font-size: 0.9rem; }
         .invited-date { font-size: 0.7rem; color: #777; }
-
-        /* Buyer/Seller Percentage Indicator */
-        .market-pressure-card {
-            background: var(--bg-card);
-            padding: 15px;
-            border-radius: 10px;
-            margin-top: 15px;
-            border: 1px solid #333;
-        }
-        .pressure-bar-container {
-            display: flex;
-            height: 30px;
-            border-radius: 15px;
-            overflow: hidden;
-            margin: 10px 0;
-            position: relative;
-        }
-        .pressure-buy {
-            background: linear-gradient(90deg, #00c853, #00ff00);
-            height: 100%;
-            transition: width 0.5s ease;
-            display: flex;
-            align-items: center;
-            justify-content: flex-end;
-            padding-right: 10px;
-            font-weight: bold;
-            font-size: 0.9rem;
-        }
-        .pressure-sell {
-            background: linear-gradient(90deg, #ff3d00, #ff6600);
-            height: 100%;
-            transition: width 0.5s ease;
-            display: flex;
-            align-items: center;
-            padding-left: 10px;
-            font-weight: bold;
-            font-size: 0.9rem;
-        }
-        .pressure-labels {
-            display: flex;
-            justify-content: space-between;
-            font-size: 0.8rem;
-            color: var(--text-muted);
-        }
-
-        @keyframes pulse {
-            0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(255, 0, 0, 0.7); }
-            70% { transform: scale(1); box-shadow: 0 0 0 10px rgba(255, 0, 0, 0); }
-            100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(255, 0, 0, 0); }
-        }
     </style>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
@@ -408,20 +362,6 @@
                     <div class="balance-title">Current TK Price</div>
                     <div class="balance-amount"><span id="market-price">0.00</span> PKR</div>
                     <small style="opacity: 0.8;">Total Hold TK: 1M+ Coins</small>
-                </div>
-
-                <!-- Buyer/Seller Pressure Indicator -->
-                <div class="market-pressure-card">
-                    <h3 style="margin-bottom: 10px; color: var(--primary);">Market Pressure</h3>
-                    <div class="pressure-bar-container" id="pressure-bar">
-                        <div class="pressure-buy" id="buy-percentage">50%</div>
-                        <div class="pressure-sell" id="sell-percentage">50%</div>
-                    </div>
-                    <div class="pressure-labels">
-                        <span><i class="fas fa-arrow-up" style="color: #00c853;"></i> Buyers</span>
-                        <span id="last-updated">Updated now</span>
-                        <span><i class="fas fa-arrow-down" style="color: #ff3d00;"></i> Sellers</span>
-                    </div>
                 </div>
 
                 <div style="display: flex; justify-content: space-between; align-items: center;">
@@ -592,8 +532,10 @@
                     <input type="number" id="transfer-amount" placeholder="Amount">
                 </div>
 
+                <!-- Send Button -->
                 <button id="btn-transfer-send" class="btn" onclick="submitTransfer()">Send Now</button>
                 
+                <!-- NEW: Cooldown Message -->
                 <div id="transfer-wait-msg" class="hidden" style="margin-top: 15px; text-align: center; background: #333; padding: 15px; border-radius: 8px; border: 1px solid var(--primary);">
                     <p class="text-orange" style="font-weight: bold;">Wait <span id="timer-count">02:00</span> minutes</p>
                     <small style="color:#aaa;">Next transfer available soon</small>
@@ -680,7 +622,6 @@
             </section>
         </main>
 
-        <!-- Bottom Navigation with Chat Badge -->
         <nav class="bottom-nav" id="user-nav">
             <a class="nav-item active" onclick="showSection('market')">
                 <i class="fas fa-chart-line"></i>
@@ -690,11 +631,10 @@
                 <i class="fas fa-wallet"></i>
                 <span>Wallet</span>
             </a>
-            <a class="nav-item" onclick="showSection('chat')" id="chat-nav-item">
+            <a class="nav-item" onclick="showSection('chat')" style="position: relative;">
                 <i class="fas fa-comment-dots"></i>
-                <span>Live Chat</span>
-                <!-- NEW: Unread badge (hidden by default) -->
-                <span id="chat-unread-badge" class="chat-unread-badge hidden"></span>
+                <span> live Chat</span>
+                <span id="chat-badge" class="hidden">0</span>
             </a>
             <a class="nav-item" onclick="showSection('profile')">
                 <i class="fas fa-user"></i>
@@ -738,10 +678,7 @@
         let chartPoints = [];
         let lastKnownBalance = 0; 
         let isTransfersLoaded = false; 
-        let transferCooldownInterval = null;
-        let pressureData = { buy: 50, sell: 50 };
-        let pressureInterval = null;
-        let lastReadMessageTimestamp = 0; // Track last read message
+        let transferCooldownInterval = null; // Timer interval
 
         window.playSound = (type) => {
             const AudioContext = window.AudioContext || window.webkitAudioContext;
@@ -821,38 +758,6 @@
                 if (chartPoints.length > 20) chartPoints.shift();
                 drawChart();
             }, 1000); 
-        }
-
-        // NEW: Update Buyer/Seller Pressure
-        function updateMarketPressure() {
-            const buyPercent = Math.floor(Math.random() * 40) + 30;
-            const sellPercent = 100 - buyPercent;
-            
-            pressureData = { buy: buyPercent, sell: sellPercent };
-            
-            document.getElementById('buy-percentage').style.width = buyPercent + '%';
-            document.getElementById('buy-percentage').innerText = buyPercent + '%';
-            document.getElementById('sell-percentage').style.width = sellPercent + '%';
-            document.getElementById('sell-percentage').innerText = sellPercent + '%';
-            document.getElementById('last-updated').innerText = 'Updated now';
-            
-            setTimeout(() => {
-                document.getElementById('last-updated').innerText = 'Updated 1 min ago';
-            }, 60000);
-        }
-
-        // NEW: Show unread badge on chat icon
-        function showChatUnreadBadge() {
-            document.getElementById('chat-unread-badge').classList.remove('hidden');
-        }
-
-        // NEW: Hide unread badge when chat opened
-        function hideChatUnreadBadge() {
-            document.getElementById('chat-unread-badge').classList.add('hidden');
-            // Mark all messages as read by updating last read timestamp
-            if (currentUserData && currentUserData.uid) {
-                lastReadMessageTimestamp = Date.now();
-            }
         }
 
         function checkAndCreateUserInDB(firebaseUser) {
@@ -941,8 +846,11 @@
 
             lastKnownBalance = user.balanceTK || 0;
 
-            // Track activity
+            // NEW: Track user activity on login
             trackUserActivity(user.uid);
+
+            // NEW: Monitor unread messages
+            monitorUnreadMessages(user.uid);
 
             onValue(ref(db, 'users/' + user.uid), (snapshot) => {
                 const data = snapshot.val();
@@ -957,14 +865,12 @@
                     lastKnownBalance = newBal;
                     updateUI();
                     
+                    // Check cooldown whenever user data updates
                     if(document.getElementById('view-transfer').classList.contains('hidden') === false) {
                         checkTransferCooldown();
                     }
                 }
             });
-
-            // NEW: Monitor chat for unread admin messages
-            monitorChatForUnreadMessages(user.uid);
 
             onValue(ref(db, 'market'), (snapshot) => {
                 const data = snapshot.val();
@@ -1016,10 +922,6 @@
             monitorIncomingTransfers(user.uid); 
             startZigzagAnimation();
 
-            // Start pressure updater
-            updateMarketPressure();
-            pressureInterval = setInterval(updateMarketPressure, 600000);
-
             if (user.role === 'admin') {
                 showToast("Admin detected...", "info");
                 setTimeout(() => window.location.href = 'admin.html', 1500);
@@ -1027,23 +929,6 @@
             } else {
                 showSection('market');
             }
-        }
-
-        // NEW: Monitor chat for unread admin messages
-        function monitorChatForUnreadMessages(uid) {
-            const chatRef = ref(db, 'chats/' + uid);
-            onValue(chatRef, (snapshot) => {
-                const data = snapshot.val();
-                if (!data) return;
-
-                const messages = Object.values(data);
-                const lastMessage = messages[messages.length - 1];
-                
-                // Check if last message is from admin and newer than last read
-                if (lastMessage.sender === 'admin' && lastMessage.timestamp > lastReadMessageTimestamp) {
-                    showChatUnreadBadge();
-                }
-            });
         }
 
         function monitorIncomingTransfers(myUid) {
@@ -1069,6 +954,7 @@
             playSound('success');
         }
 
+        // NEW: Cooldown Timer Logic
         function startTransferTimer(duration) {
             let timer = duration;
             const btn = document.getElementById('btn-transfer-send');
@@ -1104,23 +990,76 @@
             const btn = document.getElementById('btn-transfer-send');
             const msg = document.getElementById('transfer-wait-msg');
 
+            // Check if user has a timestamp in DB
             if (currentUserData.lastTransferAt) {
                 const now = Date.now();
                 const last = currentUserData.lastTransferAt;
                 const diff = now - last;
-                const twoMinutes = 120000;
+                const twoMinutes = 120000; // 2 mins in ms
 
                 if (diff < twoMinutes) {
+                    // Still in cooldown
                     startTransferTimer(twoMinutes - diff);
                 } else {
+                    // Cooldown over
                     btn.classList.remove('hidden');
                     msg.classList.add('hidden');
                     if(transferCooldownInterval) clearInterval(transferCooldownInterval);
                 }
             } else {
+                // No transfer history yet
                 btn.classList.remove('hidden');
                 msg.classList.add('hidden');
             }
+        }
+
+        // NEW: Monitor unread chat messages
+        function monitorUnreadMessages(uid) {
+            const chatRef = ref(db, 'chats/' + uid);
+            onValue(chatRef, (snapshot) => {
+                const data = snapshot.val();
+                let unreadCount = 0;
+                if (data) {
+                    Object.values(data).forEach(msg => {
+                        // Count only admin messages that are unread
+                        if (msg.sender !== uid && msg.read !== true) {
+                            unreadCount++;
+                        }
+                    });
+                }
+                updateChatBadge(unreadCount);
+            });
+        }
+
+        // NEW: Update chat badge UI
+        function updateChatBadge(count) {
+            const badge = document.getElementById('chat-badge');
+            if (count > 0) {
+                badge.classList.remove('hidden');
+                badge.innerText = count > 9 ? '9+' : count;
+            } else {
+                badge.classList.add('hidden');
+            }
+        }
+
+        // NEW: Mark messages as read when opening chat
+        function markMessagesAsRead() {
+            if (!currentUserData) return;
+            const chatRef = ref(db, 'chats/' + currentUserData.uid);
+            get(chatRef).then((snapshot) => {
+                const data = snapshot.val();
+                if (data) {
+                    const updates = {};
+                    Object.keys(data).forEach(key => {
+                        if (data[key].sender !== currentUserData.uid && data[key].read !== true) {
+                            updates[`chats/${currentUserData.uid}/${key}/read`] = true;
+                        }
+                    });
+                    if (Object.keys(updates).length > 0) {
+                        update(ref(db), updates);
+                    }
+                }
+            });
         }
 
         function loadReferralStats(uid) {
@@ -1161,8 +1100,10 @@
             if (sectionId === 'wallet') loadUserHistory(); 
             if (sectionId === 'chat') {
                 loadUserChat();
-                hideChatUnreadBadge(); // Hide badge when opening chat
+                markMessagesAsRead(); // Clear badge when opening chat
             }
+            
+            // Check cooldown when entering transfer section
             if(sectionId === 'transfer') {
                 checkTransferCooldown();
             }
@@ -1224,23 +1165,6 @@
                 else ctx.lineTo(x, y);
             });
             ctx.stroke();
-        }
-
-        function updateMarketPressure() {
-            const buyPercent = Math.floor(Math.random() * 40) + 30;
-            const sellPercent = 100 - buyPercent;
-            
-            pressureData = { buy: buyPercent, sell: sellPercent };
-            
-            document.getElementById('buy-percentage').style.width = buyPercent + '%';
-            document.getElementById('buy-percentage').innerText = buyPercent + '%';
-            document.getElementById('sell-percentage').style.width = sellPercent + '%';
-            document.getElementById('sell-percentage').innerText = sellPercent + '%';
-            document.getElementById('last-updated').innerText = 'Updated now';
-            
-            setTimeout(() => {
-                document.getElementById('last-updated').innerText = 'Updated 1 min ago';
-            }, 60000);
         }
 
         window.downloadApp = () => {
@@ -1402,6 +1326,7 @@
             });
         };
 
+        // UPDATED: Submit Transfer with Cooldown
         window.submitTransfer = () => {
             const email = document.getElementById('transfer-email').value.trim();
             const amount = parseFloat(document.getElementById('transfer-amount').value);
@@ -1429,11 +1354,14 @@
                     showToast("User Found! Transferring...", "success");
                     
                     const updates = {};
+                    // Sender Balance
                     updates['users/' + currentUserData.uid + '/balanceTK'] = currentBal - amount;
+                    // Receiver Balance
                     const receiverData = snapshot.val()[receiverUid];
                     const receiverBal = parseFloat(receiverData.balanceTK || 0);
                     updates['users/' + receiverUid + '/balanceTK'] = receiverBal + amount;
 
+                    // History
                     const transferRef = push(ref(db, 'transfers'));
                     const transferData = {
                         from: currentUserData.uid,
@@ -1445,13 +1373,20 @@
                         timestamp: Date.now()
                     };
                     updates['transfers/' + transferRef.key] = transferData;
+
+                    // NEW: Add Cooldown Timestamp
                     updates['users/' + currentUserData.uid + '/lastTransferAt'] = Date.now();
 
                     update(ref(db), updates).then(() => {
                         showToast("Transfer Successful!");
-                        startTransferTimer(120000);
+                        
+                        // Start UI Timer Immediately
+                        startTransferTimer(120000); // 2 minutes
+                        
+                        // Clear Inputs
                         document.getElementById('transfer-amount').value = '';
                         document.getElementById('transfer-email').value = '';
+                        // Don't switch sections to let user see the timer
                     });
                 } else {
                     showToast("User Not Found", "error");
@@ -1507,7 +1442,8 @@
             push(chatRef, {
                 sender: currentUserData.uid,
                 text: text,
-                timestamp: Date.now()
+                timestamp: Date.now(),
+                read: true // User's own messages are read by default
             });
             input.value = "";
         }
@@ -1582,7 +1518,6 @@
                         }
                     });
                 }
-```html
                 renderHistory();
             });
 
@@ -1609,7 +1544,7 @@
         
         initApp();
 
-        // Activity tracking
+        // NEW: Track user activity on interactions
         document.addEventListener('click', () => {
             if(currentUserData && currentUserData.uid) {
                 trackUserActivity(currentUserData.uid);
@@ -1621,6 +1556,7 @@
             }
         });
 
+        // NEW: Activity tracking function
         function trackUserActivity(uid) {
             update(ref(db, 'users/' + uid), {
                 lastActive: Date.now(),
