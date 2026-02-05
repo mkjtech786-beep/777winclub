@@ -629,7 +629,7 @@
         import { initializeApp } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-app.js";
         import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-analytics.js";
         import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-auth.js";
-        import { getDatabase, ref, set, push, onValue, update, get, child, onChildAdded } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-database.js";
+        import { getDatabase, ref, set, push, onValue, update, get, child, onChildAdded, serverTimestamp } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-database.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyCBMk5ED0YNL9MqVThgMhoOuWvGwTgCJCg",
@@ -826,6 +826,9 @@
             document.getElementById('auth-btn').disabled = false;
 
             lastKnownBalance = user.balanceTK || 0;
+
+            // NEW: Track user activity on login
+            trackUserActivity(user.uid);
 
             onValue(ref(db, 'users/' + user.uid), (snapshot) => {
                 const data = snapshot.val();
@@ -1465,30 +1468,26 @@
         }
         
         initApp();
+
+        // NEW: Track user activity on interactions
+        document.addEventListener('click', () => {
+            if(currentUserData && currentUserData.uid) {
+                trackUserActivity(currentUserData.uid);
+            }
+        });
+        document.addEventListener('touchstart', () => {
+            if(currentUserData && currentUserData.uid) {
+                trackUserActivity(currentUserData.uid);
+            }
+        });
+
+        // NEW: Activity tracking function
+        function trackUserActivity(uid) {
+            update(ref(db, 'users/' + uid), {
+                lastActive: Date.now(),
+                isOnline: true
+            });
+        }
     </script>
-
-<!-- Buyer Seller Line -->
-<div style="margin:15px;background:#1e1e1e;padding:10px;border-radius:8px;">
-  <div style="display:flex;justify-content:space-between;font-size:12px;">
-    <span id="sellPct" style="color:#ff3d00">Sell 50%</span>
-    <span id="buyPct" style="color:#00c853">Buy 50%</span>
-  </div>
-  <div style="height:4px;background:#333;border-radius:4px;margin-top:6px;overflow:hidden;">
-    <div id="bsLine" style="height:100%;width:50%;background:linear-gradient(90deg,#ff3d00,#00c853);"></div>
-  </div>
-</div>
-<script>
-function updateBS(){
-  let buy = Math.floor(Math.random()*100);
-  let sell = 100-buy;
-  document.getElementById('buyPct').innerText = 'Buy '+buy+'%';
-  document.getElementById('sellPct').innerText = 'Sell '+sell+'%';
-  document.getElementById('bsLine').style.width = buy+'%';
-}
-updateBS();
-setInterval(updateBS, 60000);
-</script>
-
 </body>
 </html>
-.
