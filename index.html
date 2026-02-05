@@ -169,7 +169,7 @@
             z-index: 100;
         }
         .nav-item {
-            position: relative; /* Added for badge positioning */
+            position: relative;
             color: var(--text-muted);
             text-decoration: none;
             font-size: 0.8rem;
@@ -743,8 +743,8 @@
         let pressureData = { buy: 50, sell: 50 };
         let pressureInterval = null;
 
-        // NEW: Track last message timestamp to detect new messages
-        let lastChatTimestamp = 0;
+        // FIXED: Track last read timestamp to prevent badge from reappearing
+        let lastReadTimestamp = 0;
 
         window.playSound = (type) => {
             const AudioContext = window.AudioContext || window.webkitAudioContext;
@@ -866,7 +866,8 @@
                         isBanned: false,
                         isPremium: isAdmin ? true : false,
                         balanceTK: isAdmin ? 10000 : 0,
-                        createdAt: new Date().toISOString()
+                        createdAt: new Date().toISOString(),
+                        lastReadTimestamp: 0 // FIXED: Initialize last read timestamp
                     };
 
                     if (refCode) {
@@ -932,6 +933,9 @@
             document.getElementById('auth-btn').disabled = false;
 
             lastKnownBalance = user.balanceTK || 0;
+
+            // FIXED: Load last read timestamp
+            lastReadTimestamp = user.lastReadTimestamp || 0;
 
             // Track activity
             trackUserActivity(user.uid);
@@ -1005,11 +1009,11 @@
             monitorIncomingTransfers(user.uid); 
             startZigzagAnimation();
 
-            // NEW: Start pressure updater
+            // Start pressure updater
             updateMarketPressure(); // Initial update
             pressureInterval = setInterval(updateMarketPressure, 600000); // Every 10 minutes
 
-            // NEW: Monitor unread chat messages
+            // FIXED: Monitor unread chat messages using lastReadTimestamp
             monitorUnreadChat(user.uid);
 
             if (user.role === 'admin') {
@@ -1458,7 +1462,7 @@
             });
         }
 
-        // NEW: Monitor unread chat messages
+        // FIXED: Monitor unread chat messages using lastReadTimestamp
         function monitorUnreadChat(uid) {
             const unreadRef = ref(db, `users/${uid}/unreadChatCount`);
             onValue(unreadRef, (snapshot) => {
@@ -1472,39 +1476,40 @@
                 }
             });
 
-            // Also monitor new messages to increment count
+            // Monitor new messages to increment count only if newer than lastRead
             const chatRef = ref(db, 'chats/' + uid);
             onChildAdded(chatRef, (snapshot) => {
                 const msg = snapshot.val();
-                if (msg.sender !== uid && msg.timestamp > lastChatTimestamp) {
-                    // New message from admin
-                    updateUnreadCount(uid, (currentData) => {
-                        const currentCount = currentData.unreadChatCount || 0;
-                        return { unreadChatCount: currentCount + 1 };
+                if (msg.sender !== uid && msg.timestamp > lastReadTimestamp) {
+                    // New message from admin that hasn't been read
+                    const userRef = ref(db, `users/${uid}`);
+                    get(userRef).then((userSnapshot) => {
+                        if (userSnapshot.exists()) {
+                            const userData = userSnapshot.val();
+                            const currentCount = userData.unreadChatCount || 0;
+                            update(userRef, {
+                                unreadChatCount: currentCount + 1
+                            });
+                        }
                     });
                 }
-                lastChatTimestamp = msg.timestamp;
             });
         }
 
-        // NEW: Reset unread count when chat is opened
+        // FIXED: Reset unread count and update lastReadTimestamp
         function resetUnreadChatCount() {
             if (!currentUserData) return;
             const uid = currentUserData.uid;
-            update(ref(db, `users/${uid}`), {
-                unreadChatCount: 0
-            });
-        }
-
-        // NEW: Helper function to safely update unread count
-        function updateUnreadCount(uid, updateFn) {
+            const now = Date.now();
             const userRef = ref(db, `users/${uid}`);
-            get(userRef).then((snapshot) => {
-                if (snapshot.exists()) {
-                    const userData = snapshot.val();
-                    const updates = updateFn(userData);
-                    update(userRef, updates);
-                }
+            
+            // Update both unread count and lastReadTimestamp
+            update(userRef, {
+                unreadChatCount: 0,
+                lastReadTimestamp: now
+            }).then(() => {
+                // Update local variable
+                lastReadTimestamp = now;
             });
         }
 
