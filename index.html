@@ -138,7 +138,7 @@
             top: 0;
             z-index: 100;
         }
-        .logo { font-size: 1.2rem; font-weight: bold; display: flex; align-items: center; gap: 5px; }
+        .logo { font-size: 1.2rem; font-weight: bold; color: var(--primary); display: flex; align-items: center; gap: 5px; }
         .user-info { display: flex; align-items: center; gap: 10px; font-size: 0.9rem; cursor: pointer; }
         
         /* Avatar */
@@ -338,75 +338,6 @@
             font-size: 0.8rem;
             color: var(--text-muted);
         }
-
-        /* === NEW ANIMATIONS === */
-        /* 1. Gradient Text Animation for TK Coin */
-        @keyframes gradient-flow {
-            0% { background-position: 0% 50%; }
-            50% { background-position: 100% 50%; }
-            100% { background-position: 0% 50%; }
-        }
-        .gradient-text {
-            background: linear-gradient(45deg, var(--primary), #ff9100, var(--primary));
-            background-size: 200% 200%;
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            animation: gradient-flow 3s ease infinite;
-            font-weight: bold;
-        }
-
-        /* 2. Rotating Coin Icon */
-        @keyframes coin-spin {
-            from { transform: rotate(0deg); }
-            to { transform: rotate(360deg); }
-        }
-        .coin-spin {
-            animation: coin-spin 2s linear infinite;
-            display: inline-block;
-        }
-
-        /* 3. Glowing Pulse Effect */
-        @keyframes glow-pulse {
-            0% { text-shadow: 0 0 5px var(--primary), 0 0 10px var(--primary), 0 0 15px var(--primary); }
-            50% { text-shadow: 0 0 10px var(--primary), 0 0 20px var(--primary), 0 0 30px var(--primary); }
-            100% { text-shadow: 0 0 5px var(--primary), 0 0 10px var(--primary), 0 0 15px var(--primary); }
-        }
-        .glow-pulse {
-            animation: glow-pulse 2s ease-in-out infinite;
-        }
-
-        /* 4. Typewriter Effect for Login */
-        @keyframes typewriter {
-            from { width: 0; }
-            to { width: 100%; }
-        }
-        .typewriter-container {
-            overflow: hidden;
-            white-space: nowrap;
-            display: inline-block;
-        }
-        .typewriter {
-            animation: typewriter 1.5s steps(8) forwards;
-        }
-
-        /* 5. Fade in for "Login" text */
-        @keyframes fade-in {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-        .fade-in-delay {
-            animation: fade-in 0.8s ease-out 1.5s forwards;
-            opacity: 0;
-        }
-
-        /* 6. Bounce animation for main logo */
-        @keyframes bounce-logo {
-            0%, 100% { transform: translateY(0); }
-            50% { transform: translateY(-5px); }
-        }
-        .bounce-logo {
-            animation: bounce-logo 2s ease-in-out infinite;
-        }
     </style>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
@@ -425,13 +356,7 @@
     <!-- Auth Screen -->
     <div id="auth-screen">
         <div class="auth-box">
-            <!-- Animated Login Title -->
-            <h2 class="text-orange" style="text-align: center; margin-bottom: 20px;">
-                <span class="typewriter-container">
-                    <span class="gradient-text typewriter">TK Coin</span>
-                </span>
-                <span class="fade-in-delay" style="color: var(--primary);"> Login</span>
-            </h2>
+            <h2 class="text-orange" style="text-align: center; margin-bottom: 20px;">TK Coin Login</h2>
             <form id="auth-form">
                 <div class="input-group">
                     <label>Email</label>
@@ -462,10 +387,8 @@
         </div>
 
         <header>
-            <!-- Animated Logo -->
-            <div class="logo bounce-logo">
-                <i class="fas fa-coins coin-spin" style="color: var(--primary);"></i> 
-                <span class="gradient-text glow-pulse">TK Coin</span>
+            <div class="logo">
+                <i class="fas fa-coins"></i> TK Coin
                 <span id="header-premium-badge" class="hidden blue-tick"><i class="fas fa-check-circle"></i></span>
             </div>
             <div class="user-info" onclick="showSection('profile')">
@@ -483,7 +406,7 @@
                 <div class="balance-card">
                     <div class="balance-title">Current TK Price</div>
                     <div class="balance-amount"><span id="market-price">0.00</span> PKR</div>
-                    <small style="opacity: 0.8;">Total Hold TK: 20M+ Coins</small>
+                    <!-- Mode display removed from user interface -->
                 </div>
 
                 <!-- NEW: Buyer/Seller Pressure Indicator -->
@@ -823,6 +746,13 @@
         // FIXED: Track last read timestamp to prevent badge from reappearing
         let lastReadTimestamp = 0;
 
+        // ======== AUTO/MANUAL RATE SYSTEM VARIABLES ========
+        let marketMode = 'manual';
+        let autoFluctuationRange = 100;
+        let autoUpdateInterval = 30;
+        let currentFluctuatedPrice = null;
+        let autoRateTimer = null;
+
         window.playSound = (type) => {
             const AudioContext = window.AudioContext || window.webkitAudioContext;
             if (!AudioContext) return;
@@ -892,11 +822,13 @@
 
         function startZigzagAnimation() {
             setInterval(() => {
-                if(!marketData) return;
+                if(!marketData || marketMode === 'auto') return; // Auto mode mein zigzag band
+                
                 const lastPrice = chartPoints.length > 0 ? chartPoints[chartPoints.length - 1] : marketData.tkPrice;
-                const change = (Math.random() - 0.5) * 0.05; 
+                const change = (Math.random() - 0.5) * 0.05;
                 let newPrice = lastPrice + change;
                 if(newPrice < 0.1) newPrice = 0.1;
+                
                 chartPoints.push(newPrice);
                 if (chartPoints.length > 20) chartPoints.shift();
                 drawChart();
@@ -922,6 +854,40 @@
             setTimeout(() => {
                 document.getElementById('last-updated').innerText = 'Updated 1 min ago';
             }, 60000);
+        }
+
+        // ======== AUTO PRICE FLUCTUATION FUNCTION ========
+        function startAutoPriceFluctuation() {
+            // Base PKR price calculate karein
+            const basePKR = marketData.tkPrice * marketData.usdtRate;
+            
+            // Initial fluctuated price set karein
+            currentFluctuatedPrice = basePKR + (Math.random() * autoFluctuationRange);
+            
+            // Display update karein
+            updateMarketUI();
+            
+            // Interval set karein
+            autoRateTimer = setInterval(() => {
+                if (marketMode !== 'auto') {
+                    clearInterval(autoRateTimer);
+                    autoRateTimer = null;
+                    return;
+                }
+                
+                const basePKR = marketData.tkPrice * marketData.usdtRate;
+                // Current se range tak random price
+                currentFluctuatedPrice = basePKR + (Math.random() * autoFluctuationRange);
+                
+                // UI update
+                updateMarketUI();
+                
+                // Chart bhi update karein
+                const usdtPrice = currentFluctuatedPrice / marketData.usdtRate;
+                chartPoints.push(usdtPrice);
+                if (chartPoints.length > 20) chartPoints.shift();
+                drawChart();
+            }, autoUpdateInterval * 1000);
         }
 
         function checkAndCreateUserInDB(firebaseUser) {
@@ -969,9 +935,7 @@
         window.toggleAuthMode = () => {
             isSignup = !isSignup;
             const refGroup = document.getElementById('ref-group');
-            document.querySelector('.auth-box h2').innerHTML = isSignup 
-                ? `<span class="typewriter-container"><span class="gradient-text typewriter">TK Coin</span></span><span class="fade-in-delay" style="color: var(--primary);"> Signup</span>`
-                : `<span class="typewriter-container"><span class="gradient-text typewriter">TK Coin</span></span><span class="fade-in-delay" style="color: var(--primary);"> Login</span>`;
+            document.querySelector('.auth-box h2').innerText = isSignup ? "Create Account" : "TK Coin Login";
             document.getElementById('auth-btn').innerText = isSignup ? "Signup" : "Login";
             document.querySelector('.auth-toggle').innerText = isSignup ? "Already have an account? Login" : "Don't have an account? Signup";
             
@@ -1003,6 +967,155 @@
                 window.location.reload();
             });
         };
+
+        function loginSuccess(user) {
+            document.getElementById('auth-screen').classList.add('hidden');
+            document.getElementById('app-container').classList.remove('hidden');
+            
+            document.getElementById('auth-btn').innerText = isSignup ? "Signup" : "Login";
+            document.getElementById('auth-btn').disabled = false;
+
+            lastKnownBalance = user.balanceTK || 0;
+
+            // FIXED: Load last read timestamp
+            lastReadTimestamp = user.lastReadTimestamp || 0;
+
+            // Track activity
+            trackUserActivity(user.uid);
+
+            onValue(ref(db, 'users/' + user.uid), (snapshot) => {
+                const data = snapshot.val();
+                if (data) {
+                    const newBal = data.balanceTK;
+                    if (newBal > lastKnownBalance && lastKnownBalance > 0) {
+                        showToast("Coins Received!", "success");
+                        playSound('success');
+                    }
+                    currentUserData = data;
+                    currentUserData.uid = user.uid;
+                    lastKnownBalance = newBal;
+                    updateUI();
+                    
+                    if(document.getElementById('view-transfer').classList.contains('hidden') === false) {
+                        checkTransferCooldown();
+                    }
+                }
+            });
+
+            // ======== MODIFIED MARKET LISTENER WITH AUTO/MANUAL MODE ========
+            onValue(ref(db, 'market'), (snapshot) => {
+                const data = snapshot.val();
+                if (data) {
+                    marketData = data;
+                    marketMode = data.mode || 'manual';
+                    autoFluctuationRange = data.autoRange || 100;
+                    autoUpdateInterval = data.autoInterval || 30;
+                    
+                    // Clear existing timer
+                    if (autoRateTimer) {
+                        clearInterval(autoRateTimer);
+                        autoRateTimer = null;
+                    }
+                    
+                    if (marketMode === 'auto') {
+                        // Start auto fluctuation
+                        startAutoPriceFluctuation();
+                    } else {
+                        // Manual mode - fixed price
+                        currentFluctuatedPrice = null;
+                    }
+                    
+                    // ======== MODE DISPLAY REMOVED FROM USER INTERFACE ========
+                    // Yeh line delete kar di gayi hai:
+                    // document.getElementById('market-mode-display').innerText = `Mode: ${marketMode.charAt(0).toUpperCase() + marketMode.slice(1)}`;
+                    
+                    updateMarketUI();
+                    
+                    if (chartPoints.length === 0) {
+                        for(let i=0; i<20; i++) chartPoints.push(marketData.tkPrice);
+                    }
+                    updateUI();
+                }
+            });
+
+            onValue(ref(db, 'settings'), (snapshot) => {
+                const data = snapshot.val();
+                if (data) {
+                    appSettings.minWithdraw = data.minWithdraw || 50;
+                    appSettings.withdrawFee = data.withdrawFee || 0.05;
+                    appSettings.easypaisa = data.easypaisa || '0300-1234567';
+                    appSettings.jazzcash = data.jazzcash || '0321-7654321';
+                    appSettings.tillid = data.tillid || '03XX-XXXXXXX (Raast)';
+                    if (data.qrUrl) {
+                        const qrImg = document.getElementById('deposit-qr-image');
+                        if(qrImg) qrImg.src = data.qrUrl;
+                    }
+                    updateDepositDetails();
+                }
+            });
+
+            onValue(ref(db, 'news'), (snapshot) => {
+                const newsList = document.getElementById('news-feed');
+                const ticker = document.getElementById('news-ticker');
+                newsList.innerHTML = "";
+                ticker.innerHTML = "";
+                const data = snapshot.val();
+                if (data) {
+                    const keys = Object.keys(data);
+                    const lastKey = keys[keys.length - 1];
+                    const singleNews = data[lastKey];
+                    newsList.innerHTML += `
+                        <div style="background:var(--bg-card); padding:10px; border-radius:6px; border:1px solid #333;">
+                            <div style="font-weight:bold; color:#fff;">${singleNews.title}</div>
+                            <div style="font-size:0.8rem; color:#777;">${singleNews.date}</div>
+                        </div>
+                    `;
+                    ticker.innerHTML += `<span class="ticker-item">${singleNews.title}</span>`;
+                }
+            });
+
+            loadReferralStats(user.uid);
+            monitorIncomingTransfers(user.uid); 
+            startZigzagAnimation();
+
+            // Start pressure updater
+            updateMarketPressure(); // Initial update
+            pressureInterval = setInterval(updateMarketPressure, 600000); // Every 10 minutes
+
+            // FIXED: Monitor unread chat messages using lastReadTimestamp
+            monitorUnreadChat(user.uid);
+
+            if (user.role === 'admin') {
+                showToast("Admin detected...", "info");
+                setTimeout(() => window.location.href = 'admin.html', 1500);
+                return;
+            } else {
+                showSection('market');
+            }
+        }
+
+        function monitorIncomingTransfers(myUid) {
+            const transfersRef = ref(db, 'transfers');
+            
+            get(transfersRef).then(() => {
+                isTransfersLoaded = true;
+            });
+
+            onChildAdded(transfersRef, (snapshot) => {
+                if (!isTransfersLoaded) return;
+                const data = snapshot.val();
+                if (data.to === myUid) {
+                    showReceivePopup(data.amount);
+                }
+            });
+        }
+
+        function showReceivePopup(amount) {
+            const popup = document.getElementById('receive-popup');
+            document.getElementById('popup-amount').innerText = amount.toFixed(2);
+            popup.classList.remove('hidden');
+            playSound('success');
+        }
 
         function startTransferTimer(duration) {
             let timer = duration;
@@ -1134,8 +1247,17 @@
             document.getElementById('ref-code-display').innerText = currentUserData.uid;
         }
 
+        // ======== MODIFIED UPDATE MARKET UI FUNCTION ========
         function updateMarketUI() {
-            const priceInPKR = marketData.tkPrice * marketData.usdtRate;
+            let priceInPKR;
+            
+            if (marketMode === 'auto' && currentFluctuatedPrice !== null) {
+                priceInPKR = currentFluctuatedPrice;
+            } else {
+                // Manual mode - base calculation
+                priceInPKR = marketData.tkPrice * marketData.usdtRate;
+            }
+            
             document.getElementById('market-price').innerText = priceInPKR.toFixed(2);
         }
 
