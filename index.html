@@ -406,7 +406,7 @@
                 <div class="balance-card">
                     <div class="balance-title">Current TK Price</div>
                     <div class="balance-amount"><span id="market-price">0.00</span> PKR</div>
-                    <!-- Mode display removed from user interface -->
+                    <small style="opacity: 0.8;">Total Hold TK: 20M+ Coins</small>
                 </div>
 
                 <!-- NEW: Buyer/Seller Pressure Indicator -->
@@ -820,15 +820,14 @@
             });
         }
 
+        // ======== RESTORED: Independent Zigzag Animation ========
         function startZigzagAnimation() {
             setInterval(() => {
-                if(!marketData || marketMode === 'auto') return; // Auto mode mein zigzag band
-                
+                if(!marketData) return; // Removed marketMode check - always run
                 const lastPrice = chartPoints.length > 0 ? chartPoints[chartPoints.length - 1] : marketData.tkPrice;
-                const change = (Math.random() - 0.5) * 0.05;
+                const change = (Math.random() - 0.5) * 0.05; 
                 let newPrice = lastPrice + change;
                 if(newPrice < 0.1) newPrice = 0.1;
-                
                 chartPoints.push(newPrice);
                 if (chartPoints.length > 20) chartPoints.shift();
                 drawChart();
@@ -856,7 +855,7 @@
             }, 60000);
         }
 
-        // ======== AUTO PRICE FLUCTUATION FUNCTION ========
+        // ======== AUTO PRICE FLUCTUATION FUNCTION (Chart Removed) ========
         function startAutoPriceFluctuation() {
             // Base PKR price calculate karein
             const basePKR = marketData.tkPrice * marketData.usdtRate;
@@ -882,11 +881,7 @@
                 // UI update
                 updateMarketUI();
                 
-                // Chart bhi update karein
-                const usdtPrice = currentFluctuatedPrice / marketData.usdtRate;
-                chartPoints.push(usdtPrice);
-                if (chartPoints.length > 20) chartPoints.shift();
-                drawChart();
+                // Chart update removed - let zigzag handle independently
             }, autoUpdateInterval * 1000);
         }
 
@@ -1026,7 +1021,7 @@
                     }
                     
                     // ======== MODE DISPLAY REMOVED FROM USER INTERFACE ========
-                    // Yeh line delete kar di gayi hai:
+                    // Yeh line DELETE karein:
                     // document.getElementById('market-mode-display').innerText = `Mode: ${marketMode.charAt(0).toUpperCase() + marketMode.slice(1)}`;
                     
                     updateMarketUI();
