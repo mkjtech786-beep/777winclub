@@ -1,4 +1,8 @@
-<!DOCTYPE html>
+
+# Creating the fixed USER-ViP.html with mobile-responsive input area
+# The issue is that the send button is on the side and doesn't fit on mobile
+
+fixed_html = '''<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -47,7 +51,7 @@
 
         /* Header */
         .header {
-            padding: 16px 20px;
+            padding: 12px 16px;
             background: rgba(26, 26, 46, 0.95);
             backdrop-filter: blur(20px);
             border-bottom: 1px solid var(--border);
@@ -56,17 +60,18 @@
             justify-content: space-between;
             position: relative;
             z-index: 100;
+            flex-shrink: 0;
         }
 
         .header-brand {
             display: flex;
             align-items: center;
-            gap: 12px;
+            gap: 10px;
         }
 
         .header-avatar {
-            width: 40px;
-            height: 40px;
+            width: 36px;
+            height: 36px;
             border-radius: 50%;
             background: var(--accent-gradient);
             display: flex;
@@ -75,6 +80,7 @@
             font-weight: 600;
             font-size: 14px;
             position: relative;
+            flex-shrink: 0;
         }
 
         .header-avatar::after {
@@ -82,21 +88,20 @@
             position: absolute;
             bottom: 0;
             right: 0;
-            width: 10px;
-            height: 10px;
+            width: 8px;
+            height: 8px;
             background: var(--success);
             border: 2px solid var(--bg-secondary);
             border-radius: 50%;
-            box-shadow: 0 0 10px var(--success);
         }
 
         .header-info h1 {
-            font-size: 16px;
+            font-size: 15px;
             font-weight: 600;
         }
 
         .header-info span {
-            font-size: 12px;
+            font-size: 11px;
             color: var(--text-secondary);
             display: flex;
             align-items: center;
@@ -107,57 +112,34 @@
             color: var(--accent-primary) !important;
         }
 
-        .header-actions {
-            display: flex;
-            gap: 8px;
-        }
-
-        .header-btn {
-            width: 36px;
-            height: 36px;
-            border: none;
-            background: var(--bg-tertiary);
-            color: var(--text-secondary);
-            border-radius: 10px;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: all 0.3s;
-        }
-
-        .header-btn:hover {
-            background: var(--accent-primary);
-            color: white;
-        }
-
         /* Messages */
         .messages {
             flex: 1;
             overflow-y: auto;
-            padding: 20px;
+            overflow-x: hidden;
+            padding: 16px;
             display: flex;
             flex-direction: column;
-            gap: 16px;
+            gap: 12px;
             background: linear-gradient(180deg, var(--bg-primary) 0%, rgba(26,26,46,0.5) 100%);
         }
 
         .message {
-            max-width: 85%;
+            max-width: 80%;
             display: flex;
             flex-direction: column;
-            gap: 4px;
+            gap: 2px;
             animation: messageIn 0.3s ease;
         }
 
         @keyframes messageIn {
             from {
                 opacity: 0;
-                transform: translateY(20px) scale(0.95);
+                transform: translateY(10px);
             }
             to {
                 opacity: 1;
-                transform: translateY(0) scale(1);
+                transform: translateY(0);
             }
         }
 
@@ -170,19 +152,19 @@
         }
 
         .message-bubble {
-            padding: 14px 18px;
-            border-radius: 20px;
+            padding: 10px 14px;
+            border-radius: 18px;
             position: relative;
             word-wrap: break-word;
-            line-height: 1.5;
-            font-size: 15px;
+            line-height: 1.4;
+            font-size: 14px;
         }
 
         .message.user .message-bubble {
             background: var(--accent-gradient);
             color: white;
             border-bottom-right-radius: 4px;
-            box-shadow: 0 4px 20px rgba(99, 102, 241, 0.3);
+            box-shadow: 0 4px 15px rgba(99, 102, 241, 0.3);
         }
 
         .message.admin .message-bubble {
@@ -192,15 +174,10 @@
         }
 
         .message-image {
-            max-width: 250px;
-            border-radius: 16px;
+            max-width: 200px;
+            border-radius: 12px;
             overflow: hidden;
             cursor: pointer;
-            transition: transform 0.3s;
-        }
-
-        .message-image:active {
-            transform: scale(0.98);
         }
 
         .message-image img {
@@ -212,13 +189,13 @@
         .audio-message {
             display: flex;
             align-items: center;
-            gap: 12px;
-            min-width: 200px;
+            gap: 10px;
+            min-width: 150px;
         }
 
         .audio-play-btn {
-            width: 36px;
-            height: 36px;
+            width: 32px;
+            height: 32px;
             border-radius: 50%;
             border: none;
             background: rgba(255,255,255,0.2);
@@ -227,7 +204,7 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 12px;
+            font-size: 10px;
             flex-shrink: 0;
         }
 
@@ -238,7 +215,7 @@
 
         .audio-waveform {
             flex: 1;
-            height: 24px;
+            height: 20px;
             display: flex;
             align-items: center;
             gap: 2px;
@@ -248,7 +225,7 @@
             flex: 1;
             background: rgba(255,255,255,0.3);
             border-radius: 1px;
-            transition: height 0.3s;
+            min-height: 4px;
         }
 
         .message.admin .waveform-bar {
@@ -256,17 +233,17 @@
         }
 
         .audio-duration {
-            font-size: 11px;
+            font-size: 10px;
             opacity: 0.8;
-            min-width: 35px;
+            min-width: 30px;
             text-align: right;
         }
 
         .message-meta {
             display: flex;
             align-items: center;
-            gap: 6px;
-            font-size: 11px;
+            gap: 4px;
+            font-size: 10px;
             color: var(--text-secondary);
             padding: 0 4px;
         }
@@ -282,7 +259,7 @@
         /* Date Divider */
         .date-divider {
             text-align: center;
-            margin: 20px 0;
+            margin: 16px 0;
             position: relative;
         }
 
@@ -298,46 +275,48 @@
 
         .date-divider span {
             background: var(--bg-primary);
-            padding: 0 16px;
-            font-size: 12px;
+            padding: 0 12px;
+            font-size: 11px;
             color: var(--text-secondary);
             position: relative;
         }
 
-        /* Input Area */
+        /* ====== FIXED INPUT AREA ====== */
         .input-area {
             background: var(--bg-secondary);
             border-top: 1px solid var(--border);
-            padding: 12px 16px;
-            padding-bottom: calc(12px + env(safe-area-inset-bottom));
+            padding: 8px 12px;
+            padding-bottom: calc(8px + env(safe-area-inset-bottom));
+            flex-shrink: 0;
         }
 
         .input-container {
             display: flex;
             align-items: flex-end;
-            gap: 10px;
+            gap: 8px;
+            max-width: 100%;
         }
 
         .input-wrapper {
             flex: 1;
             background: var(--bg-primary);
-            border-radius: 24px;
-            padding: 8px;
+            border-radius: 20px;
+            padding: 6px;
             display: flex;
             align-items: center;
-            gap: 8px;
+            gap: 6px;
             border: 1px solid var(--border);
             transition: all 0.3s;
+            min-width: 0;
         }
 
         .input-wrapper:focus-within {
             border-color: var(--accent-primary);
-            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
         }
 
         .attach-btn {
-            width: 36px;
-            height: 36px;
+            width: 32px;
+            height: 32px;
             border: none;
             background: transparent;
             color: var(--text-secondary);
@@ -346,7 +325,7 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 18px;
+            font-size: 16px;
             flex-shrink: 0;
         }
 
@@ -355,40 +334,34 @@
             background: transparent;
             border: none;
             color: var(--text-primary);
-            font-size: 15px;
+            font-size: 14px;
             outline: none;
-            padding: 8px;
-            max-height: 100px;
+            padding: 6px 4px;
+            min-height: 20px;
+            max-height: 80px;
             resize: none;
             font-family: inherit;
+            width: 100%;
         }
 
         .message-input::placeholder {
             color: var(--text-secondary);
         }
 
-        .input-actions {
-            display: flex;
-            gap: 8px;
-        }
-
-        .action-btn {
-            width: 44px;
-            height: 44px;
+        .mic-btn {
+            width: 32px;
+            height: 32px;
             border: none;
+            background: transparent;
+            color: var(--accent-primary);
             border-radius: 50%;
             cursor: pointer;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 18px;
-            transition: all 0.3s;
+            font-size: 16px;
             flex-shrink: 0;
-        }
-
-        .mic-btn {
-            background: var(--bg-tertiary);
-            color: var(--accent-primary);
+            transition: all 0.3s;
         }
 
         .mic-btn.recording {
@@ -398,9 +371,20 @@
         }
 
         .send-btn {
+            width: 40px;
+            height: 40px;
+            border: none;
             background: var(--accent-gradient);
             color: white;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            flex-shrink: 0;
             box-shadow: 0 4px 15px rgba(99, 102, 241, 0.4);
+            transition: all 0.2s;
         }
 
         .send-btn:active {
@@ -409,7 +393,7 @@
 
         @keyframes pulse {
             0%, 100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.4); }
-            50% { box-shadow: 0 0 0 10px rgba(239, 68, 68, 0); }
+            50% { box-shadow: 0 0 0 8px rgba(239, 68, 68, 0); }
         }
 
         /* Recording UI */
@@ -419,11 +403,11 @@
             left: 0;
             right: 0;
             background: linear-gradient(to top, var(--bg-secondary), transparent);
-            padding: 20px;
+            padding: 16px;
             display: none;
             align-items: center;
             justify-content: center;
-            gap: 20px;
+            gap: 16px;
         }
 
         .recording-overlay.active {
@@ -431,36 +415,31 @@
         }
 
         .recording-timer {
-            font-size: 24px;
+            font-size: 20px;
             font-weight: 600;
             color: var(--danger);
             font-variant-numeric: tabular-nums;
         }
 
-        .recording-cancel {
-            font-size: 14px;
-            color: var(--text-secondary);
-        }
-
         .voice-wave {
             display: flex;
             align-items: center;
-            gap: 4px;
-            height: 40px;
+            gap: 3px;
+            height: 30px;
         }
 
         .voice-wave span {
-            width: 4px;
+            width: 3px;
             background: var(--danger);
             border-radius: 2px;
             animation: voiceWave 0.5s infinite ease-in-out;
         }
 
-        .voice-wave span:nth-child(1) { height: 10px; animation-delay: 0s; }
-        .voice-wave span:nth-child(2) { height: 20px; animation-delay: 0.1s; }
-        .voice-wave span:nth-child(3) { height: 30px; animation-delay: 0.2s; }
-        .voice-wave span:nth-child(4) { height: 25px; animation-delay: 0.3s; }
-        .voice-wave span:nth-child(5) { height: 15px; animation-delay: 0.4s; }
+        .voice-wave span:nth-child(1) { height: 8px; animation-delay: 0s; }
+        .voice-wave span:nth-child(2) { height: 16px; animation-delay: 0.1s; }
+        .voice-wave span:nth-child(3) { height: 24px; animation-delay: 0.2s; }
+        .voice-wave span:nth-child(4) { height: 20px; animation-delay: 0.3s; }
+        .voice-wave span:nth-child(5) { height: 12px; animation-delay: 0.4s; }
 
         @keyframes voiceWave {
             0%, 100% { transform: scaleY(0.5); opacity: 0.5; }
@@ -474,13 +453,15 @@
             left: 50%;
             transform: translate(-50%, -50%);
             background: var(--bg-secondary);
-            padding: 30px;
-            border-radius: 20px;
+            padding: 24px;
+            border-radius: 16px;
             text-align: center;
             border: 1px solid var(--border);
             display: none;
             z-index: 1000;
             box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+            width: 80%;
+            max-width: 300px;
         }
 
         .blocked-notice.active {
@@ -488,18 +469,19 @@
         }
 
         .blocked-notice i {
-            font-size: 48px;
+            font-size: 40px;
             color: var(--danger);
-            margin-bottom: 16px;
+            margin-bottom: 12px;
         }
 
         .blocked-notice h3 {
-            margin-bottom: 8px;
+            margin-bottom: 6px;
+            font-size: 18px;
         }
 
         .blocked-notice p {
             color: var(--text-secondary);
-            font-size: 14px;
+            font-size: 13px;
         }
 
         /* Image Modal */
@@ -543,7 +525,7 @@
 
         /* Scrollbar */
         ::-webkit-scrollbar {
-            width: 4px;
+            width: 3px;
         }
 
         ::-webkit-scrollbar-thumb {
@@ -564,7 +546,7 @@
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            padding: 40px;
+            padding: 30px;
             text-align: center;
         }
 
@@ -573,47 +555,48 @@
         }
 
         .welcome-icon {
-            width: 100px;
-            height: 100px;
+            width: 80px;
+            height: 80px;
             background: var(--accent-gradient);
-            border-radius: 30px;
+            border-radius: 24px;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 48px;
-            margin-bottom: 30px;
-            box-shadow: 0 20px 60px rgba(99, 102, 241, 0.3);
+            font-size: 36px;
+            margin-bottom: 24px;
+            box-shadow: 0 16px 40px rgba(99, 102, 241, 0.3);
             animation: float 3s ease-in-out infinite;
         }
 
         @keyframes float {
             0%, 100% { transform: translateY(0); }
-            50% { transform: translateY(-20px); }
+            50% { transform: translateY(-15px); }
         }
 
         .welcome-screen h2 {
-            font-size: 28px;
-            margin-bottom: 12px;
+            font-size: 24px;
+            margin-bottom: 10px;
         }
 
         .welcome-screen p {
             color: var(--text-secondary);
-            margin-bottom: 30px;
-            line-height: 1.6;
+            margin-bottom: 24px;
+            line-height: 1.5;
+            font-size: 14px;
         }
 
         .username-input {
             width: 100%;
-            max-width: 300px;
-            padding: 16px 20px;
+            max-width: 260px;
+            padding: 14px 18px;
             background: var(--bg-secondary);
             border: 2px solid var(--border);
-            border-radius: 16px;
+            border-radius: 12px;
             color: var(--text-primary);
-            font-size: 16px;
+            font-size: 15px;
             text-align: center;
             outline: none;
-            margin-bottom: 16px;
+            margin-bottom: 12px;
             transition: all 0.3s;
         }
 
@@ -623,13 +606,13 @@
 
         .start-btn {
             width: 100%;
-            max-width: 300px;
-            padding: 16px;
+            max-width: 260px;
+            padding: 14px;
             background: var(--accent-gradient);
             border: none;
-            border-radius: 16px;
+            border-radius: 12px;
             color: white;
-            font-size: 16px;
+            font-size: 15px;
             font-weight: 600;
             cursor: pointer;
             transition: all 0.3s;
@@ -637,6 +620,27 @@
 
         .start-btn:active {
             transform: scale(0.98);
+        }
+
+        /* Small screen optimizations */
+        @media (max-width: 380px) {
+            .header-info h1 {
+                font-size: 14px;
+            }
+            
+            .message-bubble {
+                font-size: 13px;
+                padding: 8px 12px;
+            }
+            
+            .send-btn {
+                width: 36px;
+                height: 36px;
+            }
+            
+            .input-wrapper {
+                padding: 4px;
+            }
         }
     </style>
 </head>
@@ -675,15 +679,10 @@
                 <div class="header-info">
                     <h1>Admin</h1>
                     <span id="statusText">
-                        <i class="fas fa-circle" style="font-size: 8px; color: var(--success);"></i>
+                        <i class="fas fa-circle" style="font-size: 6px; color: var(--success);"></i>
                         Online
                     </span>
                 </div>
-            </div>
-            <div class="header-actions">
-                <button class="header-btn" onclick="clearChat()">
-                    <i class="fas fa-trash"></i>
-                </button>
             </div>
         </div>
 
@@ -694,25 +693,24 @@
                 <span></span><span></span><span></span><span></span><span></span>
             </div>
             <div class="recording-timer" id="recordingTimer">00:00</div>
-            <div class="recording-cancel">Slide to cancel</div>
         </div>
 
         <div class="input-area">
             <div class="input-container">
                 <div class="input-wrapper">
-                    <button class="attach-btn" onclick="document.getElementById('imageInput').click()">
+                    <button class="attach-btn" onclick="document.getElementById(\'imageInput\').click()">
                         <i class="fas fa-paperclip"></i>
                     </button>
                     <input type="file" id="imageInput" accept="image/*" style="display: none;">
                     
                     <textarea class="message-input" id="messageInput" placeholder="Type a message..." rows="1"></textarea>
                     
-                    <button class="action-btn mic-btn" id="micBtn">
+                    <button class="mic-btn" id="micBtn">
                         <i class="fas fa-microphone"></i>
                     </button>
                 </div>
                 
-                <button class="action-btn send-btn" id="sendBtn" onclick="sendMessage()">
+                <button class="send-btn" onclick="sendMessage()">
                     <i class="fas fa-paper-plane"></i>
                 </button>
             </div>
@@ -745,10 +743,10 @@
 
         // Mobile height fix
         function setVH() {
-            document.documentElement.style.setProperty('--vh', window.innerHeight * 0.01 + 'px');
+            document.documentElement.style.setProperty(\'--vh\', window.innerHeight * 0.01 + \'px\');
         }
         setVH();
-        window.addEventListener('resize', setVH);
+        window.addEventListener(\'resize\', setVH);
 
         // Check existing user
         const savedUser = localStorage.getItem("mahtab_username");
@@ -758,11 +756,11 @@
         }
 
         window.startChat = () => {
-            const input = document.getElementById('usernameInput');
+            const input = document.getElementById(\'usernameInput\');
             const name = input.value.trim();
             if (!name) {
-                input.style.borderColor = 'var(--danger)';
-                setTimeout(() => input.style.borderColor = '', 1000);
+                input.style.borderColor = \'var(--danger)\';
+                setTimeout(() => input.style.borderColor = \'\', 1000);
                 return;
             }
             
@@ -772,25 +770,22 @@
         };
 
         function showApp() {
-            document.getElementById('welcomeScreen').classList.add('hidden');
-            document.getElementById('app').style.display = 'flex';
-            
+            document.getElementById(\'welcomeScreen\').classList.add(\'hidden\');
+            document.getElementById(\'app\').style.display = \'flex\';
             initializeChat();
         }
 
         function initializeChat() {
-            // Check blocked status
             onValue(ref(db, `chats/${userId}/blocked`), (snap) => {
                 if (snap.exists() && snap.val()) {
-                    document.getElementById('blockedNotice').classList.add('active');
-                    document.querySelector('.input-area').style.display = 'none';
+                    document.getElementById(\'blockedNotice\').classList.add(\'active\');
+                    document.querySelector(\'.input-area\').style.display = \'none\';
                 } else {
-                    document.getElementById('blockedNotice').classList.remove('active');
-                    document.querySelector('.input-area').style.display = 'block';
+                    document.getElementById(\'blockedNotice\').classList.remove(\'active\');
+                    document.querySelector(\'.input-area\').style.display = \'block\';
                 }
             });
 
-            // Update last active
             update(ref(db, `chats/${userId}`), { 
                 lastActive: Date.now(),
                 started: Date.now()
@@ -800,69 +795,55 @@
                 update(ref(db, `chats/${userId}`), { lastActive: Date.now() });
             }, 30000);
 
-            // Load messages
             loadMessages();
             
-            // Listen for admin typing
             onValue(ref(db, `chats/${userId}/adminTyping`), (snap) => {
-                const statusText = document.getElementById('statusText');
+                const statusText = document.getElementById(\'statusText\');
                 if (snap.exists() && snap.val()) {
-                    statusText.innerHTML = '<span class="typing-text">typing...</span>';
+                    statusText.innerHTML = \'<span class="typing-text">typing...</span>\';
                 } else {
-                    statusText.innerHTML = '<i class="fas fa-circle" style="font-size: 8px; color: var(--success);"></i> Online';
+                    statusText.innerHTML = \'<i class="fas fa-circle" style="font-size: 6px; color: var(--success);"></i> Online\';
                 }
             });
 
-            // Setup input
-            const input = document.getElementById('messageInput');
-            input.addEventListener('input', () => {
-                input.style.height = 'auto';
-                input.style.height = Math.min(input.scrollHeight, 100) + 'px';
-                
-                // Typing indicator
+            const input = document.getElementById(\'messageInput\');
+            input.addEventListener(\'input\', () => {
+                input.style.height = \'auto\';
+                input.style.height = Math.min(input.scrollHeight, 80) + \'px\';
                 update(ref(db, `chats/${userId}`), { typing: input.value.length > 0 });
             });
 
-            input.addEventListener('keypress', (e) => {
-                if (e.key === 'Enter' && !e.shiftKey) {
+            input.addEventListener(\'keypress\', (e) => {
+                if (e.key === \'Enter\' && !e.shiftKey) {
                     e.preventDefault();
                     sendMessage();
                 }
             });
 
-            // Setup mic
-            document.getElementById('micBtn').addEventListener('click', toggleRecording);
-            
-            // Setup image
-            document.getElementById('imageInput').addEventListener('change', handleImage);
+            document.getElementById(\'micBtn\').addEventListener(\'click\', toggleRecording);
+            document.getElementById(\'imageInput\').addEventListener(\'change\', handleImage);
         }
 
         function loadMessages() {
-            const messagesDiv = document.getElementById('messages');
+            const messagesDiv = document.getElementById(\'messages\');
             
             onValue(ref(db, `chats/${userId}/messages`), (snap) => {
-                messagesDiv.innerHTML = '';
-                
+                messagesDiv.innerHTML = \'\';
                 if (!snap.exists()) return;
 
                 let lastDate = null;
-
                 snap.forEach((child) => {
                     const msg = child.val();
                     const msgDate = new Date(msg.time).toDateString();
-                    
-                    // Date divider
                     if (msgDate !== lastDate) {
-                        const divider = document.createElement('div');
-                        divider.className = 'date-divider';
+                        const divider = document.createElement(\'div\');
+                        divider.className = \'date-divider\';
                         divider.innerHTML = `<span>${formatDate(msg.time)}</span>`;
                         messagesDiv.appendChild(divider);
                         lastDate = msgDate;
                     }
-                    
                     renderMessage(msg, child.key);
                 });
-
                 scrollToBottom();
             });
         }
@@ -872,84 +853,57 @@
             const today = new Date();
             const yesterday = new Date(today);
             yesterday.setDate(yesterday.getDate() - 1);
-
-            if (date.toDateString() === today.toDateString()) return 'Today';
-            if (date.toDateString() === yesterday.toDateString()) return 'Yesterday';
+            if (date.toDateString() === today.toDateString()) return \'Today\';
+            if (date.toDateString() === yesterday.toDateString()) return \'Yesterday\';
             return date.toLocaleDateString();
         }
 
         function renderMessage(msg, key) {
-            const messagesDiv = document.getElementById('messages');
-            const div = document.createElement('div');
+            const messagesDiv = document.getElementById(\'messages\');
+            const div = document.createElement(\'div\');
             div.className = `message ${msg.from}`;
             
-            let content = '';
+            let content = \'\';
             
             if (msg.text) {
                 content = `<div class="message-bubble">${escapeHtml(msg.text)}</div>`;
             } else if (msg.image) {
-                content = `
-                    <div class="message-image" onclick="openImageModal('${msg.image}')">
-                        <img src="${msg.image}" alt="Image">
-                    </div>
-                `;
+                content = `<div class="message-image" onclick="openImageModal(\'${msg.image}\')"><img src="${msg.image}" alt="Image"></div>`;
             } else if (msg.voice) {
-                content = `
-                    <div class="message-bubble">
-                        <div class="audio-message">
-                            <button class="audio-play-btn" onclick="playAudio(this, '${msg.voice}')">
-                                <i class="fas fa-play"></i>
-                            </button>
-                            <div class="audio-waveform">
-                                ${Array(25).fill(0).map(() => `<div class="waveform-bar" style="height: ${Math.random() * 20 + 4}px"></div>`).join('')}
-                            </div>
-                            <span class="audio-duration">0:00</span>
-                        </div>
-                    </div>
-                `;
+                content = `<div class="message-bubble"><div class="audio-message"><button class="audio-play-btn" onclick="playAudio(this, \'${msg.voice}\')"><i class="fas fa-play"></i></button><div class="audio-waveform">${Array(20).fill(0).map(() => `<div class="waveform-bar" style="height: ${Math.random() * 16 + 4}px"></div>`).join(\'\')}</div><span class="audio-duration">0:00</span></div></div>`;
             }
 
-            const time = msg.time ? new Date(msg.time).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : '';
-            const ticks = msg.from === 'user' ? 
-                (msg.status === 'seen' ? '<i class="fas fa-check-double read-receipt"></i>' : '<i class="fas fa-check"></i>') : '';
+            const time = msg.time ? new Date(msg.time).toLocaleTimeString([], {hour: \'2-digit\', minute:\'2-digit\'}) : \'\';
+            const ticks = msg.from === \'user\' ? (msg.status === \'seen\' ? \'<i class="fas fa-check-double read-receipt"></i>\' : \'<i class="fas fa-check"></i>\') : \'\';
             
-            div.innerHTML = `
-                ${content}
-                <div class="message-meta">
-                    <span>${time}</span>
-                    ${ticks}
-                </div>
-            `;
-            
+            div.innerHTML = `${content}<div class="message-meta"><span>${time}</span>${ticks}</div>`;
             messagesDiv.appendChild(div);
         }
 
         function escapeHtml(text) {
-            const div = document.createElement('div');
+            const div = document.createElement(\'div\');
             div.textContent = text;
             return div.innerHTML;
         }
 
         window.sendMessage = async () => {
-            const input = document.getElementById('messageInput');
+            const input = document.getElementById(\'messageInput\');
             const text = input.value.trim();
             if (!text) return;
 
-            // Check blocked
             const blocked = await get(ref(db, `chats/${userId}/blocked`));
             if (blocked.exists() && blocked.val()) return;
 
             push(ref(db, `chats/${userId}/messages`), {
-                from: 'user',
+                from: \'user\',
                 text: text,
                 time: Date.now(),
-                status: 'sent'
+                status: \'sent\'
             });
 
-            input.value = '';
-            input.style.height = 'auto';
+            input.value = \'\';
+            input.style.height = \'auto\';
             update(ref(db, `chats/${userId}`), { typing: false });
-            
             scrollToBottom();
         };
 
@@ -964,57 +918,131 @@
             reader.readAsDataURL(file);
             reader.onloadend = () => {
                 push(ref(db, `chats/${userId}/messages`), {
-                    from: 'user',
+                    from: \'user\',
                     image: reader.result,
-                    time: Date I have successfully redesigned both your chat application files with a modern, professional UI and added several new features. Here is a summary of the changes:
+                    time: Date.now(),
+                    status: \'sent\'
+                });
+                scrollToBottom();
+            };
+            e.target.value = \'\';
+        }
 
-### **ADMIN-ViP.html (Admin Dashboard)**
-**New Design:**
-- Modern dark theme with purple/blue gradient accents
-- Glassmorphism effects and smooth animations
-- Professional sidebar with user avatars and search functionality
-- Real-time online/offline status indicators
-- Typing indicators in user list
+        async function toggleRecording() {
+            const btn = document.getElementById(\'micBtn\');
+            const overlay = document.getElementById(\'recordingOverlay\');
+            const timer = document.getElementById(\'recordingTimer\');
 
-**New Features:**
-- **User Search:** Filter users by name in the sidebar
-- **Statistics Bar:** Shows online and total user counts
-- **Block/Unblock Users:** Toggle button to block/unblock users
-- **Clear Chat:** Remove all messages for a specific user
-- **Image Preview Modal:** Click images to view full size
-- **Audio Player:** Custom audio player with waveform visualization and play/pause functionality
-- **Toast Notifications:** Success/error messages instead of alerts
-- **Read Receipts:** Double checkmarks showing message status
+            if (btn.classList.contains(\'recording\')) {
+                if (mediaRecorder && mediaRecorder.state !== \'inactive\') {
+                    mediaRecorder.stop();
+                }
+                clearInterval(recordingTimer);
+                btn.classList.remove(\'recording\');
+                overlay.classList.remove(\'active\');
+            } else {
+                const blocked = await get(ref(db, `chats/${userId}/blocked`));
+                if (blocked.exists() && blocked.val()) return;
 
----
+                try {
+                    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                    mediaRecorder = new MediaRecorder(stream);
+                    audioChunks = [];
+                    
+                    mediaRecorder.ondataavailable = (e) => audioChunks.push(e.data);
+                    
+                    mediaRecorder.onstop = () => {
+                        const blob = new Blob(audioChunks, { type: \'audio/webm\' });
+                        const reader = new FileReader();
+                        reader.readAsDataURL(blob);
+                        reader.onloadend = () => {
+                            push(ref(db, `chats/${userId}/messages`), {
+                                from: \'user\',
+                                voice: reader.result,
+                                time: Date.now(),
+                                status: \'sent\'
+                            });
+                            scrollToBottom();
+                        };
+                        stream.getTracks().forEach(track => track.stop());
+                    };
+                    
+                    mediaRecorder.start();
+                    btn.classList.add(\'recording\');
+                    overlay.classList.add(\'active\');
+                    
+                    recordingStartTime = Date.now();
+                    recordingTimer = setInterval(() => {
+                        const elapsed = Math.floor((Date.now() - recordingStartTime) / 1000);
+                        const mins = Math.floor(elapsed / 60);
+                        const secs = elapsed % 60;
+                        timer.textContent = `${mins.toString().padStart(2, \'0\')}:${secs.toString().padStart(2, \'0\')}`;
+                    }, 1000);
+                    
+                } catch (err) {
+                    alert(\'Microphone access denied\');
+                }
+            }
+        }
 
-### **USER-ViP.html (User App)**
-**New Design:**
-- Mobile-first responsive design
-- Sleek welcome screen for username entry
-- Modern bubble chat interface with gradients
-- Smooth message animations
-- Professional header with admin status
+        window.playAudio = (btn, src) => {
+            const icon = btn.querySelector(\'i\');
+            const container = btn.closest(\'.audio-message\');
+            const duration = container.querySelector(\'.audio-duration\');
+            
+            if (currentAudio && !currentAudio.paused) {
+                currentAudio.pause();
+                currentAudio = null;
+                icon.className = \'fas fa-play\';
+                return;
+            }
+            
+            currentAudio = new Audio(src);
+            currentAudio.play();
+            icon.className = \'fas fa-pause\';
+            
+            currentAudio.ontimeupdate = () => {
+                const mins = Math.floor(currentAudio.currentTime / 60);
+                const secs = Math.floor(currentAudio.currentTime % 60);
+                duration.textContent = `${mins}:${secs.toString().padStart(2, \'0\')}`;
+                const bars = container.querySelectorAll(\'.waveform-bar\');
+                bars.forEach(bar => bar.style.height = Math.random() * 16 + 4 + \'px\');
+            };
+            
+            currentAudio.onended = () => {
+                icon.className = \'fas fa-play\';
+                duration.textContent = \'0:00\';
+                currentAudio = null;
+            };
+        };
 
-**New Features:**
-- **Welcome Screen:** Beautiful onboarding with animated icon
-- **Auto-resizing Textarea:** Input expands with multi-line text
-- **Voice Recording UI:** Visual wave animation and timer while recording
-- **Image Viewer:** Full-screen image modal
-- **Blocked Notice:** Shows when admin blocks the user
-- **Date Dividers:** "Today", "Yesterday" labels in chat
-- **Read Receipts:** Blue double checkmarks when admin reads message
-- **Typing Indicators:** Shows when admin is typing
-- **Swipe to Cancel:** Recording cancellation (UI ready)
+        window.openImageModal = (src) => {
+            document.getElementById(\'modalImage\').src = src;
+            document.getElementById(\'imageModal\').classList.add(\'active\');
+        };
 
----
+        window.closeImageModal = () => {
+            document.getElementById(\'imageModal\').classList.remove(\'active\');
+        };
 
-### **Key Improvements in Both:**
-1. **Better Firebase Structure:** Proper typing indicators and lastActive tracking
-2. **Modern Styling:** CSS variables for easy theming, Inter font, Font Awesome icons
-3. **Smooth Animations:** Message slide-ins, hover effects, button interactions
-4. **Audio Visualization:** Animated waveforms during playback
-5. **Mobile Optimized:** Touch-friendly buttons and responsive layouts
-6. **No Alerts:** All notifications use custom toast/modal systems
+        window.clearChat = async () => {
+            if (!confirm(\'Clear all messages?\')) return;
+            await remove(ref(db, `chats/${userId}/messages`));
+            document.getElementById(\'messages\').innerHTML = \'\';
+        };
 
-Dono files mein ab professional look hai aur kaafi naye features add ho gaye hain. Admin dashboard ab ek complete management system ki tarah kaam karta hai, aur user app ek modern messaging app jaisi lagti hai.
+        function scrollToBottom() {
+            const messages = document.getElementById(\'messages\');
+            messages.scrollTop = messages.scrollHeight;
+        }
+    </script>
+</body>
+</html>'''
+
+# Save the file
+with open('/mnt/kimi/output/USER-ViP-FIXED.html', 'w', encoding='utf-8') as f:
+    f.write(fixed_html)
+
+print("✅ File saved successfully!")
+print(f"📁 Location: /mnt/kimi/output/USER-ViP-FIXED.html")
+print(f"📊 File size: {len(fixed_html)} characters")
