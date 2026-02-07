@@ -1,869 +1,732 @@
-# First, let's verify and recreate ADMIN file
-admin_content = '''<!DOCTYPE html>
+# Now create mobile-optimized USER version
+user_mobile = '''<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MAHTAB ADMIN - Premium Dashboard</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>MAHTAB CHAT</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        :root {
-            --bg-primary: #0a0a0f;
-            --bg-secondary: #12121a;
-            --bg-tertiary: #1a1a25;
-            --accent-cyan: #00d4ff;
-            --accent-purple: #7c3aed;
-            --accent-gradient: linear-gradient(135deg, #00d4ff 0%, #7c3aed 100%);
-            --text-primary: #ffffff;
-            --text-secondary: #a0a0b0;
-            --text-muted: #6c6c80;
-            --success: #10b981;
-            --danger: #ef4444;
-            --border: rgba(255,255,255,0.08);
-        }
-
-        * { margin: 0; padding: 0; box-sizing: border-box; }
+        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
         
-        body {
-            font-family: 'Inter', sans-serif;
-            background: var(--bg-primary);
-            color: var(--text-primary);
+        :root {
+            --bg: #000000;
+            --surface: #0a0a0a;
+            --surface-light: #141414;
+            --primary: #00d4ff;
+            --primary-dark: #00a8cc;
+            --secondary: #7c3aed;
+            --text: #ffffff;
+            --text-secondary: #888888;
+            --success: #22c55e;
+            --danger: #ef4444;
+            --border: #222222;
+        }
+
+        html, body {
+            height: 100%;
+            overflow: hidden;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+        }
+
+        .app {
+            display: flex;
+            flex-direction: column;
             height: 100vh;
+            height: calc(var(--vh, 1vh) * 100);
+            max-width: 100vw;
             overflow: hidden;
-            display: flex;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
         }
 
-        ::-webkit-scrollbar { width: 6px; }
-        ::-webkit-scrollbar-track { background: transparent; }
-        ::-webkit-scrollbar-thumb { background: var(--bg-tertiary); border-radius: 3px; }
-
-        .sidebar {
-            width: 350px;
-            background: var(--bg-secondary);
-            border-right: 1px solid var(--border);
-            display: flex;
-            flex-direction: column;
-        }
-
-        .sidebar-header {
-            padding: 24px 20px;
-            background: rgba(255,255,255,0.03);
-            backdrop-filter: blur(20px);
-            border-bottom: 1px solid var(--border);
-        }
-
-        .brand {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            margin-bottom: 20px;
-        }
-
-        .brand-icon {
-            width: 45px;
-            height: 45px;
-            background: var(--accent-gradient);
-            border-radius: 12px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 20px;
-            box-shadow: 0 4px 20px rgba(0,212,255,0.3);
-        }
-
-        .brand-text h1 {
-            font-family: 'Poppins', sans-serif;
-            font-size: 20px;
-            font-weight: 700;
-            background: var(--accent-gradient);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
-
-        .brand-text span {
-            font-size: 11px;
-            color: var(--text-muted);
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
-
-        .stats-bar {
-            display: flex;
-            gap: 15px;
-            padding-top: 15px;
-            border-top: 1px solid var(--border);
-        }
-
-        .stat-item {
-            flex: 1;
-            text-align: center;
-        }
-
-        .stat-value {
-            font-size: 20px;
-            font-weight: 700;
-            color: var(--accent-cyan);
-        }
-
-        .stat-label {
-            font-size: 10px;
-            color: var(--text-muted);
-            text-transform: uppercase;
-        }
-
-        .search-box {
-            position: relative;
-            margin-top: 15px;
-        }
-
-        .search-box input {
-            width: 100%;
-            background: var(--bg-tertiary);
-            border: 1px solid var(--border);
-            border-radius: 12px;
-            padding: 12px 15px 12px 40px;
-            color: var(--text-primary);
-            font-size: 14px;
-            outline: none;
-        }
-
-        .search-box i {
-            position: absolute;
-            left: 15px;
-            top: 50%;
-            transform: translateY(-50%);
-            color: var(--text-muted);
-            font-size: 14px;
-        }
-
-        .user-list {
-            flex: 1;
-            overflow-y: auto;
-            padding: 10px;
-        }
-
-        .user-item {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            padding: 12px;
-            border-radius: 12px;
-            cursor: pointer;
-            transition: all 0.3s;
-            margin-bottom: 4px;
-            border: 1px solid transparent;
-        }
-
-        .user-item:hover {
-            background: var(--bg-tertiary);
-            border-color: var(--border);
-        }
-
-        .user-item.active {
-            background: linear-gradient(135deg, rgba(0,212,255,0.1) 0%, rgba(124,58,237,0.1) 100%);
-            border-color: var(--accent-cyan);
-        }
-
-        .user-avatar {
-            width: 48px;
-            height: 48px;
-            border-radius: 50%;
-            background: var(--accent-gradient);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: 600;
-            font-size: 18px;
-            position: relative;
-        }
-
-        .status-indicator {
-            position: absolute;
-            bottom: 2px;
-            right: 2px;
-            width: 14px;
-            height: 14px;
-            border-radius: 50%;
-            border: 2px solid var(--bg-secondary);
-            background: var(--text-muted);
-        }
-
-        .status-indicator.online {
-            background: var(--success);
-            box-shadow: 0 0 0 2px rgba(16,185,129,0.3);
-            animation: pulse 2s infinite;
-        }
-
-        @keyframes pulse {
-            0%, 100% { box-shadow: 0 0 0 2px rgba(16,185,129,0.3); }
-            50% { box-shadow: 0 0 0 6px rgba(16,185,129,0.1); }
-        }
-
-        .user-info {
-            flex: 1;
-            min-width: 0;
-        }
-
-        .user-name {
-            font-weight: 600;
-            font-size: 14px;
-            margin-bottom: 3px;
-        }
-
-        .user-preview {
-            font-size: 12px;
-            color: var(--text-secondary);
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
-
-        .user-meta {
-            text-align: right;
-        }
-
-        .time-badge {
-            font-size: 11px;
-            color: var(--text-muted);
-        }
-
-        .unread-badge {
-            background: var(--accent-cyan);
-            color: var(--bg-primary);
-            font-size: 11px;
-            font-weight: 700;
-            padding: 2px 8px;
-            border-radius: 10px;
-            margin-top: 4px;
-            display: inline-block;
-        }
-
-        .main-chat {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            background: var(--bg-primary);
-        }
-
-        .chat-header {
-            padding: 20px 24px;
-            background: rgba(255,255,255,0.03);
+        /* Header - Fixed */
+        .header {
+            flex-shrink: 0;
+            height: 60px;
+            background: rgba(10, 10, 10, 0.95);
             backdrop-filter: blur(20px);
             border-bottom: 1px solid var(--border);
             display: flex;
             align-items: center;
             justify-content: space-between;
+            padding: 0 16px;
+            z-index: 100;
         }
 
-        .chat-user-info {
+        .header-left {
             display: flex;
             align-items: center;
-            gap: 15px;
+            gap: 12px;
         }
 
-        .chat-user-avatar {
-            width: 50px;
-            height: 50px;
-            border-radius: 50%;
-            background: var(--accent-gradient);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 20px;
-            font-weight: 600;
-        }
-
-        .chat-user-details h3 {
-            font-size: 16px;
-            font-weight: 600;
-            margin-bottom: 4px;
-        }
-
-        .status-text {
-            font-size: 13px;
-            color: var(--text-muted);
-            display: flex;
-            align-items: center;
-            gap: 6px;
-        }
-
-        .status-dot {
-            width: 8px;
-            height: 8px;
-            border-radius: 50%;
-            background: var(--text-muted);
-        }
-
-        .status-dot.online {
-            background: var(--success);
-            box-shadow: 0 0 8px var(--success);
-        }
-
-        .chat-actions {
-            display: flex;
-            gap: 10px;
-        }
-
-        .action-btn {
+        .avatar {
             width: 40px;
             height: 40px;
-            border-radius: 10px;
-            border: 1px solid var(--border);
-            background: var(--bg-tertiary);
-            color: var(--text-secondary);
-            cursor: pointer;
-            transition: all 0.3s;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
             display: flex;
             align-items: center;
             justify-content: center;
+            font-weight: 700;
+            font-size: 16px;
+            position: relative;
         }
 
-        .action-btn:hover {
-            background: var(--accent-cyan);
-            color: var(--bg-primary);
-            border-color: var(--accent-cyan);
+        .avatar::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            right: 0;
+            width: 12px;
+            height: 12px;
+            background: var(--success);
+            border: 2px solid var(--surface);
+            border-radius: 50%;
         }
 
-        .messages-container {
+        .header-info h1 {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 2px;
+        }
+
+        .header-status {
+            font-size: 12px;
+            color: var(--text-secondary);
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .icon-btn {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            border: none;
+            background: transparent;
+            color: var(--text);
+            font-size: 18px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .icon-btn:active {
+            background: var(--surface-light);
+            transform: scale(0.95);
+        }
+
+        /* Messages - Scrollable */
+        .messages {
             flex: 1;
             overflow-y: auto;
-            padding: 24px;
+            overflow-x: hidden;
+            padding: 16px;
             display: flex;
             flex-direction: column;
-            gap: 16px;
+            gap: 8px;
+            -webkit-overflow-scrolling: touch;
         }
 
         .message {
-            max-width: 70%;
+            max-width: 80%;
             display: flex;
             flex-direction: column;
-            gap: 4px;
-            animation: messageSlide 0.3s ease-out;
+            gap: 2px;
+            animation: slideIn 0.3s ease-out;
         }
 
-        @keyframes messageSlide {
-            from { opacity: 0; transform: translateY(20px); }
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(10px); }
             to { opacity: 1; transform: translateY(0); }
         }
 
-        .message.admin {
+        .message.sent {
             align-self: flex-end;
             align-items: flex-end;
         }
 
-        .message.user {
+        .message.received {
             align-self: flex-start;
             align-items: flex-start;
         }
 
-        .message-bubble {
-            padding: 14px 18px;
+        .bubble {
+            padding: 12px 16px;
             border-radius: 20px;
-            font-size: 14px;
-            line-height: 1.5;
+            font-size: 15px;
+            line-height: 1.4;
             word-wrap: break-word;
+            position: relative;
         }
 
-        .message.admin .message-bubble {
-            background: var(--accent-gradient);
+        .message.sent .bubble {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
             color: white;
             border-bottom-right-radius: 4px;
-            box-shadow: 0 4px 20px rgba(0,212,255,0.2);
         }
 
-        .message.user .message-bubble {
-            background: var(--bg-tertiary);
-            color: var(--text-primary);
+        .message.received .bubble {
+            background: var(--surface-light);
+            color: var(--text);
             border: 1px solid var(--border);
             border-bottom-left-radius: 4px;
         }
 
-        .message-image {
-            max-width: 300px;
-            border-radius: 16px;
+        .bubble-image {
+            padding: 0;
             overflow: hidden;
-            cursor: pointer;
-            box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+            max-width: 260px;
         }
 
-        .message-image img {
+        .bubble-image img {
             width: 100%;
             height: auto;
             display: block;
+            border-radius: 20px;
         }
 
-        .message-audio {
+        .message.sent .bubble-image {
+            border-bottom-right-radius: 4px;
+        }
+
+        .message.received .bubble-image {
+            border-bottom-left-radius: 4px;
+        }
+
+        /* Voice Message */
+        .voice-bubble {
             display: flex;
             align-items: center;
             gap: 12px;
-            min-width: 250px;
+            min-width: 200px;
+            padding: 8px 16px;
         }
 
-        .audio-play-btn {
-            width: 40px;
-            height: 40px;
+        .play-btn {
+            width: 36px;
+            height: 36px;
             border-radius: 50%;
             border: none;
             background: rgba(255,255,255,0.2);
             color: white;
-            cursor: pointer;
             display: flex;
             align-items: center;
             justify-content: center;
+            cursor: pointer;
+            font-size: 14px;
+            flex-shrink: 0;
         }
 
-        .audio-waveform {
+        .waveform {
             flex: 1;
-            height: 30px;
+            height: 24px;
             display: flex;
             align-items: center;
-            gap: 3px;
+            gap: 2px;
         }
 
-        .wave-bar {
-            width: 3px;
-            background: rgba(255,255,255,0.4);
-            border-radius: 2px;
-            height: 15px;
+        .bar {
+            flex: 1;
+            background: rgba(255,255,255,0.3);
+            border-radius: 1px;
+            min-height: 4px;
         }
 
-        .message-meta {
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            font-size: 11px;
-            color: var(--text-muted);
-            margin-top: 2px;
-        }
-
-        .message.admin .message-meta {
+        .voice-time {
+            font-size: 12px;
             color: rgba(255,255,255,0.7);
+            min-width: 36px;
+            text-align: right;
         }
 
+        .meta {
+            font-size: 11px;
+            color: var(--text-secondary);
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            padding: 0 4px;
+        }
+
+        .message.sent .meta {
+            color: rgba(255,255,255,0.6);
+        }
+
+        .ticks {
+            font-size: 14px;
+        }
+
+        .ticks.seen { color: var(--primary); }
+
+        /* Typing */
+        .typing {
+            align-self: flex-start;
+            background: var(--surface-light);
+            border: 1px solid var(--border);
+            padding: 16px 20px;
+            border-radius: 20px;
+            border-bottom-left-radius: 4px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 8px;
+        }
+
+        .dots {
+            display: flex;
+            gap: 4px;
+        }
+
+        .dots span {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--primary);
+            animation: bounce 1.4s infinite ease-in-out both;
+        }
+
+        .dots span:nth-child(1) { animation-delay: -0.32s; }
+        .dots span:nth-child(2) { animation-delay: -0.16s; }
+
+        @keyframes bounce {
+            0%, 80%, 100% { transform: scale(0.6); opacity: 0.5; }
+            40% { transform: scale(1); opacity: 1; }
+        }
+
+        /* Input Area - Fixed Bottom */
         .input-area {
-            padding: 20px 24px;
-            background: rgba(255,255,255,0.03);
+            flex-shrink: 0;
+            background: rgba(10, 10, 10, 0.98);
             backdrop-filter: blur(20px);
             border-top: 1px solid var(--border);
+            padding: 12px 16px calc(12px + env(safe-area-inset-bottom));
         }
 
-        .input-wrapper {
-            display: flex;
+        .recording-bar {
+            display: none;
             align-items: center;
             gap: 12px;
-            background: var(--bg-tertiary);
-            border: 1px solid var(--border);
-            border-radius: 16px;
-            padding: 6px;
+            background: linear-gradient(90deg, var(--danger), #ff6b6b);
+            padding: 12px 16px;
+            border-radius: 24px;
+            margin-bottom: 8px;
+            animation: slideUp 0.3s ease-out;
         }
 
-        .attach-btn, .mic-btn, .send-btn {
-            width: 44px;
-            height: 44px;
-            border-radius: 12px;
-            border: none;
-            cursor: pointer;
+        .recording-bar.active {
+            display: flex;
+        }
+
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .rec-icon {
+            width: 32px;
+            height: 32px;
+            background: rgba(255,255,255,0.2);
+            border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 18px;
-            transition: all 0.3s;
+            animation: pulse 1.5s infinite;
         }
 
-        .attach-btn, .mic-btn {
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .rec-timer {
+            flex: 1;
+            font-family: 'Courier New', monospace;
+            font-size: 20px;
+            font-weight: 700;
+        }
+
+        .rec-cancel {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            border: none;
+            background: rgba(255,255,255,0.2);
+            color: white;
+            font-size: 14px;
+        }
+
+        .input-row {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .input-attach {
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            border: none;
             background: transparent;
             color: var(--text-secondary);
+            font-size: 22px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
         }
 
-        .attach-btn:hover, .mic-btn:hover {
-            background: var(--bg-secondary);
-            color: var(--accent-cyan);
+        .input-field {
+            flex: 1;
+            background: var(--surface-light);
+            border: 1px solid var(--border);
+            border-radius: 24px;
+            padding: 12px 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
         }
 
-        .mic-btn.recording {
-            background: var(--danger);
-            color: white;
-            animation: recordingPulse 1.5s infinite;
-        }
-
-        @keyframes recordingPulse {
-            0%, 100% { box-shadow: 0 0 0 0 rgba(239,68,68,0.4); }
-            50% { box-shadow: 0 0 0 10px rgba(239,68,68,0); }
-        }
-
-        .message-input {
+        .input-field input {
             flex: 1;
             background: transparent;
             border: none;
             outline: none;
-            color: var(--text-primary);
-            font-size: 15px;
-            padding: 10px;
+            color: var(--text);
+            font-size: 16px;
+            font-family: inherit;
         }
 
-        .send-btn {
-            background: var(--accent-gradient);
-            color: white;
-            box-shadow: 0 4px 15px rgba(0,212,255,0.3);
+        .input-field input::placeholder {
+            color: var(--text-secondary);
         }
 
-        .send-btn:hover {
-            transform: scale(1.05);
-        }
-
-        .empty-state {
-            flex: 1;
+        .input-mic, .input-send {
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            border: none;
             display: flex;
-            flex-direction: column;
             align-items: center;
             justify-content: center;
-            color: var(--text-muted);
-            text-align: center;
-            padding: 40px;
+            font-size: 20px;
+            cursor: pointer;
+            transition: all 0.2s;
         }
 
-        .empty-icon {
-            font-size: 80px;
-            margin-bottom: 24px;
-            opacity: 0.3;
-            background: var(--accent-gradient);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
+        .input-mic {
+            background: var(--surface-light);
+            color: var(--primary);
+            border: 1px solid var(--border);
         }
 
-        .recording-overlay {
-            position: fixed;
-            bottom: 100px;
-            left: 50%;
-            transform: translateX(-50%);
+        .input-mic.recording {
             background: var(--danger);
             color: white;
-            padding: 12px 24px;
-            border-radius: 30px;
+            animation: pulse 1s infinite;
+        }
+
+        .input-send {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            color: white;
+            box-shadow: 0 4px 12px rgba(0, 212, 255, 0.3);
+        }
+
+        .input-send:active {
+            transform: scale(0.95);
+        }
+
+        /* Blocked Modal */
+        .blocked {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.9);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            padding: 20px;
+        }
+
+        .blocked.show {
+            display: flex;
+        }
+
+        .blocked-content {
+            background: var(--surface);
+            border: 1px solid var(--danger);
+            border-radius: 24px;
+            padding: 32px;
+            text-align: center;
+            max-width: 300px;
+        }
+
+        .blocked-icon {
+            width: 80px;
+            height: 80px;
+            background: rgba(239, 68, 68, 0.1);
+            border-radius: 50%;
             display: flex;
             align-items: center;
-            gap: 10px;
-            font-weight: 600;
-            opacity: 0;
-            pointer-events: none;
-            transition: all 0.3s;
+            justify-content: center;
+            font-size: 36px;
+            color: var(--danger);
+            margin: 0 auto 20px;
         }
 
-        .recording-overlay.active {
-            opacity: 1;
+        .blocked h2 {
+            font-size: 22px;
+            margin-bottom: 8px;
+            color: var(--danger);
         }
 
+        .blocked p {
+            color: var(--text-secondary);
+            font-size: 14px;
+            line-height: 1.5;
+        }
+
+        /* Lightbox */
         .lightbox {
             position: fixed;
             top: 0;
             left: 0;
-            width: 100%;
-            height: 100%;
+            right: 0;
+            bottom: 0;
             background: rgba(0,0,0,0.95);
-            display: flex;
+            display: none;
             align-items: center;
             justify-content: center;
             z-index: 10000;
-            opacity: 0;
-            pointer-events: none;
-            transition: opacity 0.3s;
+            padding: 20px;
         }
 
-        .lightbox.active {
-            opacity: 1;
-            pointer-events: all;
+        .lightbox.show {
+            display: flex;
         }
 
         .lightbox img {
-            max-width: 90%;
-            max-height: 90%;
-            border-radius: 8px;
+            max-width: 100%;
+            max-height: 80vh;
+            border-radius: 12px;
         }
 
         .lightbox-close {
             position: absolute;
-            top: 30px;
-            right: 30px;
-            width: 50px;
-            height: 50px;
+            top: 20px;
+            right: 20px;
+            width: 44px;
+            height: 44px;
             border-radius: 50%;
-            background: rgba(255,255,255,0.1);
             border: none;
+            background: rgba(255,255,255,0.1);
             color: white;
-            font-size: 24px;
-            cursor: pointer;
+            font-size: 20px;
         }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar { width: 0px; background: transparent; }
     </style>
 </head>
 <body>
-    <div class="sidebar">
-        <div class="sidebar-header">
-            <div class="brand">
-                <div class="brand-icon">
-                    <i class="fas fa-shield-alt"></i>
-                </div>
-                <div class="brand-text">
-                    <h1>MAHTAB</h1>
-                    <span>Admin Dashboard</span>
-                </div>
-            </div>
-            <div class="stats-bar">
-                <div class="stat-item">
-                    <div class="stat-value" id="totalUsers">0</div>
-                    <div class="stat-label">Users</div>
-                </div>
-                <div class="stat-item">
-                    <div class="stat-value" id="onlineUsers">0</div>
-                    <div class="stat-label">Online</div>
-                </div>
-                <div class="stat-item">
-                    <div class="stat-value" id="unreadTotal">0</div>
-                    <div class="stat-label">Unread</div>
-                </div>
-            </div>
-            <div class="search-box">
-                <i class="fas fa-search"></i>
-                <input type="text" id="searchUsers" placeholder="Search users...">
-            </div>
-        </div>
-        <div class="user-list" id="userList"></div>
-    </div>
-
-    <div class="main-chat">
-        <div class="chat-header" id="chatHeader" style="display: none;">
-            <div class="chat-user-info">
-                <div class="chat-user-avatar" id="chatAvatar">U</div>
-                <div class="chat-user-details">
-                    <h3 id="chatUserName">Select User</h3>
-                    <div class="status-text">
-                        <span class="status-dot" id="chatStatusDot"></span>
-                        <span id="chatStatusText">Offline</span>
+    <div class="app">
+        <div class="header">
+            <div class="header-left">
+                <div class="avatar">M</div>
+                <div class="header-info">
+                    <h1>MAHTAB ADMIN</h1>
+                    <div class="header-status">
+                        <span style="width: 8px; height: 8px; background: var(--success); border-radius: 50%; display: inline-block; margin-right: 4px;"></span>
+                        Online
                     </div>
                 </div>
             </div>
-            <div class="chat-actions">
-                <button class="action-btn" onclick="clearChat()" title="Clear Chat">
-                    <i class="fas fa-trash"></i>
-                </button>
-                <button class="action-btn" onclick="toggleBlock()" title="Block/Unblock">
-                    <i class="fas fa-ban" id="blockIcon"></i>
+            <div class="header-actions">
+                <button class="icon-btn" onclick="clearChat()">
+                    <i class="fas fa-trash-alt"></i>
                 </button>
             </div>
         </div>
 
-        <div class="empty-state" id="emptyState">
-            <div class="empty-icon"><i class="fas fa-comments"></i></div>
-            <div style="font-size: 24px; font-weight: 600; margin-bottom: 8px; color: var(--text-primary);">Welcome to Mahtab Admin</div>
-            <div style="font-size: 14px; max-width: 300px; line-height: 1.6;">Select a user from the sidebar to start managing conversations.</div>
+        <div class="messages" id="messages"></div>
+
+        <div class="typing" id="typing" style="display: none;">
+            <div class="dots">
+                <span></span><span></span><span></span>
+            </div>
         </div>
 
-        <div class="messages-container" id="msgs" style="display: none;"></div>
+        <div class="input-area">
+            <div class="recording-bar" id="recordingBar">
+                <div class="rec-icon"><i class="fas fa-microphone"></i></div>
+                <div class="rec-timer" id="recTimer">00:00</div>
+                <button class="rec-cancel" onclick="cancelRec()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
 
-        <div class="input-area" id="inputArea" style="display: none;">
-            <div class="input-wrapper">
-                <button class="attach-btn" onclick="document.getElementById('adminFile').click()">
+            <div class="input-row">
+                <button class="input-attach" onclick="sendImage()">
                     <i class="fas fa-image"></i>
                 </button>
-                <input type="file" id="adminFile" accept="image/*" style="display:none">
-                
-                <input type="text" class="message-input" id="adminInput" placeholder="Type your message...">
-                
-                <button class="mic-btn" id="adminMic">
+                <input type="file" id="imageInput" accept="image/*" style="display:none">
+
+                <div class="input-field">
+                    <input type="text" id="messageInput" placeholder="Message..." autocomplete="off">
+                </div>
+
+                <button class="input-mic" id="micBtn" onclick="toggleRec()">
                     <i class="fas fa-microphone"></i>
                 </button>
-                
-                <button class="send-btn" onclick="sendAdminMsg()">
+
+                <button class="input-send" onclick="sendMsg()">
                     <i class="fas fa-paper-plane"></i>
                 </button>
             </div>
         </div>
     </div>
 
-    <div class="recording-overlay" id="recordingOverlay">
-        <i class="fas fa-circle" style="animation: pulse 1s infinite;"></i>
-        <span>Recording</span>
-        <span id="recordingTimer" style="font-family: monospace; font-size: 18px;">00:00</span>
+    <div class="blocked" id="blocked">
+        <div class="blocked-content">
+            <div class="blocked-icon">
+                <i class="fas fa-ban"></i>
+            </div>
+            <h2>Blocked</h2>
+            <p>You cannot send messages at this time.</p>
+        </div>
     </div>
 
     <div class="lightbox" id="lightbox" onclick="closeLightbox()">
         <button class="lightbox-close" onclick="closeLightbox()">
             <i class="fas fa-times"></i>
         </button>
-        <img src="" alt="Full size" id="lightboxImg">
+        <img src="" id="lightboxImg">
     </div>
 
     <script type="module">
+        // Mobile height fix
+        function setVH() {
+            document.documentElement.style.setProperty('--vh', window.innerHeight * 0.01 + 'px');
+        }
+        setVH();
+        window.addEventListener('resize', setVH);
+
+        // Firebase
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
-        import { getDatabase, ref, onValue, push, update, onChildAdded, get, remove } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-database.js";
-        import { getStorage, ref as sRef, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-storage.js";
+        import { getDatabase, ref, push, onValue, update, get, remove } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-database.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyAqfguS1ucAtklcl06eB1JIWQr46XMpe7g",
             authDomain: "safe-chat-c0b9c.firebaseapp.com",
             databaseURL: "https://safe-chat-c0b9c-default-rtdb.asia-southeast1.firebasedatabase.app",
             projectId: "safe-chat-c0b9c",
-            storageBucket: "safe-chat-c0b9c.appspot.com",
+            storageBucket: "safe-chat-c0b9c.firebasedatabase.app",
             messagingSenderId: "119640275300",
             appId: "1:119640275300:web:20ae984f4af1ffe6a62271"
         };
 
         const app = initializeApp(firebaseConfig);
         const db = getDatabase(app);
-        const storage = getStorage(app);
 
-        let currentUserId = null;
-        let msgListener = null;
-        let isBlocked = false;
-        let recordingInterval = null;
-        let recordingSeconds = 0;
-        let recorder = null;
-        let chunks = [];
-
-        // Load Users
-        onValue(ref(db, 'chats'), (snap) => {
-            const list = document.getElementById('userList');
-            list.innerHTML = "";
-            
-            if (!snap.exists()) {
-                list.innerHTML = '<div style="padding: 40px; text-align: center; color: var(--text-muted);">No active chats</div>';
-                return;
-            }
-
-            let totalUsers = 0, onlineUsers = 0, unreadTotal = 0;
-            const users = [];
-
-            snap.forEach(user => {
-                const id = user.key;
-                const data = user.val();
-                totalUsers++;
-                
-                const isOnline = data.lastActive && (Date.now() - data.lastActive) < 60000;
-                if (isOnline) onlineUsers++;
-                
-                let unreadCount = 0;
-                if (data.messages) {
-                    Object.values(data.messages).forEach(msg => {
-                        if (msg.from === 'user' && msg.status !== 'seen') unreadCount++;
-                    });
-                }
-                unreadTotal += unreadCount;
-
-                let lastMessage = "No messages";
-                let lastTime = "";
-                if (data.messages) {
-                    const messages = Object.values(data.messages);
-                    if (messages.length > 0) {
-                        const last = messages[messages.length - 1];
-                        lastMessage = last.text || (last.image ? "📷 Image" : last.voice ? "🎤 Voice" : "Message");
-                        lastTime = new Date(last.time).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
-                    }
-                }
-
-                users.push({ id, data, isOnline, unreadCount, lastMessage, lastTime, blocked: data.blocked });
-            });
-
-            users.sort((a, b) => (b.data.lastActive || 0) - (a.data.lastActive || 0));
-
-            users.forEach(user => {
-                const div = document.createElement('div');
-                div.className = `user-item ${currentUserId === user.id ? 'active' : ''}`;
-                div.innerHTML = `
-                    <div class="user-avatar">
-                        ${user.id.charAt(0).toUpperCase()}
-                        <div class="status-indicator ${user.isOnline ? 'online' : ''}"></div>
-                    </div>
-                    <div class="user-info">
-                        <div class="user-name">${user.id} ${user.blocked ? '<i class="fas fa-ban" style="color: var(--danger); font-size: 10px;"></i>' : ''}</div>
-                        <div class="user-preview">${user.lastMessage}</div>
-                    </div>
-                    <div class="user-meta">
-                        <div class="time-badge">${user.lastTime}</div>
-                        ${user.unreadCount > 0 ? `<div class="unread-badge">${user.unreadCount}</div>` : ''}
-                    </div>
-                `;
-                div.onclick = () => openChat(user.id);
-                list.appendChild(div);
-            });
-
-            document.getElementById("totalUsers").textContent = totalUsers;
-            document.getElementById("onlineUsers").textContent = onlineUsers;
-            document.getElementById("unreadTotal").textContent = unreadTotal;
-        });
-
-        function openChat(id) {
-            currentUserId = id;
-            document.getElementById("emptyState").style.display = "none";
-            document.getElementById("chatHeader").style.display = "flex";
-            document.getElementById("msgs").style.display = "flex";
-            document.getElementById("inputArea").style.display = "block";
-            
-            document.getElementById("chatUserName").textContent = id;
-            document.getElementById("chatAvatar").textContent = id.charAt(0).toUpperCase();
-            
-            get(ref(db, `chats/${id}/blocked`)).then(snap => {
-                isBlocked = snap.exists() && snap.val() === true;
-                updateBlockIcon();
-            });
-            
-            get(ref(db, `chats/${id}/lastActive`)).then(snap => {
-                const isOnline = snap.val() && (Date.now() - snap.val()) < 60000;
-                document.getElementById("chatStatusDot").className = `status-dot ${isOnline ? 'online' : ''}`;
-                document.getElementById("chatStatusText").textContent = isOnline ? "Online" : "Offline";
-            });
-
-            if (msgListener) msgListener();
-            const msgBox = document.getElementById('msgs');
-            msgBox.innerHTML = "";
-
-            msgListener = onChildAdded(ref(db, `chats/${id}/messages`), (snap) => {
-                renderMessage(snap.val(), snap.key);
-            });
-
-            get(ref(db, `chats/${id}/messages`)).then(snap => {
-                if (snap.exists()) {
-                    const updates = {};
-                    snap.forEach(child => {
-                        if (child.val().from === 'user' && child.val().status !== 'seen') {
-                            updates[`chats/${id}/messages/${child.key}/status`] = 'seen';
-                        }
-                    });
-                    if (Object.keys(updates).length > 0) update(ref(db), updates);
-                }
-            });
-
-            document.querySelectorAll('.user-item').forEach(item => item.classList.remove('active'));
-            event.currentTarget.classList.add('active');
+        // User
+        let userId = localStorage.getItem("mahtab_user");
+        if (!userId) {
+            userId = prompt("Enter username:")?.trim();
+            if (!userId) userId = "user_" + Math.random().toString(36).substr(2, 6);
+            localStorage.setItem("mahtab_user", userId);
         }
 
-        function renderMessage(m, key) {
-            const box = document.getElementById('msgs');
-            const d = document.createElement('div');
-            d.className = `message ${m.from}`;
+        // State
+        let isBlocked = false;
+        let recorder = null;
+        let chunks = [];
+        let recInterval = null;
+        let recSeconds = 0;
+        let currentAudio = null;
 
-            let content = '';
-            if (m.text) content += `<div class="message-bubble">${escapeHtml(m.text)}</div>`;
-            if (m.image) content += `<div class="message-image" onclick="openLightbox('${m.image}')"><img src="${m.image}"></div>`;
-            if (m.voice) {
-                content += `<div class="message-bubble">
-                    <div class="message-audio">
-                        <button class="audio-play-btn" onclick="toggleAudio(this, '${m.voice}')"><i class="fas fa-play"></i></button>
-                        <div class="audio-waveform">${Array(8).fill('<div class="wave-bar"></div>').join('')}</div>
-                    </div>
-                </div>`;
+        // Block check
+        onValue(ref(db, "chats/" + userId + "/blocked"), snap => {
+            isBlocked = snap.exists() && snap.val() === true;
+            document.getElementById("blocked").classList.toggle("show", isBlocked);
+        });
+
+        // Load messages
+        onValue(ref(db, "chats/" + userId + "/messages"), snap => {
+            const box = document.getElementById("messages");
+            box.innerHTML = "";
+            
+            if (snap.exists()) {
+                snap.forEach(child => {
+                    const m = child.val();
+                    if (!m) return;
+                    
+                    const div = document.createElement("div");
+                    div.className = "message " + (m.from === "user" ? "sent" : "received");
+                    
+                    let html = "";
+                    
+                    if (m.text) {
+                        html += `<div class="bubble">${escapeHtml(m.text)}</div>`;
+                    }
+                    
+                    if (m.image) {
+                        html += `<div class="bubble bubble-image" onclick="openLightbox('${m.image}')">
+                            <img src="${m.image}" loading="lazy">
+                        </div>`;
+                    }
+                    
+                    if (m.voice) {
+                        html += `<div class="bubble voice-bubble">
+                            <button class="play-btn" onclick="playVoice(this, '${m.voice}')">
+                                <i class="fas fa-play"></i>
+                            </button>
+                            <div class="waveform">
+                                ${Array(20).fill('<div class="bar" style="height:' + (Math.random() * 20 + 4) + 'px"></div>').join('')}
+                            </div>
+                            <span class="voice-time">0:00</span>
+                        </div>`;
+                    }
+                    
+                    const time = m.time ? new Date(m.time).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : "";
+                    const status = m.from === "user" ? getTicks(m.status) : "";
+                    html += `<div class="meta">${time}${status}</div>`;
+                    
+                    div.innerHTML = html;
+                    box.appendChild(div);
+                });
+                box.scrollTop = box.scrollHeight;
             }
+        });
 
-            const time = m.time ? new Date(m.time).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : '';
-            const status = m.from === 'admin' ? (m.status === 'seen' ? '✓✓' : m.status === 'delivered' ? '✓✓' : '✓') : '';
-            content += `<div class="message-meta"><span>${time}</span>${status ? `<span style="margin-left: 4px; ${m.status === 'seen' ? 'color: var(--accent-cyan)' : ''}">${status}</span>` : ''}</div>`;
-
-            d.innerHTML = content;
-            box.appendChild(d);
-            box.scrollTop = box.scrollHeight;
-
-            if (m.from === 'user' && m.status !== 'seen') {
-                update(ref(db, `chats/${currentUserId}/messages/${key}`), { status: 'seen' });
+        // Typing
+        onValue(ref(db, "chats/" + userId + "/typing"), snap => {
+            document.getElementById("typing").style.display = (snap.exists() && snap.val()) ? "flex" : "none";
+            if (snap.exists() && snap.val()) {
+                document.getElementById("messages").scrollTop = document.getElementById("messages").scrollHeight;
             }
+        });
+
+        function getTicks(status) {
+            if (status === "seen") return ' <span class="ticks seen">✓✓</span>';
+            if (status === "delivered") return ' <span class="ticks">✓✓</span>';
+            return ' <span class="ticks">✓</span>';
         }
 
         function escapeHtml(text) {
@@ -872,150 +735,185 @@ admin_content = '''<!DOCTYPE html>
             return div.innerHTML;
         }
 
-        window.sendAdminMsg = () => {
-            if (isBlocked) { alert("User is blocked"); return; }
-            const input = document.getElementById('adminInput');
-            if (!input.value.trim()) return;
+        // Send text
+        window.sendMsg = async () => {
+            if (isBlocked) return;
+            const input = document.getElementById("messageInput");
+            const text = input.value.trim();
+            if (!text) return;
             
-            push(ref(db, `chats/${currentUserId}/messages`), {
-                from: 'admin', text: input.value, time: Date.now(), status: 'sent'
-            });
-            update(ref(db, `chats/${currentUserId}`), { lastActive: Date.now() });
             input.value = "";
+            push(ref(db, "chats/" + userId + "/messages"), {
+                from: "user", text, time: Date.now(), status: "sent"
+            });
+            update(ref(db, "chats/" + userId), { lastActive: Date.now() });
         };
 
-        document.getElementById('adminFile').onchange = async (e) => {
+        // Send image
+        window.sendImage = () => {
             if (isBlocked) return;
+            document.getElementById("imageInput").click();
+        };
+
+        document.getElementById("imageInput").onchange = e => {
             const file = e.target.files[0];
             if (!file) return;
-            try {
-                const path = `admin_media/${Date.now()}_${file.name}`;
-                const snapshot = await uploadBytes(sRef(storage, path), file);
-                const url = await getDownloadURL(snapshot.ref);
-                push(ref(db, `chats/${currentUserId}/messages`), { from: 'admin', image: url, time: Date.now(), status: 'sent' });
-                update(ref(db, `chats/${currentUserId}`), { lastActive: Date.now() });
-            } catch (err) { alert("Upload Error: " + err.message); }
+            
+            const reader = new FileReader();
+            reader.readAsDataURL(file);
+            reader.onloadend = () => {
+                push(ref(db, "chats/" + userId + "/messages"), {
+                    from: "user", image: reader.result, time: Date.now(), status: "sent"
+                });
+                update(ref(db, "chats/" + userId), { lastActive: Date.now() });
+            };
+            e.target.value = "";
         };
 
-        const micBtn = document.getElementById('adminMic');
-        micBtn.onclick = async () => {
-            if (isBlocked) { alert("User is blocked"); return; }
-            if (micBtn.classList.contains('recording')) {
-                stopRecording();
+        // Voice recording
+        window.toggleRec = async () => {
+            if (isBlocked) return;
+            if (recorder && recorder.state === "recording") {
+                stopRec();
             } else {
-                startRecording();
+                startRec();
             }
         };
 
-        async function startRecording() {
+        async function startRec() {
             try {
                 const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
                 recorder = new MediaRecorder(stream);
                 chunks = [];
-                micBtn.classList.add('recording');
-                document.getElementById('recordingOverlay').classList.add('active');
                 
-                recordingSeconds = 0;
-                updateTimer();
-                recordingInterval = setInterval(updateTimer, 1000);
-
-                recorder.ondataavailable = (e) => chunks.push(e.data);
-                recorder.onstop = async () => {
-                    const blob = new Blob(chunks, { type: 'audio/webm' });
-                    const path = `admin_voices/${Date.now()}.webm`;
-                    try {
-                        const snapshot = await uploadBytes(sRef(storage, path), blob);
-                        const url = await getDownloadURL(snapshot.ref);
-                        push(ref(db, `chats/${currentUserId}/messages`), { from: 'admin', voice: url, time: Date.now(), status: 'sent' });
-                        update(ref(db, `chats/${currentUserId}`), { lastActive: Date.now() });
-                    } catch (err) { alert("Voice Send Failed!"); }
-                    stream.getTracks().forEach(track => track.stop());
+                document.getElementById("recordingBar").classList.add("active");
+                document.getElementById("micBtn").classList.add("recording");
+                
+                recSeconds = 0;
+                updateRecTimer();
+                recInterval = setInterval(updateRecTimer, 1000);
+                
+                recorder.ondataavailable = e => chunks.push(e.data);
+                recorder.onstop = () => {
+                    const blob = new Blob(chunks, { type: "audio/webm" });
+                    const reader = new FileReader();
+                    reader.readAsDataURL(blob);
+                    reader.onloadend = () => {
+                        push(ref(db, "chats/" + userId + "/messages"), {
+                            from: "user", voice: reader.result, time: Date.now(), status: "sent"
+                        });
+                        update(ref(db, "chats/" + userId), { lastActive: Date.now() });
+                    };
+                    stream.getTracks().forEach(t => t.stop());
                 };
+                
                 recorder.start();
-            } catch (err) { alert("Mic Access Denied!"); }
-        }
-
-        function stopRecording() {
-            if (recorder && recorder.state !== 'inactive') recorder.stop();
-            micBtn.classList.remove('recording');
-            document.getElementById('recordingOverlay').classList.remove('active');
-            clearInterval(recordingInterval);
-        }
-
-        function updateTimer() {
-            recordingSeconds++;
-            const mins = Math.floor(recordingSeconds / 60).toString().padStart(2, '0');
-            const secs = (recordingSeconds % 60).toString().padStart(2, '0');
-            document.getElementById('recordingTimer').textContent = `${mins}:${secs}`;
-        }
-
-        window.toggleAudio = function(btn, src) {
-            const icon = btn.querySelector('i');
-            let audio = btn.nextElementSibling.nextElementSibling;
-            if (!audio || audio.tagName !== 'AUDIO') {
-                audio = document.createElement('audio');
-                audio.src = src;
-                audio.style.display = 'none';
-                btn.parentElement.appendChild(audio);
+            } catch (err) {
+                alert("Mic access denied!");
             }
-            if (audio.paused) {
-                document.querySelectorAll('audio').forEach(a => { a.pause(); a.currentTime = 0; });
-                document.querySelectorAll('.audio-play-btn i').forEach(i => i.className = 'fas fa-play');
-                audio.play();
-                icon.className = 'fas fa-pause';
+        }
+
+        function stopRec() {
+            if (recorder && recorder.state !== "inactive") recorder.stop();
+            document.getElementById("recordingBar").classList.remove("active");
+            document.getElementById("micBtn").classList.remove("recording");
+            clearInterval(recInterval);
+        }
+
+        window.cancelRec = () => {
+            if (recorder && recorder.state !== "inactive") {
+                recorder.stop();
+                recorder = null;
+            }
+            document.getElementById("recordingBar").classList.remove("active");
+            document.getElementById("micBtn").classList.remove("recording");
+            clearInterval(recInterval);
+            recSeconds = 0;
+        };
+
+        function updateRecTimer() {
+            recSeconds++;
+            const m = Math.floor(recSeconds / 60).toString().padStart(2, '0');
+            const s = (recSeconds % 60).toString().padStart(2, '0');
+            document.getElementById("recTimer").textContent = `${m}:${s}`;
+        }
+
+        // Play voice
+        window.playVoice = (btn, src) => {
+            const icon = btn.querySelector("i");
+            const bubble = btn.closest(".voice-bubble");
+            const timeEl = bubble.querySelector(".voice-time");
+            
+            if (currentAudio && !currentAudio.paused) {
+                currentAudio.pause();
+                currentAudio.currentTime = 0;
+                document.querySelectorAll(".play-btn i").forEach(i => i.className = "fas fa-play");
+            }
+            
+            if (!currentAudio || currentAudio.src !== src) {
+                currentAudio = new Audio(src);
+                currentAudio.ontimeupdate = () => {
+                    const m = Math.floor(currentAudio.currentTime / 60);
+                    const s = Math.floor(currentAudio.currentTime % 60).toString().padStart(2, "0");
+                    timeEl.textContent = `${m}:${s}`;
+                };
+                currentAudio.onended = () => {
+                    icon.className = "fas fa-play";
+                    timeEl.textContent = "0:00";
+                };
+                currentAudio.play();
+                icon.className = "fas fa-pause";
+            } else if (currentAudio.paused) {
+                currentAudio.play();
+                icon.className = "fas fa-pause";
             } else {
-                audio.pause();
-                icon.className = 'fas fa-play';
+                currentAudio.pause();
+                icon.className = "fas fa-play";
             }
         };
 
-        window.openLightbox = (src) => {
-            document.getElementById('lightboxImg').src = src;
-            document.getElementById('lightbox').classList.add('active');
+        // Lightbox
+        window.openLightbox = src => {
+            document.getElementById("lightboxImg").src = src;
+            document.getElementById("lightbox").classList.add("show");
         };
 
         window.closeLightbox = () => {
-            document.getElementById('lightbox').classList.remove('active');
+            document.getElementById("lightbox").classList.remove("show");
         };
 
-        window.toggleBlock = () => {
-            if (!currentUserId) return;
-            isBlocked = !isBlocked;
-            update(ref(db, `chats/${currentUserId}`), { blocked: isBlocked });
-            updateBlockIcon();
-            alert(isBlocked ? "User blocked" : "User unblocked");
-        };
-
-        function updateBlockIcon() {
-            const icon = document.getElementById('blockIcon');
-            icon.className = isBlocked ? 'fas fa-unlock' : 'fas fa-ban';
-        }
-
+        // Clear chat
         window.clearChat = () => {
-            if (!currentUserId || !confirm("Clear all messages?")) return;
-            remove(ref(db, `chats/${currentUserId}/messages`));
-            document.getElementById('msgs').innerHTML = '';
+            if (!confirm("Clear all messages?")) return;
+            remove(ref(db, "chats/" + userId + "/messages"));
         };
 
-        document.getElementById('adminInput').addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') sendAdminMsg();
+        // Enter to send
+        document.getElementById("messageInput").addEventListener("keypress", e => {
+            if (e.key === "Enter") sendMsg();
         });
 
-        document.getElementById('searchUsers').addEventListener('input', (e) => {
-            const term = e.target.value.toLowerCase();
-            document.querySelectorAll('.user-item').forEach(item => {
-                const name = item.querySelector('.user-name').textContent.toLowerCase();
-                item.style.display = name.includes(term) ? 'flex' : 'none';
-            });
-        });
+        // Keep alive
+        setInterval(() => {
+            update(ref(db, "chats/" + userId), { lastActive: Date.now() });
+        }, 30000);
+        
+        update(ref(db, "chats/" + userId), { lastActive: Date.now(), started: Date.now() });
     </script>
 </body>
 </html>'''
 
-# Save admin file
-with open('/mnt/kimi/output/ADMIN-ViP.html', 'w', encoding='utf-8') as f:
-    f.write(admin_content)
+# Save user file
+with open('/mnt/kimi/output/USER-ViP.html', 'w', encoding='utf-8') as f:
+    f.write(user_mobile)
 
-print("✅ ADMIN file saved successfully!")
-print(f"File size: {len(admin_content)} characters")
-print(f"Location: /mnt/kimi/output/ADMIN-ViP.html")
+print("✅ USER Mobile file saved!")
+print(f"File size: {len(user_mobile)} characters")
+
+# List files
+import os
+files = os.listdir('/mnt/kimi/output/')
+print("\n📁 Files in output directory:")
+for f in files:
+    size = os.path.getsize(f'/mnt/kimi/output/{f}')
+    print(f"  - {f} ({size} bytes)")
