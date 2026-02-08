@@ -90,6 +90,11 @@
             box-shadow: 0 0 10px var(--success);
         }
 
+        .header-avatar.offline::after {
+            background: var(--text-secondary);
+            box-shadow: none;
+        }
+
         .header-info h1 {
             font-size: 16px;
             font-weight: 600;
@@ -105,6 +110,14 @@
 
         .typing-text {
             color: var(--accent-primary) !important;
+        }
+
+        .online-status {
+            color: var(--success) !important;
+        }
+
+        .last-seen {
+            color: var(--text-secondary) !important;
         }
 
         .header-actions {
@@ -336,8 +349,8 @@
         }
 
         .attach-btn {
-            width: 36px;
-            height: 36px;
+            width: 44px;
+            height: 44px;
             border: none;
             background: transparent;
             color: var(--text-secondary);
@@ -348,6 +361,11 @@
             justify-content: center;
             font-size: 18px;
             flex-shrink: 0;
+            transition: all 0.3s;
+        }
+
+        .attach-btn:hover {
+            color: var(--accent-primary);
         }
 
         .message-input {
@@ -671,9 +689,9 @@
     <div class="app" id="app" style="display: none;">
         <div class="header">
             <div class="header-brand">
-                <div class="header-avatar">A</div>
+                <div class="header-avatar" id="adminAvatar">A</div>
                 <div class="header-info">
-                    <h1>Admin</h1>
+                    <h1>MAHTAB KHAN JAMALI</h1>
                     <span id="statusText">
                         <i class="fas fa-circle" style="font-size: 8px; color: var(--success);"></i>
                         Online
@@ -681,7 +699,7 @@
                 </div>
             </div>
             <div class="header-actions">
-                <button class="header-btn" onclick="clearChat()">
+                <button class="header-btn" onclick="clearChat()" title="Clear from my screen only">
                     <i class="fas fa-trash"></i>
                 </button>
             </div>
@@ -704,14 +722,14 @@
                         <i class="fas fa-paperclip"></i>
                     </button>
                     <input type="file" id="imageInput" accept="image/*" style="display: none;">
-                    
+
                     <textarea class="message-input" id="messageInput" placeholder="Type a message..." rows="1"></textarea>
-                    
+
                     <button class="action-btn mic-btn" id="micBtn">
                         <i class="fas fa-microphone"></i>
                     </button>
                 </div>
-                
+
                 <button class="action-btn send-btn" id="sendBtn" onclick="sendMessage()">
                     <i class="fas fa-paper-plane"></i>
                 </button>
@@ -742,6 +760,7 @@
         let recordingStartTime = null;
         let recordingTimer = null;
         let currentAudio = null;
+        let adminOnlineTimeout = null;
 
         // Mobile height fix
         function setVH() {
@@ -765,7 +784,7 @@
                 setTimeout(() => input.style.borderColor = '', 1000);
                 return;
             }
-            
+
             userId = name;
             localStorage.setItem("mahtab_username", userId);
             showApp();
@@ -774,7 +793,7 @@
         function showApp() {
             document.getElementById('welcomeScreen').classList.add('hidden');
             document.getElementById('app').style.display = 'flex';
-            
+
             initializeChat();
         }
 
@@ -802,14 +821,26 @@
 
             // Load messages
             loadMessages();
-            
+
+            // Listen for admin online status and last seen
+            onValue(ref(db, `chats/${userId}/adminOnline`), (snap) => {
+                updateAdminStatus(snap.val());
+            });
+
+            onValue(ref(db, `chats/${userId}/adminLastSeen`), (snap) => {
+                if (snap.exists()) {
+                    updateLastSeen(snap.val());
+                }
+            });
+
             // Listen for admin typing
             onValue(ref(db, `chats/${userId}/adminTyping`), (snap) => {
                 const statusText = document.getElementById('statusText');
                 if (snap.exists() && snap.val()) {
                     statusText.innerHTML = '<span class="typing-text">typing...</span>';
                 } else {
-                    statusText.innerHTML = '<i class="fas fa-circle" style="font-size: 8px; color: var(--success);"></i> Online';
+                    // Will be updated by online status listener
+                    checkAdminStatus();
                 }
             });
 
@@ -818,7 +849,7 @@
             input.addEventListener('input', () => {
                 input.style.height = 'auto';
                 input.style.height = Math.min(input.scrollHeight, 100) + 'px';
-                
+
                 // Typing indicator
                 update(ref(db, `chats/${userId}`), { typing: input.value.length > 0 });
             });
@@ -832,17 +863,85 @@
 
             // Setup mic
             document.getElementById('micBtn').addEventListener('click', toggleRecording);
-            
+
             // Setup image
             document.getElementById('imageInput').addEventListener('change', handleImage);
         }
 
+        function updateAdminStatus(isOnline) {
+            const statusText = document.getElementById('statusText');
+            const adminAvatar = document.getElementById('adminAvatar');
+
+            if (isOnline) {
+                statusText.innerHTML = '<i class="fas fa-circle" style="font-size: 8px; color: var(--success);"></i> <span class="online-status">Online</span>';
+                adminAvatar.classList.remove('offline');
+
+                // Clear any timeout
+                if (adminOnlineTimeout) {
+                    clearTimeout(adminOnlineTimeout);
+                    adminOnlineTimeout = null;
+                }
+            } else {
+                // Check last seen
+                get(ref(db, `chats/${userId}/adminLastSeen`)).then((snap) => {
+                    if (snap.exists()) {
+                        updateLastSeen(snap.val());
+                    } else {
+                        statusText.innerHTML = '<span class="last-seen">Offline</span>';
+                    }
+                    adminAvatar.classList.add('offline');
+                });
+            }
+        }
+
+        function updateLastSeen(timestamp) {
+            const statusText = document.getElementById('statusText');
+            const adminAvatar = document.getElementById('adminAvatar');
+
+            if (!timestamp) return;
+
+            const lastSeen = new Date(timestamp);
+            const now = new Date();
+            const diffMs = now - lastSeen;
+            const diffMins = Math.floor(diffMs / 60000);
+            const diffHours = Math.floor(diffMs / 3600000);
+            const diffDays = Math.floor(diffMs / 86400000);
+
+            let timeText = '';
+
+            if (diffMins < 1) {
+                timeText = 'Just now';
+            } else if (diffMins < 60) {
+                timeText = `${diffMins} min ago`;
+            } else if (diffHours < 24) {
+                timeText = `${diffHours} hour${diffHours > 1 ? 's' : ''} ago`;
+            } else {
+                timeText = `${diffDays} day${diffDays > 1 ? 's' : ''} ago`;
+            }
+
+            // Format time like "12:34 PM"
+            const hours = lastSeen.getHours();
+            const minutes = lastSeen.getMinutes().toString().padStart(2, '0');
+            const ampm = hours >= 12 ? 'PM' : 'AM';
+            const displayHours = hours % 12 || 12;
+            const formattedTime = `${displayHours}:${minutes} ${ampm}`;
+
+            statusText.innerHTML = `<span class="last-seen">Last seen ${formattedTime} (${timeText})</span>`;
+            adminAvatar.classList.add('offline');
+        }
+
+        function checkAdminStatus() {
+            get(ref(db, `chats/${userId}/adminOnline`)).then((snap) => {
+                updateAdminStatus(snap.val());
+            });
+        }
+
         function loadMessages() {
             const messagesDiv = document.getElementById('messages');
-            
+
             onValue(ref(db, `chats/${userId}/messages`), (snap) => {
                 messagesDiv.innerHTML = '';
-                
+
                 if (!snap.exists()) return;
 
                 let lastDate = null;
@@ -850,7 +949,7 @@
                 snap.forEach((child) => {
                     const msg = child.val();
                     const msgDate = new Date(msg.time).toDateString();
-                    
+
                     // Date divider
                     if (msgDate !== lastDate) {
                         const divider = document.createElement('div');
@@ -859,7 +958,7 @@
                         messagesDiv.appendChild(divider);
                         lastDate = msgDate;
                     }
-                    
+
                     renderMessage(msg, child.key);
                 });
 
@@ -882,9 +981,9 @@
             const messagesDiv = document.getElementById('messages');
             const div = document.createElement('div');
             div.className = `message ${msg.from}`;
-            
+
             let content = '';
-            
+
             if (msg.text) {
                 content = `<div class="message-bubble">${escapeHtml(msg.text)}</div>`;
             } else if (msg.image) {
@@ -912,7 +1011,7 @@
             const time = msg.time ? new Date(msg.time).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : '';
             const ticks = msg.from === 'user' ? 
                 (msg.status === 'seen' ? '<i class="fas fa-check-double read-receipt"></i>' : '<i class="fas fa-check"></i>') : '';
-            
+
             div.innerHTML = `
                 ${content}
                 <div class="message-meta">
@@ -920,7 +1019,7 @@
                     ${ticks}
                 </div>
             `;
-            
+
             messagesDiv.appendChild(div);
         }
 
@@ -949,7 +1048,7 @@
             input.value = '';
             input.style.height = 'auto';
             update(ref(db, `chats/${userId}`), { typing: false });
-            
+
             scrollToBottom();
         };
 
@@ -997,11 +1096,11 @@
                     const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
                     mediaRecorder = new MediaRecorder(stream);
                     audioChunks = [];
-                    
+
                     mediaRecorder.ondataavailable = (e) => {
                         audioChunks.push(e.data);
                     };
-                    
+
                     mediaRecorder.onstop = () => {
                         const blob = new Blob(audioChunks, { type: 'audio/webm' });
                         const reader = new FileReader();
@@ -1017,11 +1116,11 @@
                         };
                         stream.getTracks().forEach(track => track.stop());
                     };
-                    
+
                     mediaRecorder.start();
                     btn.classList.add('recording');
                     overlay.classList.add('active');
-                    
+
                     // Start timer
                     recordingStartTime = Date.now();
                     recordingTimer = setInterval(() => {
@@ -1030,7 +1129,7 @@
                         const secs = elapsed % 60;
                         timer.textContent = `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
                     }, 1000);
-                    
+
                 } catch (err) {
                     alert('Microphone access denied');
                 }
@@ -1041,30 +1140,30 @@
             const icon = btn.querySelector('i');
             const container = btn.closest('.audio-message');
             const duration = container.querySelector('.audio-duration');
-            
+
             if (currentAudio && !currentAudio.paused) {
                 currentAudio.pause();
                 currentAudio = null;
                 icon.className = 'fas fa-play';
                 return;
             }
-            
+
             currentAudio = new Audio(src);
             currentAudio.play();
             icon.className = 'fas fa-pause';
-            
+
             currentAudio.ontimeupdate = () => {
                 const mins = Math.floor(currentAudio.currentTime / 60);
                 const secs = Math.floor(currentAudio.currentTime % 60);
                 duration.textContent = `${mins}:${secs.toString().padStart(2, '0')}`;
-                
+
                 // Animate waveform
                 const bars = container.querySelectorAll('.waveform-bar');
                 bars.forEach(bar => {
                     bar.style.height = Math.random() * 20 + 4 + 'px';
                 });
             };
-            
+
             currentAudio.onended = () => {
                 icon.className = 'fas fa-play';
                 duration.textContent = '0:00';
@@ -1081,9 +1180,11 @@
             document.getElementById('imageModal').classList.remove('active');
         };
 
-        window.clearChat = async () => {
-            if (!confirm('Clear all messages?')) return;
-            await remove(ref(db, `chats/${userId}/messages`));
+        // Clear only from user's screen, not from database
+        window.clearChat = () => {
+            if (!confirm('Clear all messages from your screen only?
+
+Note: Messages will remain visible to admin.')) return;
             document.getElementById('messages').innerHTML = '';
         };
 
