@@ -672,30 +672,6 @@
             font-size: 0.85rem;
             text-align: center;
         }
-
-        /* Auto Mode Badge */
-        .auto-mode-badge {
-            display: inline-block;
-            background: var(--success);
-            color: white;
-            padding: 2px 8px;
-            border-radius: 4px;
-            font-size: 0.7rem;
-            margin-left: 10px;
-            animation: pulse 2s infinite;
-        }
-        
-        @keyframes pulse {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.5; }
-        }
-
-        .sync-status {
-            display: inline-block;
-            font-size: 0.7rem;
-            margin-left: 5px;
-            color: var(--success);
-        }
     </style>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
@@ -758,7 +734,7 @@
             <!-- Market -->
             <section id="view-market" class="section">
                 <div class="balance-card">
-                    <div class="balance-title">Current TK Price <span id="sync-badge" class="sync-status hidden"><i class="fas fa-sync"></i></span></div>
+                    <div class="balance-title">Current TK Price</div>
                     <div class="balance-amount"><span id="market-price">0.00</span> PKR</div>
                     <small style="opacity: 0.8;">Total Hold TK: 20M+ Coins</small>
                 </div>
@@ -776,12 +752,11 @@
                     </div>
                 </div>
 
-                <!-- TODAY'S CHART SECTION - AUTO/MANUAL MODE -->
+                <!-- TODAY'S CHART SECTION - CLEAN VERSION -->
                 <div class="today-chart-container">
                     <div class="today-chart-header">
                         <div class="today-chart-title">
                             <i class="fas fa-chart-line"></i> Today's Price Movement
-                            <span id="auto-mode-badge" class="auto-mode-badge hidden">AUTO</span>
                             <span id="manual-mode-badge" class="hidden" style="background: var(--primary); color: white; padding: 2px 8px; border-radius: 4px; font-size: 0.7rem; margin-left: 10px;">Updated</span>
                         </div>
                         <div class="today-stats">
@@ -794,13 +769,15 @@
                                 <div class="stat-value stat-low" id="today-low">0.00</div>
                             </div>
                             <div class="stat-item">
-                                <div class="stat-label">Points</div>
+                                <div class="stat-label">Changes</div>
                                 <div class="stat-value" id="today-changes">0</div>
                             </div>
                         </div>
                     </div>
                     
                     <canvas id="todayChartCanvas"></canvas>
+                    
+                    <!-- NO HISTORY LIST - ONLY CHART -->
                 </div>
 
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 20px;">
@@ -825,8 +802,8 @@
                     <div class="balance-amount" style="font-size: 1.8rem;"><span id="portfolio-total-value">0</span> PKR</div>
                     <div class="portfolio-grid">
                         <div class="portfolio-item">
-                            <div class="portfolio-label">Current Balance</div>
-                            <div class="portfolio-value" id="portfolio-current-balance">0 TK</div>
+                            <div class="portfolio-label">Total Invested</div>
+                            <div class="portfolio-value" id="portfolio-total-invested">0 PKR</div>
                         </div>
                         <div class="portfolio-item">
                             <div class="portfolio-label">Net P/L</div>
@@ -844,7 +821,7 @@
                         <span id="portfolio-price-change" style="font-weight: bold;">0%</span>
                     </div>
                 </div>
-                <h3 style="margin-bottom: 15px;">My Latest Investment</h3>
+                <h3 style="margin-bottom: 15px;">My Investments</h3>
                 <div id="investments-list" style="display: flex; flex-direction: column; gap: 10px;">
                     <div style="text-align:center; color:#777; padding: 20px;">
                         <i class="fas fa-inbox" style="font-size: 2rem; margin-bottom: 10px; display: block;"></i>
@@ -1278,9 +1255,6 @@
         let lastManualPrice = null;
         let selectedSavingsPlan = null;
         let userSavings = [];
-        let autoChartTimer = null;
-        let latestInvestment = null;
-        let serverTimeOffset = 0; // Store time difference between server and client
 
         window.playSound = (type) => {
             const AudioContext = window.AudioContext || window.webkitAudioContext;
@@ -1335,25 +1309,8 @@
             }
         }
 
-        // ======== SYNC SERVER TIME ========
-        function syncServerTime() {
-            const startTime = Date.now();
-            const timeRef = ref(db, '.info/serverTimeOffset');
-            
-            onValue(timeRef, (snapshot) => {
-                const offset = snapshot.val() || 0;
-                serverTimeOffset = offset;
-                console.log('Server time offset synced:', offset);
-            }, { onlyOnce: true });
-        }
-
-        function getSyncedTime() {
-            return Date.now() + serverTimeOffset;
-        }
-
         function initApp() {
             checkUrlParams();
-            syncServerTime(); // Sync time on startup
             
             onAuthStateChanged(auth, (user) => {
                 if (user) {
@@ -1366,95 +1323,17 @@
             });
         }
 
-        // ======== SERVER-SYNCED AUTO PRICE ========
-        function getConsistentAutoPrice(basePrice, range, intervalSeconds) {
-            // Use synced server time instead of local device time
-            const now = getSyncedTime();
-            const intervalMs = intervalSeconds * 1000;
-            const timeSlot = Math.floor(now / intervalMs);
-            
-            // Use time slot to generate consistent random seed
-            const seed = timeSlot * 12345;
-            const random = ((seed * 9301 + 49297) % 233280) / 233280;
-            
-            // Generate price fluctuation based on time
-            const fluctuation = (random - 0.5) * 2 * range;
-            return basePrice + fluctuation;
-        }
-
-        function startAutoPriceSystem() {
-            if (autoChartTimer) clearInterval(autoChartTimer);
-            
-            // Show sync indicator
-            document.getElementById('sync-badge').classList.remove('hidden');
-            
-            // Calculate and display initial price immediately
-            updateAutoPriceDisplay();
-            
-            // Update every autoUpdateInterval seconds
-            autoChartTimer = setInterval(() => {
-                updateAutoPriceDisplay();
-            }, 1000); // Check every second for smooth updates
-        }
-
-        function updateAutoPriceDisplay() {
-            if (marketMode !== 'auto') {
-                document.getElementById('sync-badge').classList.add('hidden');
-                return;
-            }
-            
-            const basePKR = marketData.tkPrice * marketData.usdtRate;
-            const newPrice = getConsistentAutoPrice(basePKR, autoFluctuationRange, autoUpdateInterval);
-            
-            // Only update if price actually changed
-            if (currentFluctuatedPrice === null || Math.abs(currentFluctuatedPrice - newPrice) > 0.01) {
-                currentFluctuatedPrice = newPrice;
-                
-                // Add to chart history (max 15 points FIFO)
-                addToAutoChartHistory(newPrice);
-                
-                updateMarketUI();
-                updateTodayChart();
-            }
-        }
-
-        function addToAutoChartHistory(price) {
-            const now = getSyncedTime();
-            
-            // Check if we already have a point at this exact time slot
-            const intervalMs = autoUpdateInterval * 1000;
-            const timeSlot = Math.floor(now / intervalMs);
-            
-            const existingIndex = todayPriceHistory.findIndex(p => {
-                const pSlot = Math.floor(p.timestamp / intervalMs);
-                return pSlot === timeSlot;
-            });
-            
-            if (existingIndex >= 0) {
-                // Update existing point
-                todayPriceHistory[existingIndex].price = price;
-                todayPriceHistory[existingIndex].timestamp = now;
-            } else {
-                // Add new point
-                todayPriceHistory.push({
-                    price: price,
-                    timestamp: now,
-                    date: new Date(now).toISOString()
-                });
-                
-                // Keep only last 15 points
-                if (todayPriceHistory.length > 15) {
-                    todayPriceHistory.shift();
-                }
-            }
-        }
-
-        function stopAutoPriceSystem() {
-            if (autoChartTimer) {
-                clearInterval(autoChartTimer);
-                autoChartTimer = null;
-            }
-            document.getElementById('sync-badge').classList.add('hidden');
+        function startZigzagAnimation() {
+            setInterval(() => {
+                if(!marketData) return;
+                const lastPrice = chartPoints.length > 0 ? chartPoints[chartPoints.length - 1] : marketData.tkPrice;
+                const change = (Math.random() - 0.5) * 0.05; 
+                let newPrice = lastPrice + change;
+                if(newPrice < 0.1) newPrice = 0.1;
+                chartPoints.push(newPrice);
+                if (chartPoints.length > 20) chartPoints.shift();
+                drawChart();
+            }, 1000); 
         }
 
         function updateMarketPressure() {
@@ -1472,6 +1351,26 @@
             setTimeout(() => {
                 document.getElementById('last-updated').innerText = 'Updated 1 min ago';
             }, 60000);
+        }
+
+        function startAutoPriceFluctuation() {
+            const basePKR = marketData.tkPrice * marketData.usdtRate;
+            currentFluctuatedPrice = basePKR + (Math.random() * autoFluctuationRange);
+            
+            updateMarketUI();
+            
+            autoRateTimer = setInterval(() => {
+                if (marketMode !== 'auto') {
+                    clearInterval(autoRateTimer);
+                    autoRateTimer = null;
+                    return;
+                }
+                
+                const basePKR = marketData.tkPrice * marketData.usdtRate;
+                currentFluctuatedPrice = basePKR + (Math.random() * autoFluctuationRange);
+                
+                updateMarketUI();
+            }, autoUpdateInterval * 1000);
         }
 
         function checkAndCreateUserInDB(firebaseUser) {
@@ -1562,7 +1461,7 @@
             }
         }
 
-        // ======== CLEAN PRICE HISTORY - 15 POINTS MAX FIFO ========
+        // ======== CLEAN PRICE HISTORY - ONLY SHOW ACTUAL CHANGES ========
         function loadTodayPriceHistory() {
             const today = new Date().toDateString();
             const historyRef = ref(db, 'priceHistory/' + today);
@@ -1570,11 +1469,21 @@
             onValue(historyRef, (snapshot) => {
                 const data = snapshot.val();
                 if (data) {
-                    // Get all points sorted by time
+                    // Filter only unique price changes (remove consecutive duplicates)
                     const allPoints = Object.values(data).sort((a, b) => a.timestamp - b.timestamp);
+                    todayPriceHistory = [];
                     
-                    // Keep only last 15 points
-                    todayPriceHistory = allPoints.slice(-15);
+                    allPoints.forEach((point, index) => {
+                        if (index === 0) {
+                            todayPriceHistory.push(point);
+                        } else {
+                            const lastPoint = todayPriceHistory[todayPriceHistory.length - 1];
+                            // Only add if price actually changed (more than 0.01 difference)
+                            if (Math.abs(point.price - lastPoint.price) > 0.01) {
+                                todayPriceHistory.push(point);
+                            }
+                        }
+                    });
                     
                     updateTodayChart();
                 } else {
@@ -1608,12 +1517,13 @@
             const prices = todayPriceHistory.map(h => h.price);
             const high = Math.max(...prices);
             const low = Math.min(...prices);
+            const changes = todayPriceHistory.length - 1;
             
             document.getElementById('today-high').innerText = high.toFixed(2);
             document.getElementById('today-low').innerText = low.toFixed(2);
-            document.getElementById('today-changes').innerText = todayPriceHistory.length;
+            document.getElementById('today-changes').innerText = changes;
             
-            const padding = 40;
+            const padding = 60;
             const chartWidth = canvas.width - (padding * 2);
             const chartHeight = canvas.height - (padding * 2);
             
@@ -1651,7 +1561,7 @@
             
             ctx.stroke();
             
-            // Draw points with up/down indicators
+            // Draw points with price labels
             todayPriceHistory.forEach((point, index) => {
                 const x = padding + (index * stepX);
                 const y = padding + chartHeight - ((point.price - low) / priceRange) * chartHeight;
@@ -1675,19 +1585,16 @@
                         color = '#00c853';
                         priceText = '+' + diff.toFixed(0);
                         textColor = '#00c853';
-                        textY = y - 20;
+                        textY = y - 20; // Above the dot
                     } else if (diff < 0) {
                         // Price went DOWN - Red with -value
                         color = '#ff3d00';
-                        priceText = diff.toFixed(0);
+                        priceText = diff.toFixed(0); // Already negative
                         textColor = '#ff3d00';
-                        textY = y + 30;
+                        textY = y + 30; // Below the dot
                     } else {
-                        // No change - neutral color
-                        color = '#888';
-                        priceText = '=';
-                        textColor = '#888';
-                        textY = y - 20;
+                        // No change - skip drawing
+                        return;
                     }
                 }
                 
@@ -1704,7 +1611,7 @@
                 // Draw point
                 ctx.beginPath();
                 ctx.fillStyle = color;
-                ctx.arc(x, y, 6, 0, Math.PI * 2);
+                ctx.arc(x, y, 8, 0, Math.PI * 2);
                 ctx.fill();
                 
                 // Draw white border
@@ -1713,173 +1620,199 @@
                 ctx.stroke();
                 
                 // Draw price label with background
-                ctx.font = 'bold 11px Arial';
+                ctx.font = 'bold 12px Arial';
                 const textWidth = ctx.measureText(priceText).width;
-                const paddingBox = 3;
+                const paddingBox = 4;
                 
                 // Draw background for text
                 ctx.fillStyle = 'rgba(0,0,0,0.8)';
-                ctx.fillRect(x - (textWidth/2) - paddingBox, textY - 10, textWidth + (paddingBox*2), 16);
+                ctx.fillRect(x - (textWidth/2) - paddingBox, textY - 12, textWidth + (paddingBox*2), 18);
                 
                 // Draw text
                 ctx.fillStyle = textColor;
                 ctx.textAlign = 'center';
                 ctx.fillText(priceText, x, textY);
                 
-                // Draw time label below (only for every 2nd point to avoid crowding)
-                if (index % 2 === 0 || todayPriceHistory.length <= 8) {
-                    ctx.fillStyle = '#aaa';
-                    ctx.font = '9px Arial';
-                    const time = new Date(point.timestamp).toLocaleTimeString('en-US', {hour: '2-digit', minute:'2-digit'});
-                    ctx.fillText(time, x, canvas.height - 10);
-                }
+                // Draw time label below
+                ctx.fillStyle = '#aaa';
+                ctx.font = '10px Arial';
+                const time = new Date(point.timestamp).toLocaleTimeString('en-US', {hour: '2-digit', minute:'2-digit'});
+                ctx.fillText(time, x, canvas.height - 10);
             });
             
             // Draw Y-axis labels
             ctx.fillStyle = '#777';
-            ctx.font = '10px Arial';
+            ctx.font = '11px Arial';
             ctx.textAlign = 'right';
             for (let i = 0; i <= 4; i++) {
                 const price = low + (priceRange / 4) * (4 - i);
                 const y = padding + (chartHeight / 4) * i;
-                ctx.fillText(price.toFixed(0), padding - 5, y + 3);
+                ctx.fillText(price.toFixed(2), padding - 10, y + 4);
             }
         }
 
-        // ======== PORTFOLIO - SHOW ONLY 1 LATEST INVESTMENT ========
         function calculatePortfolioPL() {
-            if (!currentUserData || !marketData) return;
-            
-            const currentPrice = getCurrentPrice();
-            const currentPricePKR = currentPrice * marketData.usdtRate;
-            const availableBalance = parseFloat(currentUserData.balanceTK) || 0;
-            
-            updatePortfolioPriceDisplay();
-            
-            // Find latest investment
-            let latestInv = null;
-            let totalInvested = 0;
-            let totalCurrentValue = 0;
-            
-            if (availableBalance > 0 && userInvestments.length > 0) {
-                // Sort by date descending and get latest
-                const sortedInvestments = [...userInvestments].sort((a, b) => {
-                    return new Date(b.date) - new Date(a.date);
-                });
-                latestInv = sortedInvestments[0];
-                
-                // Calculate total invested from all approved deposits
-                userInvestments.forEach(inv => {
-                    totalInvested += parseFloat(inv.rawAmount) || 0;
-                });
-                
-                // Current value based on available balance
-                totalCurrentValue = availableBalance * currentPricePKR;
-            }
-            
-            const netPL = totalCurrentValue - totalInvested;
-            const plPercentage = totalInvested > 0 ? ((netPL / totalInvested) * 100) : 0;
-            
-            // Update summary
-            document.getElementById('portfolio-current-balance').innerText = availableBalance.toFixed(2) + ' TK';
-            
-            const netPLElement = document.getElementById('portfolio-net-pl');
-            netPLElement.innerText = (netPL >= 0 ? '+' : '') + netPL.toFixed(2) + ' PKR';
-            
-            if (netPL >= 0) {
-                netPLElement.classList.remove('loss');
-                netPLElement.classList.add('profit');
-            } else {
-                netPLElement.classList.remove('profit');
-                netPLElement.classList.add('loss');
-            }
-            
-            document.getElementById('portfolio-total-value').innerText = totalCurrentValue.toFixed(2);
-            
-            const priceChangeElement = document.getElementById('portfolio-price-change');
-            const changePercent = ((Math.random() * 4) - 2).toFixed(2);
-            priceChangeElement.innerText = (changePercent >= 0 ? '+' : '') + changePercent + '%';
-            priceChangeElement.style.color = changePercent >= 0 ? '#00ff88' : '#ff4757';
-            
-            // Quick view in wallet
-            document.getElementById('quick-pl').innerText = (netPL >= 0 ? '+' : '') + netPL.toFixed(2) + ' PKR';
-            document.getElementById('quick-pl').style.color = netPL >= 0 ? '#00c853' : '#ff3d00';
-            document.getElementById('quick-pl-percent').innerText = (plPercentage >= 0 ? '+' : '') + plPercentage.toFixed(2) + '%';
-            document.getElementById('quick-pl-percent').style.color = netPL >= 0 ? '#00c853' : '#ff3d00';
-            
-            // Render only 1 latest investment
-            renderLatestInvestment(latestInv, currentPricePKR, availableBalance, netPL, plPercentage);
+    if (!currentUserData || !marketData) return;
+
+    const currentPrice = getCurrentPrice();
+    const currentPricePKR = currentPrice * marketData.usdtRate;
+    const availableBalance = parseFloat(currentUserData.balanceTK) || 0;
+
+    updatePortfolioPriceDisplay();
+
+    let totalInvested = 0;
+    let totalCurrentValue = 0;
+
+    // Calculate combined investment data
+    if (availableBalance > 0 && userInvestments.length > 0) {
+        let totalHistoricalInvested = 0;
+        let totalHistoricalTK = 0;
+        let totalWeightedBuyPrice = 0;
+
+        userInvestments.forEach(inv => {
+            const rawAmount = parseFloat(inv.rawAmount) || 0;
+            const tkAmount = parseFloat(inv.amount) || 0;
+            const buyPriceTK = parseFloat(inv.tkPriceAtDeposit) || marketData.tkPrice;
+            const buyRate = parseFloat(inv.usdtRateAtDeposit) || marketData.usdtRate;
+            const buyPricePKR = buyPriceTK * buyRate;
+
+            totalHistoricalInvested += rawAmount;
+            totalHistoricalTK += tkAmount;
+            totalWeightedBuyPrice += (tkAmount * buyPricePKR);
+        });
+
+        // Calculate weighted average buy price per TK
+        const avgBuyPricePerTK = totalHistoricalTK > 0 ? totalWeightedBuyPrice / totalHistoricalTK : 0;
+
+        // Current value of available balance
+        totalCurrentValue = availableBalance * currentPricePKR;
+
+        // Invested amount proportional to remaining balance
+        const retentionRatio = totalHistoricalTK > 0 ? availableBalance / totalHistoricalTK : 0;
+        totalInvested = totalHistoricalInvested * retentionRatio;
+
+        // Store for single card display
+        window.combinedInvestmentData = {
+            availableBalance: availableBalance,
+            totalHistoricalTK: totalHistoricalTK,
+            avgBuyPricePerTK: avgBuyPricePerTK,
+            currentPricePKR: currentPricePKR,
+            totalInvested: totalInvested,
+            totalCurrentValue: totalCurrentValue,
+            firstDepositDate: userInvestments[0]?.date || new Date().toLocaleString()
+        };
+    } else {
+        window.combinedInvestmentData = null;
+    }
+
+    const netPL = totalCurrentValue - totalInvested;
+    const plPercentage = totalInvested > 0 ? ((netPL / totalInvested) * 100) : 0;
+
+    document.getElementById('portfolio-total-invested').innerText = totalInvested.toFixed(2) + ' PKR';
+    document.getElementById('portfolio-total-value').innerText = totalCurrentValue.toFixed(2);
+
+    const netPLElement = document.getElementById('portfolio-net-pl');
+    netPLElement.innerText = (netPL >= 0 ? '+' : '') + netPL.toFixed(2) + ' PKR';
+
+    if (netPL >= 0) {
+        netPLElement.classList.remove('loss');
+        netPLElement.classList.add('profit');
+    } else {
+        netPLElement.classList.remove('profit');
+        netPLElement.classList.add('loss');
+    }
+
+    const priceChangeElement = document.getElementById('portfolio-price-change');
+    const changePercent = ((currentPricePKR - (window.combinedInvestmentData?.avgBuyPricePerTK || currentPricePKR)) / (window.combinedInvestmentData?.avgBuyPricePerTK || currentPricePKR) * 100);
+    priceChangeElement.innerText = (changePercent >= 0 ? '+' : '') + changePercent.toFixed(2) + '%';
+    priceChangeElement.style.color = changePercent >= 0 ? '#00ff88' : '#ff4757';
+
+    document.getElementById('quick-pl').innerText = (netPL >= 0 ? '+' : '') + netPL.toFixed(2) + ' PKR';
+    document.getElementById('quick-pl').style.color = netPL >= 0 ? '#00c853' : '#ff3d00';
+    document.getElementById('quick-pl-percent').innerText = (plPercentage >= 0 ? '+' : '') + plPercentage.toFixed(2) + '%';
+    document.getElementById('quick-pl-percent').style.color = netPL >= 0 ? '#00c853' : '#ff3d00';
+
+    renderInvestmentsList();
         }
 
-        function renderLatestInvestment(latestInv, currentPricePKR, availableBalance, netPL, plPercentage) {
-            const listContainer = document.getElementById('investments-list');
-            
-            if (!latestInv || availableBalance <= 0) {
-                listContainer.innerHTML = `
-                    <div style="text-align:center; color:#777; padding: 20px;">
-                        <i class="fas fa-inbox" style="font-size: 2rem; margin-bottom: 10px; display: block;"></i>
-                        No active investments. Your balance is 0 TK.<br>
-                        <small style="color: #555;">Make a deposit to start investing!</small>
-                    </div>
-                `;
-                return;
-            }
-            
-            const buyPriceTK = parseFloat(latestInv.tkPriceAtDeposit) || marketData.tkPrice;
-            const buyRate = parseFloat(latestInv.usdtRateAtDeposit) || marketData.usdtRate;
-            const buyPricePKR = buyPriceTK * buyRate;
-            
-            const currentValue = availableBalance * currentPricePKR;
-            const isProfit = netPL >= 0;
-            
-            const card = document.createElement('div');
-            card.className = `investment-card ${isProfit ? 'profit' : 'loss'}`;
-            
-            card.innerHTML = `
-                <div class="investment-header">
-                    <div>
-                        <div class="investment-amount">${availableBalance.toFixed(2)} TK</div>
-                        <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 2px;">
-                            <i class="fas fa-wallet"></i> Current Balance
-                        </div>
-                    </div>
-                    <div style="text-align: right;">
-                        <div style="font-size: 0.8rem; color: var(--text-muted);">Latest Deposit</div>
-                        <div style="font-weight: bold; font-size: 0.9rem;">${new Date(latestInv.date).toLocaleDateString()}</div>
-                    </div>
+        function renderInvestmentsList() {
+    const listContainer = document.getElementById('investments-list');
+
+    if (!window.combinedInvestmentData || window.combinedInvestmentData.availableBalance <= 0) {
+        listContainer.innerHTML = `
+            <div style="text-align:center; color:#777; padding: 20px;">
+                <i class="fas fa-inbox" style="font-size: 2rem; margin-bottom: 10px; display: block;"></i>
+                No active investments. Your balance is 0 TK.<br>
+                <small style="color: #555;">Make a deposit to start investing!</small>
+            </div>
+        `;
+        return;
+    }
+
+    const data = window.combinedInvestmentData;
+    const netPL = data.totalCurrentValue - data.totalInvested;
+    const plPercent = data.totalInvested > 0 ? ((netPL / data.totalInvested) * 100) : 0;
+    const isProfit = netPL >= 0;
+
+    // Show only ONE combined investment card
+    listContainer.innerHTML = '';
+
+    const card = document.createElement('div');
+    card.className = `investment-card ${isProfit ? 'profit' : 'loss'}`;
+
+    card.innerHTML = `
+        <div class="investment-header">
+            <div>
+                <div class="investment-amount">${data.availableBalance.toFixed(2)} TK</div>
+                <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 2px;">
+                    <i class="fas fa-layer-group"></i> Combined Investment
                 </div>
-                
-                <div class="investment-details">
-                    <div class="investment-detail-item">
-                        <span class="investment-detail-label">Buy Price</span>
-                        <span class="investment-detail-value">${buyPricePKR.toFixed(2)} <span class="rate-badge">PKR</span></span>
-                    </div>
-                    <div class="investment-detail-item">
-                        <span class="investment-detail-label">Current Price</span>
-                        <span class="investment-detail-value">${currentPricePKR.toFixed(2)} <span class="rate-badge">PKR</span></span>
-                    </div>
+                <div style="font-size: 0.75rem; color: #666; margin-top: 2px;">
+                    <i class="fas fa-calendar-alt"></i> ${data.firstDepositDate}
                 </div>
-                
-                <div class="pl-display">
-                    <div>
-                        <div style="font-size: 0.8rem; color: var(--text-muted);">Current Value</div>
-                        <div style="font-weight: bold; font-size: 1.1rem;">${currentValue.toFixed(2)} PKR</div>
-                    </div>
-                    <div style="text-align: right;">
-                        <div class="pl-amount ${isProfit ? 'text-green' : 'text-red'}">
-                            ${isProfit ? '+' : ''}${netPL.toFixed(2)} PKR
-                        </div>
-                        <div class="pl-percentage ${isProfit ? 'text-green' : 'text-red'}">
-                            ${isProfit ? '<i class="fas fa-arrow-up"></i>' : '<i class="fas fa-arrow-down"></i>'} 
-                            ${Math.abs(plPercentage).toFixed(2)}%
-                        </div>
-                    </div>
+            </div>
+            <div style="text-align: right;">
+                <div style="font-size: 0.8rem; color: var(--text-muted);">Invested</div>
+                <div style="font-weight: bold;">${data.totalInvested.toFixed(2)} PKR</div>
+                <div style="font-size: 0.7rem; color: #666; margin-top: 2px;">
+                    Avg: ${data.avgBuyPricePerTK.toFixed(2)} PKR/TK
                 </div>
-            `;
-            
-            listContainer.innerHTML = '';
-            listContainer.appendChild(card);
-        }
+            </div>
+        </div>
+
+        <div class="investment-details">
+            <div class="investment-detail-item">
+                <span class="investment-detail-label">Avg Buy Price</span>
+                <span class="investment-detail-value">${data.avgBuyPricePerTK.toFixed(2)} <span class="rate-badge">PKR</span></span>
+            </div>
+            <div class="investment-detail-item">
+                <span class="investment-detail-label">Current Price</span>
+                <span class="investment-detail-value">${data.currentPricePKR.toFixed(2)} <span class="rate-badge">PKR</span></span>
+            </div>
+        </div>
+
+        <div class="pl-display">
+            <div>
+                <div style="font-size: 0.8rem; color: var(--text-muted);">Current Value</div>
+                <div style="font-weight: bold; font-size: 1.1rem;">${data.totalCurrentValue.toFixed(2)} PKR</div>
+            </div>
+            <div style="text-align: right;">
+                <div class="pl-amount ${isProfit ? 'text-green' : 'text-red'}">
+                    ${isProfit ? '+' : ''}${netPL.toFixed(2)} PKR
+                </div>
+                <div class="pl-percentage ${isProfit ? 'text-green' : 'text-red'}">
+                    ${isProfit ? '<i class="fas fa-arrow-up"></i>' : '<i class="fas fa-arrow-down"></i>'} 
+                    ${Math.abs(plPercent).toFixed(2)}%
+                </div>
+            </div>
+        </div>
+
+        <div style="margin-top: 10px; padding-top: 10px; border-top: 1px dashed #444; font-size: 0.75rem; color: #666; text-align: center;">
+            <i class="fas fa-info-circle"></i> Based on ${userInvestments.length} deposit(s) • Withdrawals deducted proportionally
+        </div>
+    `;
+
+    listContainer.appendChild(card);
 
         function loginSuccess(user) {
             document.getElementById('auth-screen').classList.add('hidden');
@@ -1916,30 +1849,32 @@
                 const data = snapshot.val();
                 if (data) {
                     const oldMode = marketMode;
+                    const oldPrice = marketData.tkPrice;
                     
                     marketData = data;
                     marketMode = data.mode || 'manual';
                     autoFluctuationRange = data.autoRange || 100;
                     autoUpdateInterval = data.autoInterval || 30;
                     
-                    // Update badges
-                    const autoBadge = document.getElementById('auto-mode-badge');
-                    const manualBadge = document.getElementById('manual-mode-badge');
+                    const badge = document.getElementById('manual-mode-badge');
+                    if (marketMode === 'manual') {
+                        badge.classList.remove('hidden');
+                    } else {
+                        badge.classList.add('hidden');
+                    }
+                    
+                    if (marketMode === 'manual' && oldMode === 'manual' && oldPrice !== data.tkPrice) {
+                        savePriceChangeToHistory(data.tkPrice * data.usdtRate);
+                    }
+                    
+                    if (autoRateTimer) {
+                        clearInterval(autoRateTimer);
+                        autoRateTimer = null;
+                    }
                     
                     if (marketMode === 'auto') {
-                        autoBadge.classList.remove('hidden');
-                        manualBadge.classList.add('hidden');
-                        
-                        // Start auto price system if not already running
-                        if (!autoChartTimer) {
-                            startAutoPriceSystem();
-                        }
+                        startAutoPriceFluctuation();
                     } else {
-                        autoBadge.classList.add('hidden');
-                        manualBadge.classList.remove('hidden');
-                        
-                        // Stop auto system
-                        stopAutoPriceSystem();
                         currentFluctuatedPrice = null;
                         lastManualPrice = data.tkPrice * data.usdtRate;
                     }
@@ -2005,6 +1940,7 @@
             loadReferralStats(user.uid);
             loadUserSavings(user.uid);
             monitorIncomingTransfers(user.uid); 
+            startZigzagAnimation();
             loadTodayPriceHistory();
             updateMarketPressure();
             pressureInterval = setInterval(updateMarketPressure, 600000);
@@ -2017,6 +1953,18 @@
             } else {
                 showSection('market');
             }
+        }
+
+        function savePriceChangeToHistory(price) {
+            const today = new Date().toDateString();
+            const historyRef = ref(db, 'priceHistory/' + today);
+            const newEntry = {
+                price: price,
+                timestamp: Date.now(),
+                date: new Date().toISOString()
+            };
+            
+            push(historyRef, newEntry);
         }
 
         function loadUserInvestments(uid) {
