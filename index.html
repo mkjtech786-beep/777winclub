@@ -38,7 +38,7 @@
         .text-green { color: var(--success); }
         .text-red { color: var(--danger); }
         .text-warning { color: var(--warning); }
-        
+
         .btn {
             background: var(--primary);
             color: white;
@@ -54,7 +54,7 @@
         .btn:disabled { background: #555; cursor: not-allowed; }
         .btn-outline { background: transparent; border:1px solid var(--primary); color: var(--primary); }
         .btn-sm { padding: 5px 10px; font-size: 0.8rem; width: auto; }
-        
+
         .input-group { margin-bottom: 15px; }
         .input-group label { display: block; margin-bottom: 5px; color: var(--text-muted); font-size: 0.9rem; }
         .input-group input, .input-group select {
@@ -140,7 +140,7 @@
         }
         .logo { font-size: 1.2rem; font-weight: bold; color: var(--primary); display: flex; align-items: center; gap: 5px; }
         .user-info { display: flex; align-items: center; gap: 10px; font-size: 0.9rem; cursor: pointer; }
-        
+
         .avatar {
             width: 35px;
             height: 35px;
@@ -197,7 +197,7 @@
         }
 
         .section { padding: 15px; max-width: 600px; margin: 0 auto; }
-        
+
         .chart-container {
             background: var(--bg-card);
             padding: 15px;
@@ -227,7 +227,7 @@
             margin-top: 15px;
             border: 1px solid #333;
         }
-        
+
         .today-chart-header {
             display: flex;
             justify-content: space-between;
@@ -236,35 +236,35 @@
             padding-bottom: 10px;
             border-bottom: 1px solid #333;
         }
-        
+
         .today-chart-title {
             color: var(--primary);
             font-size: 1.1rem;
             font-weight: bold;
         }
-        
+
         .today-stats {
             display: flex;
             gap: 15px;
             font-size: 0.8rem;
         }
-        
+
         .stat-item {
             text-align: center;
         }
-        
+
         .stat-label {
             color: var(--text-muted);
             font-size: 0.7rem;
         }
-        
+
         .stat-value {
             font-weight: bold;
         }
-        
+
         .stat-high { color: var(--success); }
         .stat-low { color: var(--danger); }
-        
+
         #todayChartCanvas {
             width: 100%;
             height: 250px;
@@ -282,7 +282,7 @@
         }
         .balance-title { font-size: 0.9rem; opacity: 0.9; }
         .balance-amount { font-size: 2rem; font-weight: bold; margin: 5px 0; }
-        
+
         .menu-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 20px; }
         .menu-card {
             background: var(--bg-card);
@@ -389,32 +389,32 @@
             margin-bottom: 20px;
             box-shadow: 0 4px 15px rgba(0,0,0,0.3);
         }
-        
+
         .portfolio-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
             gap: 15px;
             margin-top: 15px;
         }
-        
+
         .portfolio-item {
             background: rgba(255,255,255,0.1);
             padding: 10px;
             border-radius: 8px;
             text-align: center;
         }
-        
+
         .portfolio-label {
             font-size: 0.8rem;
             opacity: 0.8;
             margin-bottom: 5px;
         }
-        
+
         .portfolio-value {
             font-size: 1.2rem;
             font-weight: bold;
         }
-        
+
         .profit { color: #00ff88; }
         .loss { color: #ff4757; }
 
@@ -427,7 +427,7 @@
             position: relative;
             overflow: hidden;
         }
-        
+
         .investment-card::before {
             content: '';
             position: absolute;
@@ -437,23 +437,23 @@
             width: 4px;
             background: var(--primary);
         }
-        
+
         .investment-card.profit::before { background: var(--success); }
         .investment-card.loss::before { background: var(--danger); }
-        
+
         .investment-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
             margin-bottom: 10px;
         }
-        
+
         .investment-amount {
             font-size: 1.3rem;
             font-weight: bold;
             color: var(--primary);
         }
-        
+
         .investment-details {
             display: grid;
             grid-template-columns: 1fr 1fr;
@@ -462,22 +462,22 @@
             color: var(--text-muted);
             margin-bottom: 10px;
         }
-        
+
         .investment-detail-item {
             display: flex;
             flex-direction: column;
         }
-        
+
         .investment-detail-label {
             font-size: 0.75rem;
             margin-bottom: 2px;
         }
-        
+
         .investment-detail-value {
             color: white;
             font-weight: 500;
         }
-        
+
         .pl-display {
             display: flex;
             justify-content: space-between;
@@ -485,12 +485,12 @@
             padding-top: 10px;
             border-top: 1px solid #333;
         }
-        
+
         .pl-amount {
             font-size: 1.1rem;
             font-weight: bold;
         }
-        
+
         .pl-percentage {
             font-size: 0.9rem;
             padding: 4px 8px;
@@ -505,16 +505,16 @@
             border-radius: 8px;
             margin-bottom: 15px;
         }
-        
+
         .deposit-info-row {
             display: flex;
             justify-content: space-between;
             margin-bottom: 8px;
             font-size: 0.9rem;
         }
-        
+
         .deposit-info-row:last-child { margin-bottom: 0; }
-        
+
         .rate-badge {
             display: inline-block;
             background: var(--primary);
@@ -532,7 +532,7 @@
             gap: 10px;
             margin: 15px 0;
         }
-        
+
         .savings-plan-btn {
             background: var(--bg-card);
             border: 2px solid #333;
@@ -542,35 +542,35 @@
             cursor: pointer;
             transition: 0.2s;
         }
-        
+
         .savings-plan-btn:hover {
             border-color: var(--primary);
         }
-        
+
         .savings-plan-btn.selected {
             border-color: var(--success);
             background: rgba(0,200,83,0.1);
         }
-        
+
         .plan-days {
             font-size: 1.5rem;
             font-weight: bold;
             color: var(--primary);
         }
-        
+
         .plan-label {
             font-size: 0.8rem;
             color: var(--text-muted);
             margin-top: 5px;
         }
-        
+
         .plan-profit {
             font-size: 1.1rem;
             color: var(--success);
             margin-top: 10px;
             font-weight: bold;
         }
-        
+
         .savings-card {
             background: var(--bg-card);
             border: 1px solid #333;
@@ -579,28 +579,28 @@
             margin-bottom: 10px;
             position: relative;
         }
-        
+
         .savings-card.active {
             border-left: 4px solid var(--success);
         }
-        
+
         .savings-card.matured {
             border-left: 4px solid var(--blue);
         }
-        
+
         .savings-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
             margin-bottom: 10px;
         }
-        
+
         .savings-amount {
             font-size: 1.3rem;
             font-weight: bold;
             color: var(--primary);
         }
-        
+
         .savings-status {
             font-size: 0.8rem;
             padding: 4px 8px;
@@ -608,11 +608,11 @@
             background: var(--success);
             color: white;
         }
-        
+
         .savings-status.matured {
             background: var(--blue);
         }
-        
+
         .savings-details {
             display: grid;
             grid-template-columns: 1fr 1fr;
@@ -621,22 +621,22 @@
             color: var(--text-muted);
             margin-bottom: 10px;
         }
-        
+
         .savings-detail-item {
             display: flex;
             flex-direction: column;
         }
-        
+
         .savings-detail-label {
             font-size: 0.75rem;
             margin-bottom: 2px;
         }
-        
+
         .savings-detail-value {
             color: white;
             font-weight: 500;
         }
-        
+
         .profit-display {
             display: flex;
             justify-content: space-between;
@@ -644,13 +644,13 @@
             padding-top: 10px;
             border-top: 1px solid #333;
         }
-        
+
         .profit-amount {
             font-size: 1.1rem;
             font-weight: bold;
             color: var(--success);
         }
-        
+
         .locked-notice {
             background: rgba(255,0,0,0.1);
             border: 1px solid var(--danger);
@@ -661,7 +661,7 @@
             font-size: 0.85rem;
             text-align: center;
         }
-        
+
         .matured-notice {
             background: rgba(0,200,83,0.1);
             border: 1px solid var(--success);
@@ -671,6 +671,22 @@
             margin-top: 10px;
             font-size: 0.85rem;
             text-align: center;
+        }
+
+        /* Fake Auto Indicator */
+        .fake-auto-indicator {
+            background: linear-gradient(90deg, #ff6600, #ff9100);
+            color: white;
+            padding: 4px 10px;
+            border-radius: 4px;
+            font-size: 0.7rem;
+            margin-left: 10px;
+            animation: pulse 1.5s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
         }
     </style>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
@@ -704,7 +720,7 @@
                 </div>
                 <button type="submit" class="btn" id="auth-btn">Login</button>
             </form>
-            <div class="auth-toggle" onclick="toggleAuthMode()">Don't have an account? Signup</div>
+            <div class="auth-toggle" onclick="window.toggleAuthMode()">Don't have an account? Signup</div>
             <div style="margin-top: 15px; font-size: 0.8rem; color: #666; text-align: center;">
                 For your security, make sure your login details are correct. Never share your password with anyone..
             </div>
@@ -721,7 +737,7 @@
                 <i class="fas fa-coins"></i> TK Coin
                 <span id="header-premium-badge" class="hidden blue-tick"><i class="fas fa-check-circle"></i></span>
             </div>
-            <div class="user-info" onclick="showSection('profile')">
+            <div class="user-info" onclick="window.showSection('profile')">
                 <div style="text-align: right;">
                     <div id="header-name">User</div>
                     <div id="header-balance" style="color: var(--primary);">0 TK</div>
@@ -752,11 +768,12 @@
                     </div>
                 </div>
 
-                <!-- TODAY'S CHART SECTION - CLEAN VERSION -->
+                <!-- TODAY'S CHART SECTION -->
                 <div class="today-chart-container">
                     <div class="today-chart-header">
                         <div class="today-chart-title">
                             <i class="fas fa-chart-line"></i> Today's Price Movement
+                            <span id="fake-auto-badge" class="fake-auto-indicator hidden">FAKE AUTO</span>
                             <span id="manual-mode-badge" class="hidden" style="background: var(--primary); color: white; padding: 2px 8px; border-radius: 4px; font-size: 0.7rem; margin-left: 10px;">Updated</span>
                         </div>
                         <div class="today-stats">
@@ -769,15 +786,13 @@
                                 <div class="stat-value stat-low" id="today-low">0.00</div>
                             </div>
                             <div class="stat-item">
-                                <div class="stat-label">Changes</div>
+                                <div class="stat-label">Points</div>
                                 <div class="stat-value" id="today-changes">0</div>
                             </div>
                         </div>
                     </div>
-                    
+
                     <canvas id="todayChartCanvas"></canvas>
-                    
-                    <!-- NO HISTORY LIST - ONLY CHART -->
                 </div>
 
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 20px;">
@@ -821,7 +836,7 @@
                         <span id="portfolio-price-change" style="font-weight: bold;">0%</span>
                     </div>
                 </div>
-                <h3 style="margin-bottom: 15px;">My Investments</h3>
+                <h3 style="margin-bottom: 15px;">My Investment</h3>
                 <div id="investments-list" style="display: flex; flex-direction: column; gap: 10px;">
                     <div style="text-align:center; color:#777; padding: 20px;">
                         <i class="fas fa-inbox" style="font-size: 2rem; margin-bottom: 10px; display: block;"></i>
@@ -839,25 +854,25 @@
                 </div>
 
                 <div class="menu-grid">
-                    <div class="menu-card" onclick="showSection('deposit')">
+                    <div class="menu-card" onclick="window.showSection('deposit')">
                         <span class="menu-icon text-orange"><i class="fas fa-wallet"></i></span>
                         <div>Deposit</div>
                     </div>
-                    <div class="menu-card" onclick="showSection('withdraw')">
+                    <div class="menu-card" onclick="window.showSection('withdraw')">
                         <span class="menu-icon text-green"><i class="fas fa-money-bill-wave"></i></span>
                         <div>Withdraw</div>
                     </div>
-                    <div class="menu-card" onclick="showSection('transfer')">
+                    <div class="menu-card" onclick="window.showSection('transfer')">
                         <span class="menu-icon text-blue"><i class="fas fa-exchange-alt"></i></span>
                         <div>Transfer</div>
                     </div>
-                    <div class="menu-card" onclick="showSection('premium')">
+                    <div class="menu-card" onclick="window.showSection('premium')">
                         <span class="menu-icon" style="color: gold;"><i class="fas fa-crown"></i></span>
                         <div>Pro</div>
                     </div>
                 </div>
 
-                <div style="background: var(--bg-card); padding: 15px; border-radius: 10px; margin-bottom: 20px; border: 1px solid #333; cursor: pointer;" onclick="showSection('portfolio')">
+                <div style="background: var(--bg-card); padding: 15px; border-radius: 10px; margin-bottom: 20px; border: 1px solid #333; cursor: pointer;" onclick="window.showSection('portfolio')">
                     <div style="display: flex; justify-content: space-between; align-items: center;">
                         <div>
                             <div style="font-weight: bold; margin-bottom: 5px;"><i class="fas fa-chart-line text-orange"></i> Portfolio</div>
@@ -889,14 +904,14 @@
                     <input type="number" id="futures-amount" placeholder="e.g. 10 TK">
                 </div>
                 <div class="trade-buttons">
-                    <button class="btn btn-long" onclick="openFutures('long')">Buy / Long</button>
-                    <button class="btn btn-short" onclick="openFutures('short')">Sell / Short</button>
+                    <button class="btn btn-long" onclick="window.openFutures('long')">Buy / Long</button>
+                    <button class="btn btn-short" onclick="window.openFutures('short')">Sell / Short</button>
                 </div>
                 <h3 style="margin-top: 20px;">Your Positions</h3>
                 <div id="futures-positions" style="margin-top: 10px; display: flex; flex-direction: column; gap: 10px;">
                     <div style="text-align:center; color:#555;">No open positions</div>
                 </div>
-                <button class="btn btn-outline" style="margin-top: 20px;" onclick="showSection('wallet')">Back</button>
+                <button class="btn btn-outline" style="margin-top: 20px;" onclick="window.showSection('wallet')">Back</button>
             </section>
 
             <!-- Deposit -->
@@ -905,7 +920,7 @@
                 <p style="color: #aaa; margin-bottom: 20px;">Select payment method below.</p>
                 <div class="input-group">
                     <label>Method</label>
-                    <select id="deposit-method" onchange="updateDepositDetails()">
+                    <select id="deposit-method" onchange="window.updateDepositDetails()">
                         <option value="easypaisa">Easypaisa</option>
                         <option value="jazzcash">JazzCash</option>
                         <option value="tillid">Till Id - (Raast)</option>
@@ -919,11 +934,11 @@
                         <div style="font-size: 0.8rem; color: var(--primary);" id="deposit-name">---</div>
                     </div>
                     <img id="deposit-qr-image" src="./qr.png" style="display:none; max-width: 150px; height: auto; border-radius: 8px;" alt="QR Code">
-                    <button id="copy-btn" class="btn btn-sm btn-outline" onclick="copyDepositNumber()"><i class="fas fa-copy"></i></button>
+                    <button id="copy-btn" class="btn btn-sm btn-outline" onclick="window.copyDepositNumber()"><i class="fas fa-copy"></i></button>
                 </div>
                 <div class="input-group">
                     <label>Amount Sent (PKR)</label>
-                    <input type="number" id="deposit-amount" oninput="calculateDeposit()" placeholder="e.g. 500 PKR">
+                    <input type="number" id="deposit-amount" oninput="window.calculateDeposit()" placeholder="e.g. 500 PKR">
                 </div>
                 <div class="input-group">
                     <label>Reference No / Transaction ID</label>
@@ -946,8 +961,8 @@
                         <span style="font-weight: bold;"><span id="deposit-invest-value">0</span> PKR</span>
                     </div>
                 </div>
-                <button class="btn" onclick="submitDeposit()">Submit Deposit Request</button>
-                <button class="btn btn-outline" style="margin-top: 10px;" onclick="showSection('wallet')">Back</button>
+                <button class="btn" onclick="window.submitDeposit()">Submit Deposit Request</button>
+                <button class="btn btn-outline" style="margin-top: 10px;" onclick="window.showSection('wallet')">Back</button>
             </section>
 
             <!-- Withdraw -->
@@ -971,13 +986,13 @@
                 </div>
                 <div class="input-group">
                     <label>Amount (TK)</label>
-                    <input type="number" id="withdraw-amount" placeholder="Tk coin" oninput="calculateWithdraw()">
+                    <input type="number" id="withdraw-amount" placeholder="Tk coin" oninput="window.calculateWithdraw()">
                 </div>
                 <div style="background: #222; padding: 10px; border-radius: 6px; margin-bottom: 20px; color: #aaa;">
                     <small>Estimated Receive: <strong style="color: white; font-size: 1.1rem;"><span id="withdraw-calc-usdt">0.00</span> PKR</strong></small>
                 </div>
-                <button class="btn" onclick="submitWithdraw()">Request Withdrawal</button>
-                <button class="btn btn-outline" style="margin-top: 10px;" onclick="showSection('wallet')">Back</button>
+                <button class="btn" onclick="window.submitWithdraw()">Request Withdrawal</button>
+                <button class="btn btn-outline" style="margin-top: 10px;" onclick="window.showSection('wallet')">Back</button>
             </section>
 
             <!-- Transfer -->
@@ -998,12 +1013,12 @@
                 <div id="transfer-tax-info" class="hidden" style="background: rgba(255,102,0,0.1); border: 1px solid var(--primary); padding: 10px; border-radius: 6px; margin-bottom: 15px; color: var(--primary); font-size: 0.85rem;">
                     <i class="fas fa-info-circle"></i> Transfer Tax: <span id="transfer-tax-percent">2</span>% (<span id="transfer-tax-amount">0</span> TK will be deducted)
                 </div>
-                <button id="btn-transfer-send" class="btn" onclick="submitTransfer()">Send Now</button>
+                <button id="btn-transfer-send" class="btn" onclick="window.submitTransfer()">Send Now</button>
                 <div id="transfer-wait-msg" class="hidden" style="margin-top: 15px; text-align: center; background: #333; padding: 15px; border-radius: 8px; border: 1px solid var(--primary);">
                     <p class="text-orange" style="font-weight: bold;">Wait <span id="timer-count">02:00</span> minutes</p>
                     <small style="color:#aaa;">Next transfer available soon</small>
                 </div>
-                <button class="btn btn-outline" style="margin-top: 10px;" onclick="showSection('wallet')">Back</button>
+                <button class="btn btn-outline" style="margin-top: 10px;" onclick="window.showSection('wallet')">Back</button>
             </section>
 
             <!-- Premium -->
@@ -1022,8 +1037,8 @@
                         <i class="fas fa-check-circle"></i> Special Access
                     </div>
                 </div>
-                <button class="btn" id="btn-upgrade" onclick="upgradePremium()">Upgrade Now</button>
-                <button class="btn btn-outline" style="margin-top: 10px;" onclick="showSection('wallet')">Back</button>
+                <button class="btn" id="btn-upgrade" onclick="window.upgradePremium()">Upgrade Now</button>
+                <button class="btn btn-outline" style="margin-top: 10px;" onclick="window.showSection('wallet')">Back</button>
             </section>
 
             <!-- Chat -->
@@ -1033,7 +1048,7 @@
                     <div class="chat-messages" id="chat-messages"></div>
                     <div class="chat-input-area">
                         <input type="text" id="chat-input" placeholder="Type a message..." style="flex: 1; padding: 8px; border-radius: 4px; border: none; background: #333; color: white;">
-                        <button class="btn btn-sm" onclick="sendChatMessage()"><i class="fas fa-paper-plane"></i></button>
+                        <button class="btn btn-sm" onclick="window.sendChatMessage()"><i class="fas fa-paper-plane"></i></button>
                     </div>
                 </div>
             </section>
@@ -1047,13 +1062,13 @@
                     <div id="profile-status" style="margin-top: 5px; font-size: 0.9rem; color: var(--primary);">Normal User</div>
                 </div>
 
-                <div class="menu-card" onclick="downloadApp()" style="margin-bottom: 15px;">
+                <div class="menu-card" onclick="window.downloadApp()" style="margin-bottom: 15px;">
                     <i class="fab fa-android" style="color: #a4c639; font-size: 2rem; margin-bottom: 5px;"></i>
                     <div style="font-weight: bold;">Download App</div>
                     <small style="color:#888;">For better experience</small>
                 </div>
 
-                <div class="menu-card" onclick="copyReferralLink()" style="margin-bottom: 15px; text-align: left; flex-direction: row; justify-content: space-between; padding: 15px;">
+                <div class="menu-card" onclick="window.copyReferralLink()" style="margin-bottom: 15px; text-align: left; flex-direction: row; justify-content: space-between; padding: 15px;">
                     <div>
                         <div style="font-weight: bold; font-size: 0.9rem; color: #fff;">Invite & Earn</div>
                         <small style="color: var(--text-muted); display: block; margin-top: 2px;">Share your ID to get 3% bonus</small>
@@ -1075,7 +1090,7 @@
                 </div>
 
                 <!-- Savings Section -->
-                <div class="menu-card" onclick="showSection('savings')" style="margin-bottom: 15px; text-align: left; flex-direction: row; justify-content: space-between; padding: 15px; background: linear-gradient(135deg, rgba(0,200,83,0.2), rgba(0,200,83,0.05)); border-color: var(--success);">
+                <div class="menu-card" onclick="window.showSection('savings')" style="margin-bottom: 15px; text-align: left; flex-direction: row; justify-content: space-between; padding: 15px; background: linear-gradient(135deg, rgba(0,200,83,0.2), rgba(0,200,83,0.05)); border-color: var(--success);">
                     <div>
                         <div style="font-weight: bold; font-size: 1rem; color: var(--success);"><i class="fas fa-piggy-bank"></i> Savings Account</div>
                         <small style="color: var(--text-muted); display: block; margin-top: 2px;">Earn daily profit on locked savings</small>
@@ -1087,16 +1102,16 @@
                 </div>
 
                 <h3>About</h3>
-                <div class="menu-card" onclick="showAboutModal()" style="text-align: left; margin-bottom: 10px;">
+                <div class="menu-card" onclick="window.showAboutModal()" style="text-align: left; margin-bottom: 10px;">
                     <i class="fas fa-info-circle"></i> TK Coin is a Singapore-based digital finance platform offering fast, secure transactions and smart earning solutions for global users
                 </div>
-                <button class="btn" style="background: #333;" onclick="logout()">Logout</button>
+                <button class="btn" style="background: #333;" onclick="window.logout()">Logout</button>
             </section>
 
             <!-- Savings View -->
             <section id="view-savings" class="section hidden">
                 <h2 class="text-orange" style="margin-bottom: 15px;"><i class="fas fa-piggy-bank"></i> Savings Account</h2>
-                
+
                 <div class="balance-card" style="background: linear-gradient(135deg, #00c853, #00e676);">
                     <div class="balance-title">Total Savings</div>
                     <div class="balance-amount">Rs. <span id="total-savings-amount">0</span></div>
@@ -1112,29 +1127,29 @@
                 <!-- Create New Savings -->
                 <div style="background: var(--bg-card); padding: 20px; border-radius: 12px; margin-bottom: 20px; border: 1px solid #333;">
                     <h3 style="margin-bottom: 15px; color: var(--primary);">Create New Savings</h3>
-                    
+
                     <div class="input-group">
                         <label>Amount (PKR)</label>
-                        <input type="number" id="savings-amount" placeholder="Minimum 1000 PKR" oninput="calculateSavings()">
+                        <input type="number" id="savings-amount" placeholder="Minimum 1000 PKR" oninput="window.calculateSavings()">
                     </div>
-                    
+
                     <div style="background: rgba(255,0,0,0.1); border: 1px solid var(--danger); color: var(--danger); padding: 10px; border-radius: 6px; margin-bottom: 15px; font-size: 0.85rem; display: none;" id="savings-min-warning">
                         <i class="fas fa-exclamation-triangle"></i> Minimum savings amount is <span id="savings-min-amount">1000</span> PKR
                     </div>
 
                     <label style="display: block; margin-bottom: 10px; color: var(--text-muted); font-size: 0.9rem;">Select Plan</label>
                     <div class="savings-plan-selector">
-                        <div class="savings-plan-btn" onclick="selectSavingsPlan(30)" id="plan-30">
+                        <div class="savings-plan-btn" onclick="window.selectSavingsPlan(30)" id="plan-30">
                             <div class="plan-days">30</div>
                             <div class="plan-label">Days</div>
                             <div class="plan-profit"><span id="profit-30">2</span>%</div>
                         </div>
-                        <div class="savings-plan-btn" onclick="selectSavingsPlan(60)" id="plan-60">
+                        <div class="savings-plan-btn" onclick="window.selectSavingsPlan(60)" id="plan-60">
                             <div class="plan-days">60</div>
                             <div class="plan-label">Days</div>
                             <div class="plan-profit"><span id="profit-60">3</span>%</div>
                         </div>
-                        <div class="savings-plan-btn" onclick="selectSavingsPlan(90)" id="plan-90">
+                        <div class="savings-plan-btn" onclick="window.selectSavingsPlan(90)" id="plan-90">
                             <div class="plan-days">90</div>
                             <div class="plan-label">Days</div>
                             <div class="plan-profit"><span id="profit-90">4</span>%</div>
@@ -1156,7 +1171,7 @@
                         </div>
                     </div>
 
-                    <button class="btn" onclick="createSavings()" style="margin-top: 15px;">
+                    <button class="btn" onclick="window.createSavings()" style="margin-top: 15px;">
                         <i class="fas fa-lock"></i> Lock Savings
                     </button>
                     <p style="color: #777; font-size: 0.8rem; margin-top: 10px; text-align: center;">
@@ -1174,26 +1189,26 @@
                     </div>
                 </div>
 
-                <button class="btn btn-outline" style="margin-top: 20px;" onclick="showSection('profile')">Back to Profile</button>
+                <button class="btn btn-outline" style="margin-top: 20px;" onclick="window.showSection('profile')">Back to Profile</button>
             </section>
 
         </main>
 
         <nav class="bottom-nav" id="user-nav">
-            <a class="nav-item active" onclick="showSection('market')">
+            <a class="nav-item active" onclick="window.showSection('market')">
                 <i class="fas fa-chart-line"></i>
                 <span>Market</span>
             </a>
-            <a class="nav-item" onclick="showSection('wallet')">
+            <a class="nav-item" onclick="window.showSection('wallet')">
                 <i class="fas fa-wallet"></i>
                 <span>Wallet</span>
             </a>
-            <a class="nav-item" onclick="showSection('chat')" id="chat-nav-item">
+            <a class="nav-item" onclick="window.showSection('chat')" id="chat-nav-item">
                 <i class="fas fa-comment-dots"></i>
                 <span>Live Chat</span>
                 <span id="chat-badge" class="nav-badge hidden">0</span>
             </a>
-            <a class="nav-item" onclick="showSection('profile')">
+            <a class="nav-item" onclick="window.showSection('profile')">
                 <i class="fas fa-user"></i>
                 <span>Profile</span>
             </a>
@@ -1201,6 +1216,7 @@
     </div>
 
     <script type="module">
+
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
         import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-analytics.js";
         import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
@@ -1255,6 +1271,15 @@
         let lastManualPrice = null;
         let selectedSavingsPlan = null;
         let userSavings = [];
+
+        // FAKE AUTO SYSTEM VARIABLES - 15 Points Max
+        let fakeAutoEnabled = false;
+        let fakeAutoInterval = null;
+        let fakePriceHistory = [];
+        const MAX_FAKE_POINTS = 15;
+        let fakeBasePrice = 280;
+        let fakeCurrentPrice = 280;
+        let fakeStartTime = null;
 
         window.playSound = (type) => {
             const AudioContext = window.AudioContext || window.webkitAudioContext;
@@ -1311,7 +1336,7 @@
 
         function initApp() {
             checkUrlParams();
-            
+
             onAuthStateChanged(auth, (user) => {
                 if (user) {
                     checkAndCreateUserInDB(user);
@@ -1321,6 +1346,248 @@
                     currentUserData = null;
                 }
             });
+        }
+
+        // ======== SYNCED FAKE AUTO PRICE SYSTEM ========
+        // All devices see same price based on time
+        function initFakeAutoSystem() {
+            onValue(ref(db, 'fakeAuto'), (snapshot) => {
+                const data = snapshot.val();
+                if (data) {
+                    const wasEnabled = fakeAutoEnabled;
+                    fakeAutoEnabled = data.enabled || false;
+                    fakeBasePrice = data.basePrice || 280;
+
+                    const badge = document.getElementById('fake-auto-badge');
+                    if (fakeAutoEnabled) {
+                        badge.classList.remove('hidden');
+                        if (!wasEnabled) startFakeAutoPrice();
+                    } else {
+                        badge.classList.add('hidden');
+                        stopFakeAutoPrice();
+                    }
+                }
+            });
+        }
+
+        // Calculate synced price based on current time - same for all devices
+        function calculateSyncedFakePrice() {
+            const now = Date.now();
+            // Create a sine wave pattern that changes over time
+            // Period of 60 seconds for full cycle
+            const period = 60000; 
+            const phase = (now % period) / period;
+
+            // Generate price between base-30 and base+30
+            const amplitude = 30;
+            const change = Math.sin(phase * Math.PI * 2) * amplitude;
+
+            // Add some randomness based on time chunks (10 second chunks)
+            const chunk = Math.floor(now / 10000);
+            const randomOffset = ((chunk * 9301 + 49297) % 233280) / 233280 * 10 - 5;
+
+            return fakeBasePrice + change + randomOffset;
+        }
+
+        function startFakeAutoPrice() {
+            if (fakeAutoInterval) clearInterval(fakeAutoInterval);
+
+            // Initialize with 15 points based on past time
+            fakePriceHistory = [];
+            const now = Date.now();
+            for (let i = 0; i < MAX_FAKE_POINTS; i++) {
+                const timeOffset = (MAX_FAKE_POINTS - 1 - i) * 2000; // 2 second intervals
+                const pastTime = now - timeOffset;
+
+                // Calculate what price was at that time
+                const period = 60000;
+                const phase = (pastTime % period) / period;
+                const amplitude = 30;
+                const change = Math.sin(phase * Math.PI * 2) * amplitude;
+                const chunk = Math.floor(pastTime / 10000);
+                const randomOffset = ((chunk * 9301 + 49297) % 233280) / 233280 * 10 - 5;
+
+                fakePriceHistory.push({
+                    price: fakeBasePrice + change + randomOffset,
+                    timestamp: pastTime
+                });
+            }
+            fakeCurrentPrice = fakePriceHistory[fakePriceHistory.length - 1].price;
+
+            // Update immediately
+            updateFakeAutoChart();
+            document.getElementById('market-price').innerText = fakeCurrentPrice.toFixed(2);
+
+            // Update every 2 seconds
+            fakeAutoInterval = setInterval(() => {
+                if (!fakeAutoEnabled) return;
+
+                // Calculate current synced price
+                fakeCurrentPrice = calculateSyncedFakePrice();
+
+                // Add new point
+                fakePriceHistory.push({
+                    price: fakeCurrentPrice,
+                    timestamp: Date.now()
+                });
+
+                // Keep only 15 points - remove oldest (FIFO)
+                if (fakePriceHistory.length > MAX_FAKE_POINTS) {
+                    fakePriceHistory.shift();
+                }
+
+                // Update display
+                updateFakeAutoChart();
+                document.getElementById('market-price').innerText = fakeCurrentPrice.toFixed(2);
+
+            }, 2000);
+        }
+
+        function stopFakeAutoPrice() {
+            if (fakeAutoInterval) {
+                clearInterval(fakeAutoInterval);
+                fakeAutoInterval = null;
+            }
+        }
+
+        function updateFakeAutoChart() {
+            const canvas = document.getElementById('todayChartCanvas');
+            const ctx = canvas.getContext('2d');
+
+            canvas.width = canvas.parentElement.offsetWidth;
+            canvas.height = 250;
+
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            if (fakePriceHistory.length === 0) return;
+
+            const prices = fakePriceHistory.map(h => h.price);
+            const high = Math.max(...prices);
+            const low = Math.min(...prices);
+
+            document.getElementById('today-high').innerText = high.toFixed(2);
+            document.getElementById('today-low').innerText = low.toFixed(2);
+            document.getElementById('today-changes').innerText = fakePriceHistory.length;
+
+            const padding = 60;
+            const chartWidth = canvas.width - (padding * 2);
+            const chartHeight = canvas.height - (padding * 2);
+
+            const priceRange = high - low || 1;
+            const stepX = chartWidth / (fakePriceHistory.length - 1 || 1);
+
+            // Draw grid
+            ctx.strokeStyle = '#333';
+            ctx.lineWidth = 1;
+            for (let i = 0; i <= 4; i++) {
+                const y = padding + (chartHeight / 4) * i;
+                ctx.beginPath();
+                ctx.moveTo(padding, y);
+                ctx.lineTo(canvas.width - padding, y);
+                ctx.stroke();
+            }
+
+            // Draw line
+            ctx.beginPath();
+            ctx.strokeStyle = '#ff6600';
+            ctx.lineWidth = 3;
+            ctx.lineJoin = 'round';
+            ctx.lineCap = 'round';
+
+            fakePriceHistory.forEach((point, index) => {
+                const x = padding + (index * stepX);
+                const y = padding + chartHeight - ((point.price - low) / priceRange) * chartHeight;
+
+                if (index === 0) {
+                    ctx.moveTo(x, y);
+                } else {
+                    ctx.lineTo(x, y);
+                }
+            });
+
+            ctx.stroke();
+
+            // Draw points with price changes
+            fakePriceHistory.forEach((point, index) => {
+                const x = padding + (index * stepX);
+                const y = padding + chartHeight - ((point.price - low) / priceRange) * chartHeight;
+
+                let color = '#ff6600';
+                let priceText = '';
+                let textColor = '#fff';
+                let textY = y - 20;
+
+                if (index === 0) {
+                    color = '#ff6600';
+                    priceText = point.price.toFixed(0);
+                    textColor = '#ff6600';
+                } else {
+                    const prevPrice = fakePriceHistory[index - 1].price;
+                    const diff = point.price - prevPrice;
+
+                    if (diff > 0.5) {
+                        color = '#00c853';
+                        priceText = '+' + diff.toFixed(0);
+                        textColor = '#00c853';
+                        textY = y - 20;
+                    } else if (diff < -0.5) {
+                        color = '#ff3d00';
+                        priceText = diff.toFixed(0);
+                        textColor = '#ff3d00';
+                        textY = y + 30;
+                    } else {
+                        return;
+                    }
+                }
+
+                // Draw line to text
+                ctx.beginPath();
+                ctx.strokeStyle = color;
+                ctx.lineWidth = 1;
+                ctx.setLineDash([2, 2]);
+                ctx.moveTo(x, y);
+                ctx.lineTo(x, textY + (textY < y ? 15 : -5));
+                ctx.stroke();
+                ctx.setLineDash([]);
+
+                // Draw point
+                ctx.beginPath();
+                ctx.fillStyle = color;
+                ctx.arc(x, y, 8, 0, Math.PI * 2);
+                ctx.fill();
+
+                ctx.strokeStyle = '#fff';
+                ctx.lineWidth = 2;
+                ctx.stroke();
+
+                // Draw text
+                ctx.font = 'bold 12px Arial';
+                const textWidth = ctx.measureText(priceText).width;
+                const paddingBox = 4;
+
+                ctx.fillStyle = 'rgba(0,0,0,0.8)';
+                ctx.fillRect(x - (textWidth/2) - paddingBox, textY - 12, textWidth + (paddingBox*2), 18);
+
+                ctx.fillStyle = textColor;
+                ctx.textAlign = 'center';
+                ctx.fillText(priceText, x, textY);
+
+                // Draw time
+                ctx.fillStyle = '#aaa';
+                ctx.font = '10px Arial';
+                const time = new Date(point.timestamp).toLocaleTimeString('en-US', {hour: '2-digit', minute:'2-digit'});
+                ctx.fillText(time, x, canvas.height - 10);
+            });
+
+            // Y-axis labels
+            ctx.fillStyle = '#777';
+            ctx.font = '11px Arial';
+            ctx.textAlign = 'right';
+            for (let i = 0; i <= 4; i++) {
+                const price = low + (priceRange / 4) * (4 - i);
+                const y = padding + (chartHeight / 4) * i;
+                ctx.fillText(price.toFixed(2), padding - 10, y + 4);
+            }
         }
 
         function startZigzagAnimation() {
@@ -1339,15 +1606,15 @@
         function updateMarketPressure() {
             const buyPercent = Math.floor(Math.random() * 40) + 30;
             const sellPercent = 100 - buyPercent;
-            
+
             pressureData = { buy: buyPercent, sell: sellPercent };
-            
+
             document.getElementById('buy-percentage').style.width = buyPercent + '%';
             document.getElementById('buy-percentage').innerText = buyPercent + '%';
             document.getElementById('sell-percentage').style.width = sellPercent + '%';
             document.getElementById('sell-percentage').innerText = sellPercent + '%';
             document.getElementById('last-updated').innerText = 'Updated now';
-            
+
             setTimeout(() => {
                 document.getElementById('last-updated').innerText = 'Updated 1 min ago';
             }, 60000);
@@ -1356,19 +1623,19 @@
         function startAutoPriceFluctuation() {
             const basePKR = marketData.tkPrice * marketData.usdtRate;
             currentFluctuatedPrice = basePKR + (Math.random() * autoFluctuationRange);
-            
+
             updateMarketUI();
-            
+
             autoRateTimer = setInterval(() => {
                 if (marketMode !== 'auto') {
                     clearInterval(autoRateTimer);
                     autoRateTimer = null;
                     return;
                 }
-                
+
                 const basePKR = marketData.tkPrice * marketData.usdtRate;
                 currentFluctuatedPrice = basePKR + (Math.random() * autoFluctuationRange);
-                
+
                 updateMarketUI();
             }, autoUpdateInterval * 1000);
         }
@@ -1421,7 +1688,7 @@
             document.querySelector('.auth-box h2').innerText = isSignup ? "Create Account" : "TK Coin Login";
             document.getElementById('auth-btn').innerText = isSignup ? "Signup" : "Login";
             document.querySelector('.auth-toggle').innerText = isSignup ? "Already have an account? Login" : "Don't have an account? Signup";
-            
+
             if(isSignup) refGroup.classList.remove('hidden');
             else refGroup.classList.add('hidden');
         };
@@ -1452,39 +1719,45 @@
         };
 
         function updatePortfolioPriceDisplay() {
-            const currentPrice = getCurrentPrice();
-            const priceInPKR = currentPrice * marketData.usdtRate;
-            
+            let currentPrice;
+            if (fakeAutoEnabled) {
+                currentPrice = fakeCurrentPrice;
+            } else {
+                currentPrice = getCurrentPrice() * marketData.usdtRate;
+            }
+
             const portfolioPriceEl = document.getElementById('portfolio-current-price');
             if (portfolioPriceEl) {
-                portfolioPriceEl.innerText = priceInPKR.toFixed(2);
+                portfolioPriceEl.innerText = currentPrice.toFixed(2);
             }
         }
 
-        // ======== CLEAN PRICE HISTORY - ONLY SHOW ACTUAL CHANGES ========
         function loadTodayPriceHistory() {
+            if (fakeAutoEnabled) {
+                updateFakeAutoChart();
+                return;
+            }
+
             const today = new Date().toDateString();
             const historyRef = ref(db, 'priceHistory/' + today);
-            
+
             onValue(historyRef, (snapshot) => {
                 const data = snapshot.val();
                 if (data) {
-                    // Filter only unique price changes (remove consecutive duplicates)
                     const allPoints = Object.values(data).sort((a, b) => a.timestamp - b.timestamp);
                     todayPriceHistory = [];
-                    
+
                     allPoints.forEach((point, index) => {
                         if (index === 0) {
                             todayPriceHistory.push(point);
                         } else {
                             const lastPoint = todayPriceHistory[todayPriceHistory.length - 1];
-                            // Only add if price actually changed (more than 0.01 difference)
                             if (Math.abs(point.price - lastPoint.price) > 0.01) {
                                 todayPriceHistory.push(point);
                             }
                         }
                     });
-                    
+
                     updateTodayChart();
                 } else {
                     todayPriceHistory = [];
@@ -1494,43 +1767,44 @@
         }
 
         function updateTodayChart() {
+            if (fakeAutoEnabled) return;
+
             const canvas = document.getElementById('todayChartCanvas');
             const ctx = canvas.getContext('2d');
-            
+
             canvas.width = canvas.parentElement.offsetWidth;
             canvas.height = 250;
-            
+
             ctx.clearRect(0, 0, canvas.width, canvas.height);
-            
+
             if (todayPriceHistory.length === 0) {
                 ctx.fillStyle = '#555';
                 ctx.font = '14px Arial';
                 ctx.textAlign = 'center';
                 ctx.fillText('No price changes today', canvas.width / 2, canvas.height / 2);
-                
+
                 document.getElementById('today-high').innerText = '0.00';
                 document.getElementById('today-low').innerText = '0.00';
                 document.getElementById('today-changes').innerText = '0';
                 return;
             }
-            
+
             const prices = todayPriceHistory.map(h => h.price);
             const high = Math.max(...prices);
             const low = Math.min(...prices);
             const changes = todayPriceHistory.length - 1;
-            
+
             document.getElementById('today-high').innerText = high.toFixed(2);
             document.getElementById('today-low').innerText = low.toFixed(2);
             document.getElementById('today-changes').innerText = changes;
-            
+
             const padding = 60;
             const chartWidth = canvas.width - (padding * 2);
             const chartHeight = canvas.height - (padding * 2);
-            
+
             const priceRange = high - low || 1;
             const stepX = chartWidth / (todayPriceHistory.length - 1 || 1);
-            
-            // Draw grid lines
+
             ctx.strokeStyle = '#333';
             ctx.lineWidth = 1;
             for (let i = 0; i <= 4; i++) {
@@ -1540,65 +1814,58 @@
                 ctx.lineTo(canvas.width - padding, y);
                 ctx.stroke();
             }
-            
-            // Draw connecting line
+
             ctx.beginPath();
             ctx.strokeStyle = '#ff6600';
             ctx.lineWidth = 3;
             ctx.lineJoin = 'round';
             ctx.lineCap = 'round';
-            
+
             todayPriceHistory.forEach((point, index) => {
                 const x = padding + (index * stepX);
                 const y = padding + chartHeight - ((point.price - low) / priceRange) * chartHeight;
-                
+
                 if (index === 0) {
                     ctx.moveTo(x, y);
                 } else {
                     ctx.lineTo(x, y);
                 }
             });
-            
+
             ctx.stroke();
-            
-            // Draw points with price labels
+
             todayPriceHistory.forEach((point, index) => {
                 const x = padding + (index * stepX);
                 const y = padding + chartHeight - ((point.price - low) / priceRange) * chartHeight;
-                
+
                 let color = '#ff6600';
                 let priceText = '';
                 let textColor = '#fff';
                 let textY = y - 20;
-                
+
                 if (index === 0) {
-                    // First point - just show price
                     color = '#ff6600';
                     priceText = point.price.toFixed(0);
                     textColor = '#ff6600';
                 } else {
                     const prevPrice = todayPriceHistory[index - 1].price;
                     const diff = point.price - prevPrice;
-                    
+
                     if (diff > 0) {
-                        // Price went UP - Green with +value
                         color = '#00c853';
                         priceText = '+' + diff.toFixed(0);
                         textColor = '#00c853';
-                        textY = y - 20; // Above the dot
+                        textY = y - 20;
                     } else if (diff < 0) {
-                        // Price went DOWN - Red with -value
                         color = '#ff3d00';
-                        priceText = diff.toFixed(0); // Already negative
+                        priceText = diff.toFixed(0);
                         textColor = '#ff3d00';
-                        textY = y + 30; // Below the dot
+                        textY = y + 30;
                     } else {
-                        // No change - skip drawing
                         return;
                     }
                 }
-                
-                // Draw connecting line to text
+
                 ctx.beginPath();
                 ctx.strokeStyle = color;
                 ctx.lineWidth = 1;
@@ -1607,40 +1874,33 @@
                 ctx.lineTo(x, textY + (textY < y ? 15 : -5));
                 ctx.stroke();
                 ctx.setLineDash([]);
-                
-                // Draw point
+
                 ctx.beginPath();
                 ctx.fillStyle = color;
                 ctx.arc(x, y, 8, 0, Math.PI * 2);
                 ctx.fill();
-                
-                // Draw white border
+
                 ctx.strokeStyle = '#fff';
                 ctx.lineWidth = 2;
                 ctx.stroke();
-                
-                // Draw price label with background
+
                 ctx.font = 'bold 12px Arial';
                 const textWidth = ctx.measureText(priceText).width;
                 const paddingBox = 4;
-                
-                // Draw background for text
+
                 ctx.fillStyle = 'rgba(0,0,0,0.8)';
                 ctx.fillRect(x - (textWidth/2) - paddingBox, textY - 12, textWidth + (paddingBox*2), 18);
-                
-                // Draw text
+
                 ctx.fillStyle = textColor;
                 ctx.textAlign = 'center';
                 ctx.fillText(priceText, x, textY);
-                
-                // Draw time label below
+
                 ctx.fillStyle = '#aaa';
                 ctx.font = '10px Arial';
                 const time = new Date(point.timestamp).toLocaleTimeString('en-US', {hour: '2-digit', minute:'2-digit'});
                 ctx.fillText(time, x, canvas.height - 10);
             });
-            
-            // Draw Y-axis labels
+
             ctx.fillStyle = '#777';
             ctx.font = '11px Arial';
             ctx.textAlign = 'right';
@@ -1651,173 +1911,193 @@
             }
         }
 
+        // ======== PORTFOLIO - SHOW ONLY 1 LATEST INVESTMENT ========
         function calculatePortfolioPL() {
-    if (!currentUserData || !marketData) return;
+            if (!currentUserData || !marketData) return;
 
-    const currentPrice = getCurrentPrice();
-    const currentPricePKR = currentPrice * marketData.usdtRate;
-    const availableBalance = parseFloat(currentUserData.balanceTK) || 0;
+            let currentPricePKR;
+            if (fakeAutoEnabled) {
+                currentPricePKR = fakeCurrentPrice;
+            } else {
+                currentPricePKR = getCurrentPrice() * marketData.usdtRate;
+            }
 
-    updatePortfolioPriceDisplay();
+            const availableBalance = parseFloat(currentUserData.balanceTK) || 0;
 
-    let totalInvested = 0;
-    let totalCurrentValue = 0;
+            updatePortfolioPriceDisplay();
 
-    // Calculate combined investment data
-    if (availableBalance > 0 && userInvestments.length > 0) {
-        let totalHistoricalInvested = 0;
-        let totalHistoricalTK = 0;
-        let totalWeightedBuyPrice = 0;
+            let totalInvested = 0;
+            let totalCurrentValue = 0;
+            let latestInvestment = null;
 
-        userInvestments.forEach(inv => {
-            const rawAmount = parseFloat(inv.rawAmount) || 0;
-            const tkAmount = parseFloat(inv.amount) || 0;
-            const buyPriceTK = parseFloat(inv.tkPriceAtDeposit) || marketData.tkPrice;
-            const buyRate = parseFloat(inv.usdtRateAtDeposit) || marketData.usdtRate;
-            const buyPricePKR = buyPriceTK * buyRate;
+            // Get only the latest investment
+            if (availableBalance > 0 && userInvestments.length > 0) {
+                // Sort by date descending and get latest
+                const sortedInvestments = [...userInvestments].sort((a, b) => {
+                    return new Date(b.date) - new Date(a.date);
+                });
 
-            totalHistoricalInvested += rawAmount;
-            totalHistoricalTK += tkAmount;
-            totalWeightedBuyPrice += (tkAmount * buyPricePKR);
-        });
+                // Get the latest one
+                latestInvestment = sortedInvestments[0];
 
-        // Calculate weighted average buy price per TK
-        const avgBuyPricePerTK = totalHistoricalTK > 0 ? totalWeightedBuyPrice / totalHistoricalTK : 0;
+                // Calculate total historical for ratio
+                let totalHistoricalInvested = 0;
+                let totalHistoricalTK = 0;
 
-        // Current value of available balance
-        totalCurrentValue = availableBalance * currentPricePKR;
+                userInvestments.forEach(inv => {
+                    totalHistoricalInvested += parseFloat(inv.rawAmount) || 0;
+                    totalHistoricalTK += parseFloat(inv.amount) || 0;
+                });
 
-        // Invested amount proportional to remaining balance
-        const retentionRatio = totalHistoricalTK > 0 ? availableBalance / totalHistoricalTK : 0;
-        totalInvested = totalHistoricalInvested * retentionRatio;
+                // Calculate retention ratio based on current balance vs total historical
+                const retentionRatio = totalHistoricalTK > 0 ? availableBalance / totalHistoricalTK : 0;
 
-        // Store for single card display
-        window.combinedInvestmentData = {
-            availableBalance: availableBalance,
-            totalHistoricalTK: totalHistoricalTK,
-            avgBuyPricePerTK: avgBuyPricePerTK,
-            currentPricePKR: currentPricePKR,
-            totalInvested: totalInvested,
-            totalCurrentValue: totalCurrentValue,
-            firstDepositDate: userInvestments[0]?.date || new Date().toLocaleString()
-        };
-    } else {
-        window.combinedInvestmentData = null;
-    }
+                // Calculate values for the latest investment proportionally
+                const originalTK = parseFloat(latestInvestment.amount) || 0;
+                const originalInvested = parseFloat(latestInvestment.rawAmount) || 0;
 
-    const netPL = totalCurrentValue - totalInvested;
-    const plPercentage = totalInvested > 0 ? ((netPL / totalInvested) * 100) : 0;
+                const activeTK = originalTK * retentionRatio;
+                const activeInvested = originalInvested * retentionRatio;
 
-    document.getElementById('portfolio-total-invested').innerText = totalInvested.toFixed(2) + ' PKR';
-    document.getElementById('portfolio-total-value').innerText = totalCurrentValue.toFixed(2);
+                totalCurrentValue = availableBalance * currentPricePKR;
+                totalInvested = activeInvested;
 
-    const netPLElement = document.getElementById('portfolio-net-pl');
-    netPLElement.innerText = (netPL >= 0 ? '+' : '') + netPL.toFixed(2) + ' PKR';
+                // Store for rendering
+                latestInvestment.activeTK = activeTK;
+                latestInvestment.activeInvested = activeInvested;
+            }
 
-    if (netPL >= 0) {
-        netPLElement.classList.remove('loss');
-        netPLElement.classList.add('profit');
-    } else {
-        netPLElement.classList.remove('profit');
-        netPLElement.classList.add('loss');
-    }
+            const netPL = totalCurrentValue - totalInvested;
+            const plPercentage = totalInvested > 0 ? ((netPL / totalInvested) * 100) : 0;
 
-    const priceChangeElement = document.getElementById('portfolio-price-change');
-    const changePercent = ((currentPricePKR - (window.combinedInvestmentData?.avgBuyPricePerTK || currentPricePKR)) / (window.combinedInvestmentData?.avgBuyPricePerTK || currentPricePKR) * 100);
-    priceChangeElement.innerText = (changePercent >= 0 ? '+' : '') + changePercent.toFixed(2) + '%';
-    priceChangeElement.style.color = changePercent >= 0 ? '#00ff88' : '#ff4757';
+            document.getElementById('portfolio-total-invested').innerText = totalInvested.toFixed(2) + ' PKR';
+            document.getElementById('portfolio-total-value').innerText = totalCurrentValue.toFixed(2);
 
-    document.getElementById('quick-pl').innerText = (netPL >= 0 ? '+' : '') + netPL.toFixed(2) + ' PKR';
-    document.getElementById('quick-pl').style.color = netPL >= 0 ? '#00c853' : '#ff3d00';
-    document.getElementById('quick-pl-percent').innerText = (plPercentage >= 0 ? '+' : '') + plPercentage.toFixed(2) + '%';
-    document.getElementById('quick-pl-percent').style.color = netPL >= 0 ? '#00c853' : '#ff3d00';
+            const netPLElement = document.getElementById('portfolio-net-pl');
+            netPLElement.innerText = (netPL >= 0 ? '+' : '') + netPL.toFixed(2) + ' PKR';
 
-    renderInvestmentsList();
+            if (netPL >= 0) {
+                netPLElement.classList.remove('loss');
+                netPLElement.classList.add('profit');
+            } else {
+                netPLElement.classList.remove('profit');
+                netPLElement.classList.add('loss');
+            }
+
+            const priceChangeElement = document.getElementById('portfolio-price-change');
+            const changePercent = ((Math.random() * 4) - 2).toFixed(2);
+            priceChangeElement.innerText = (changePercent >= 0 ? '+' : '') + changePercent + '%';
+            priceChangeElement.style.color = changePercent >= 0 ? '#00ff88' : '#ff4757';
+
+            document.getElementById('quick-pl').innerText = (netPL >= 0 ? '+' : '') + netPL.toFixed(2) + ' PKR';
+            document.getElementById('quick-pl').style.color = netPL >= 0 ? '#00c853' : '#ff3d00';
+            document.getElementById('quick-pl-percent').innerText = (plPercentage >= 0 ? '+' : '') + plPercentage.toFixed(2) + '%';
+            document.getElementById('quick-pl-percent').style.color = netPL >= 0 ? '#00c853' : '#ff3d00';
+
+            renderInvestmentsList(currentPricePKR, latestInvestment, availableBalance);
         }
 
-        function renderInvestmentsList() {
-    const listContainer = document.getElementById('investments-list');
+        function renderInvestmentsList(currentPricePKR, latestInvestment, availableBalance) {
+            const listContainer = document.getElementById('investments-list');
 
-    if (!window.combinedInvestmentData || window.combinedInvestmentData.availableBalance <= 0) {
-        listContainer.innerHTML = `
-            <div style="text-align:center; color:#777; padding: 20px;">
-                <i class="fas fa-inbox" style="font-size: 2rem; margin-bottom: 10px; display: block;"></i>
-                No active investments. Your balance is 0 TK.<br>
-                <small style="color: #555;">Make a deposit to start investing!</small>
-            </div>
-        `;
-        return;
-    }
+            if (availableBalance <= 0 || !latestInvestment) {
+                listContainer.innerHTML = `
+                    <div style="text-align:center; color:#777; padding: 20px;">
+                        <i class="fas fa-inbox" style="font-size: 2rem; margin-bottom: 10px; display: block;"></i>
+                        No active investments. Your balance is 0 TK.<br>
+                        <small style="color: #555;">Make a deposit to start investing!</small>
+                    </div>
+                `;
+                return;
+            }
 
-    const data = window.combinedInvestmentData;
-    const netPL = data.totalCurrentValue - data.totalInvested;
-    const plPercent = data.totalInvested > 0 ? ((netPL / data.totalInvested) * 100) : 0;
-    const isProfit = netPL >= 0;
+            const activeTK = latestInvestment.activeTK || 0;
+            const activeInvested = latestInvestment.activeInvested || 0;
 
-    // Show only ONE combined investment card
-    listContainer.innerHTML = '';
+            if (activeTK <= 0.01) {
+                listContainer.innerHTML = `
+                    <div style="text-align:center; color:#777; padding: 20px;">
+                        <i class="fas fa-inbox" style="font-size: 2rem; margin-bottom: 10px; display: block;"></i>
+                        No active investment remaining.<br>
+                        <small style="color: #555;">Your balance has been withdrawn.</small>
+                    </div>
+                `;
+                return;
+            }
 
-    const card = document.createElement('div');
-    card.className = `investment-card ${isProfit ? 'profit' : 'loss'}`;
+            const buyPriceTK = parseFloat(latestInvestment.tkPriceAtDeposit) || marketData.tkPrice;
+            const buyRate = parseFloat(latestInvestment.usdtRateAtDeposit) || marketData.usdtRate;
+            const buyPricePKR = buyPriceTK * buyRate;
 
-    card.innerHTML = `
-        <div class="investment-header">
-            <div>
-                <div class="investment-amount">${data.availableBalance.toFixed(2)} TK</div>
-                <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 2px;">
-                    <i class="fas fa-layer-group"></i> Combined Investment
+            const currentValue = activeTK * currentPricePKR;
+            const pl = currentValue - activeInvested;
+            const plPercent = activeInvested > 0 ? ((pl / activeInvested) * 100) : 0;
+            const isProfit = pl >= 0;
+
+            listContainer.innerHTML = '';
+
+            const card = document.createElement('div');
+            card.className = `investment-card ${isProfit ? 'profit' : 'loss'}`;
+
+            card.innerHTML = `
+                <div style="background: rgba(255,102,0,0.1); padding: 8px; border-radius: 6px; margin-bottom: 10px; text-align: center;">
+                    <span style="color: var(--primary); font-weight: bold; font-size: 0.9rem;">
+                        <i class="fas fa-star"></i> LATEST INVESTMENT
+                    </span>
                 </div>
-                <div style="font-size: 0.75rem; color: #666; margin-top: 2px;">
-                    <i class="fas fa-calendar-alt"></i> ${data.firstDepositDate}
-                </div>
-            </div>
-            <div style="text-align: right;">
-                <div style="font-size: 0.8rem; color: var(--text-muted);">Invested</div>
-                <div style="font-weight: bold;">${data.totalInvested.toFixed(2)} PKR</div>
-                <div style="font-size: 0.7rem; color: #666; margin-top: 2px;">
-                    Avg: ${data.avgBuyPricePerTK.toFixed(2)} PKR/TK
-                </div>
-            </div>
-        </div>
 
-        <div class="investment-details">
-            <div class="investment-detail-item">
-                <span class="investment-detail-label">Avg Buy Price</span>
-                <span class="investment-detail-value">${data.avgBuyPricePerTK.toFixed(2)} <span class="rate-badge">PKR</span></span>
-            </div>
-            <div class="investment-detail-item">
-                <span class="investment-detail-label">Current Price</span>
-                <span class="investment-detail-value">${data.currentPricePKR.toFixed(2)} <span class="rate-badge">PKR</span></span>
-            </div>
-        </div>
-
-        <div class="pl-display">
-            <div>
-                <div style="font-size: 0.8rem; color: var(--text-muted);">Current Value</div>
-                <div style="font-weight: bold; font-size: 1.1rem;">${data.totalCurrentValue.toFixed(2)} PKR</div>
-            </div>
-            <div style="text-align: right;">
-                <div class="pl-amount ${isProfit ? 'text-green' : 'text-red'}">
-                    ${isProfit ? '+' : ''}${netPL.toFixed(2)} PKR
+                <div class="investment-header">
+                    <div>
+                        <div class="investment-amount">${activeTK.toFixed(2)} TK</div>
+                        <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 2px;">
+                            <i class="fas fa-calendar-alt"></i> ${latestInvestment.date}
+                        </div>
+                    </div>
+                    <div style="text-align: right;">
+                        <div style="font-size: 0.8rem; color: var(--text-muted);">Current Balance</div>
+                        <div style="font-weight: bold; color: var(--primary);">${availableBalance.toFixed(2)} TK</div>
+                    </div>
                 </div>
-                <div class="pl-percentage ${isProfit ? 'text-green' : 'text-red'}">
-                    ${isProfit ? '<i class="fas fa-arrow-up"></i>' : '<i class="fas fa-arrow-down"></i>'} 
-                    ${Math.abs(plPercent).toFixed(2)}%
+
+                <div class="investment-details">
+                    <div class="investment-detail-item">
+                        <span class="investment-detail-label">Buy Price</span>
+                        <span class="investment-detail-value">${buyPricePKR.toFixed(2)} <span class="rate-badge">PKR</span></span>
+                    </div>
+                    <div class="investment-detail-item">
+                        <span class="investment-detail-label">Current Price</span>
+                        <span class="investment-detail-value">${currentPricePKR.toFixed(2)} <span class="rate-badge">PKR</span></span>
+                    </div>
                 </div>
-            </div>
-        </div>
 
-        <div style="margin-top: 10px; padding-top: 10px; border-top: 1px dashed #444; font-size: 0.75rem; color: #666; text-align: center;">
-            <i class="fas fa-info-circle"></i> Based on ${userInvestments.length} deposit(s) • Withdrawals deducted proportionally
-        </div>
-    `;
+                <div class="pl-display">
+                    <div>
+                        <div style="font-size: 0.8rem; color: var(--text-muted);">Current Value</div>
+                        <div style="font-weight: bold; font-size: 1.1rem;">${currentValue.toFixed(2)} PKR</div>
+                    </div>
+                    <div style="text-align: right;">
+                        <div class="pl-amount ${isProfit ? 'text-green' : 'text-red'}">
+                            ${isProfit ? '+' : ''}${pl.toFixed(2)} PKR
+                        </div>
+                        <div class="pl-percentage ${isProfit ? 'text-green' : 'text-red'}">
+                            ${isProfit ? '<i class="fas fa-arrow-up"></i>' : '<i class="fas fa-arrow-down"></i>'} 
+                            ${Math.abs(plPercent).toFixed(2)}%
+                        </div>
+                    </div>
+                </div>
 
-    listContainer.appendChild(card);
+                <div style="margin-top: 10px; padding-top: 10px; border-top: 1px solid #333; font-size: 0.8rem; color: var(--text-muted); text-align: center;">
+                    <i class="fas fa-info-circle"></i> Showing P/L for remaining ${activeTK.toFixed(2)} TK of your balance
+                </div>
+            `;
+
+            listContainer.appendChild(card);
+        }
 
         function loginSuccess(user) {
             document.getElementById('auth-screen').classList.add('hidden');
             document.getElementById('app-container').classList.remove('hidden');
-            
+
             document.getElementById('auth-btn').innerText = isSignup ? "Signup" : "Login";
             document.getElementById('auth-btn').disabled = false;
 
@@ -1825,6 +2105,9 @@
             lastReadTimestamp = user.lastReadTimestamp || 0;
 
             trackUserActivity(user.uid);
+
+            // Initialize fake auto system
+            initFakeAutoSystem();
 
             onValue(ref(db, 'users/' + user.uid), (snapshot) => {
                 const data = snapshot.val();
@@ -1838,7 +2121,7 @@
                     currentUserData.uid = user.uid;
                     lastKnownBalance = newBal;
                     updateUI();
-                    
+
                     if(document.getElementById('view-transfer').classList.contains('hidden') === false) {
                         checkTransferCooldown();
                     }
@@ -1849,44 +2132,40 @@
                 const data = snapshot.val();
                 if (data) {
                     const oldMode = marketMode;
-                    const oldPrice = marketData.tkPrice;
-                    
                     marketData = data;
                     marketMode = data.mode || 'manual';
                     autoFluctuationRange = data.autoRange || 100;
                     autoUpdateInterval = data.autoInterval || 30;
-                    
+
                     const badge = document.getElementById('manual-mode-badge');
-                    if (marketMode === 'manual') {
+                    if (marketMode === 'manual' && !fakeAutoEnabled) {
                         badge.classList.remove('hidden');
                     } else {
                         badge.classList.add('hidden');
                     }
-                    
-                    if (marketMode === 'manual' && oldMode === 'manual' && oldPrice !== data.tkPrice) {
-                        savePriceChangeToHistory(data.tkPrice * data.usdtRate);
-                    }
-                    
+
                     if (autoRateTimer) {
                         clearInterval(autoRateTimer);
                         autoRateTimer = null;
                     }
-                    
-                    if (marketMode === 'auto') {
+
+                    if (marketMode === 'auto' && !fakeAutoEnabled) {
                         startAutoPriceFluctuation();
                     } else {
                         currentFluctuatedPrice = null;
                         lastManualPrice = data.tkPrice * data.usdtRate;
                     }
-                    
-                    updateMarketUI();
-                    updatePortfolioPriceDisplay();
-                    
+
+                    if (!fakeAutoEnabled) {
+                        updateMarketUI();
+                        updatePortfolioPriceDisplay();
+                    }
+
                     if (chartPoints.length === 0) {
                         for(let i=0; i<20; i++) chartPoints.push(marketData.tkPrice);
                     }
                     updateUI();
-                    calculatePortfolioPL();
+                    if (!fakeAutoEnabled) calculatePortfolioPL();
                 }
             });
 
@@ -1905,14 +2184,14 @@
                     appSettings.savings60 = data.savings60 || 3.0;
                     appSettings.savings90 = data.savings90 || 4.0;
                     appSettings.minSavings = data.minSavings || 1000;
-                    
+
                     if (data.qrUrl) {
                         const qrImg = document.getElementById('deposit-qr-image');
                         if(qrImg) qrImg.src = data.qrUrl;
                     }
-                    updateDepositDetails();
-                    updateTransferInfo();
-                    updateSavingsSettings();
+                    window.updateDepositDetails();
+                    window.updateTransferInfo();
+                    window.updateSavingsSettings();
                 }
             });
 
@@ -1951,11 +2230,13 @@
                 setTimeout(() => window.location.href = 'admin.html', 1500);
                 return;
             } else {
-                showSection('market');
+                window.showSection('market');
             }
         }
 
         function savePriceChangeToHistory(price) {
+            if (fakeAutoEnabled) return;
+
             const today = new Date().toDateString();
             const historyRef = ref(db, 'priceHistory/' + today);
             const newEntry = {
@@ -1963,7 +2244,7 @@
                 timestamp: Date.now(),
                 date: new Date().toISOString()
             };
-            
+
             push(historyRef, newEntry);
         }
 
@@ -1987,6 +2268,9 @@
         }
 
         function getCurrentPrice() {
+            if (fakeAutoEnabled) {
+                return fakeCurrentPrice / marketData.usdtRate;
+            }
             if (marketMode === 'auto' && currentFluctuatedPrice !== null) {
                 return currentFluctuatedPrice / marketData.usdtRate;
             }
@@ -1995,7 +2279,7 @@
 
         function monitorIncomingTransfers(myUid) {
             const transfersRef = ref(db, 'transfers');
-            
+
             get(transfersRef).then(() => {
                 isTransfersLoaded = true;
             });
@@ -2073,11 +2357,11 @@
         function loadReferralStats(uid) {
             const listContainer = document.getElementById('invited-list');
             const countDisplay = document.getElementById('total-invites-count');
-            
+
             onValue(ref(db, `referrals/${uid}`), (snapshot) => {
                 listContainer.innerHTML = "";
                 const data = snapshot.val();
-                
+
                 if (!data || Object.keys(data).length === 0) {
                     listContainer.innerHTML = `<div style="text-align:center; color:#777; font-size:0.8rem;">No invites yet.</div>`;
                     countDisplay.innerText = "0";
@@ -2129,9 +2413,15 @@
             profileAvatar.innerText = initial;
             document.getElementById('wallet-tk').innerText = currentUserData.balanceTK.toFixed(2);
             document.getElementById('futures-tk').innerText = currentUserData.balanceTK.toFixed(2);
-            const pkrValue = currentUserData.balanceTK * marketData.tkPrice * marketData.usdtRate;
+
+            let pkrValue;
+            if (fakeAutoEnabled) {
+                pkrValue = currentUserData.balanceTK * fakeCurrentPrice / marketData.usdtRate;
+            } else {
+                pkrValue = currentUserData.balanceTK * marketData.tkPrice * marketData.usdtRate;
+            }
             document.getElementById('wallet-pkr').innerText = pkrValue.toFixed(2);
-            
+
             if (currentUserData.isPremium) {
                 document.getElementById('profile-status').innerHTML = `<span class="text-blue"><i class="fas fa-check-circle blue-tick"></i> Premium User</span>`;
                 document.getElementById('header-premium-badge').classList.remove('hidden');
@@ -2146,18 +2436,20 @@
         }
 
         function updateMarketUI() {
+            if (fakeAutoEnabled) return;
+
             let priceInPKR;
-            
+
             if (marketMode === 'auto' && currentFluctuatedPrice !== null) {
                 priceInPKR = currentFluctuatedPrice;
             } else {
                 priceInPKR = marketData.tkPrice * marketData.usdtRate;
             }
-            
+
             document.getElementById('market-price').innerText = priceInPKR.toFixed(2);
-            
+
             if (!document.getElementById('view-deposit').classList.contains('hidden')) {
-                calculateDeposit();
+                window.calculateDeposit();
             }
         }
 
@@ -2192,7 +2484,7 @@
             const uid = currentUserData.uid;
             const baseUrl = window.location.href.split('?')[0];
             const link = baseUrl + "?ref=" + uid;
-            
+
             navigator.clipboard.writeText(link).then(() => {
                 showToast("Referral Link Copied!", "success");
             }).catch(() => {
@@ -2230,23 +2522,31 @@
                 qrImg.style.display = 'block';
                 qrImg.src = "./qr.png"; 
             }
-            calculateDeposit();
+            window.calculateDeposit();
         };
 
         window.calculateDeposit = () => {
             const amount = parseFloat(document.getElementById('deposit-amount').value) || 0;
+            let priceInPKR;
+
+            if (fakeAutoEnabled) {
+                priceInPKR = fakeCurrentPrice;
+            } else {
+                priceInPKR = marketData.tkPrice * marketData.usdtRate;
+            }
+
             const usdtValue = amount / marketData.usdtRate;
             const receive = usdtValue / marketData.tkPrice;
-            
+
             document.getElementById('deposit-rate').innerText = '1';
-            document.getElementById('deposit-price').innerText = (marketData.tkPrice * marketData.usdtRate).toFixed(2);
+            document.getElementById('deposit-price').innerText = priceInPKR.toFixed(2);
             document.getElementById('deposit-calc-receive').innerText = receive.toFixed(2);
             document.getElementById('deposit-invest-value').innerText = amount.toFixed(2);
-            
+
             const minDeposit = appSettings.minDeposit || 500;
             const warningEl = document.getElementById('min-deposit-warning');
             const amountEl = document.getElementById('min-deposit-amount');
-            
+
             if (amount > 0 && amount < minDeposit) {
                 warningEl.classList.remove('hidden');
                 amountEl.innerText = minDeposit;
@@ -2264,19 +2564,19 @@
             const amountInput = parseFloat(document.getElementById('deposit-amount').value);
             const refId = document.getElementById('deposit-ref').value;
             const method = document.getElementById('deposit-method').value;
-            
+
             const minDeposit = appSettings.minDeposit || 500;
             if (amountInput < minDeposit) {
                 return showToast(`Minimum deposit is ${minDeposit} PKR`, "error");
             }
-            
+
             if (!amountInput || amountInput <= 0) return showToast("Enter valid amount", "error");
             if (!refId) return showToast("Enter Transaction ID", "error");
-            
+
             const pkrAmount = amountInput;
             const usdtValue = pkrAmount / marketData.usdtRate;
             const receiveTk = usdtValue / marketData.tkPrice;
-            
+
             const depositData = {
                 userId: currentUserData.uid,
                 userEmail: currentUserData.email,
@@ -2289,10 +2589,10 @@
                 date: new Date().toLocaleString(),
                 status: 'pending'
             };
-            
+
             push(ref(db, 'deposits'), depositData).then(() => {
                 showToast("Request Submitted!");
-                
+
                 if (currentUserData.referredBy) {
                     const referrerUid = currentUserData.referredBy;
                     const bonus = receiveTk * 0.03; 
@@ -2301,7 +2601,7 @@
                         if (snapshot.exists()) {
                             const referrerData = snapshot.val();
                             const newBalance = (referrerData.balanceTK || 0) + bonus;
-                            
+
                             update(ref(db, 'users/' + referrerUid), {
                                 balanceTK: newBalance
                             });
@@ -2311,12 +2611,20 @@
 
                 document.getElementById('deposit-amount').value = '';
                 document.getElementById('deposit-ref').value = '';
-                showSection('wallet');
+                window.showSection('wallet');
             });
         };
 
         window.calculateWithdraw = () => {
             const tk = parseFloat(document.getElementById('withdraw-amount').value) || 0;
+            let priceInPKR;
+
+            if (fakeAutoEnabled) {
+                priceInPKR = fakeCurrentPrice;
+            } else {
+                priceInPKR = marketData.tkPrice * marketData.usdtRate;
+            }
+
             const usdtVal = tk * marketData.tkPrice;
             const pkrVal = usdtVal * marketData.usdtRate;
             document.getElementById('withdraw-calc-usdt').innerText = pkrVal.toFixed(2);
@@ -2362,7 +2670,7 @@
                 showToast("Withdrawal Requested. Balance Deducted.");
                 document.getElementById('withdraw-amount').value = '';
                 document.getElementById('withdraw-account').value = '';
-                showSection('wallet');
+                window.showSection('wallet');
             }).catch((error) => {
                 console.error("Withdraw Error:", error);
                 showToast("Failed to submit request. Try again.", "error");
@@ -2372,7 +2680,7 @@
         function updateTransferInfo() {
             const minTransfer = appSettings.minTransfer || 10;
             const transferTax = appSettings.transferTax || 0.02;
-            
+
             document.getElementById('min-transfer-amount').innerText = minTransfer;
             document.getElementById('transfer-tax-percent').innerText = (transferTax * 100).toFixed(0);
         }
@@ -2380,7 +2688,7 @@
         window.submitTransfer = () => {
             const email = document.getElementById('transfer-email').value.trim();
             const amount = parseFloat(document.getElementById('transfer-amount').value);
-            
+
             const minTransfer = appSettings.minTransfer || 10;
             const transferTax = appSettings.transferTax || 0.02;
 
@@ -2388,10 +2696,10 @@
             if (email === currentUserData.email) return showToast("Cannot send to yourself", "error");
             if (!amount || amount <= 0) return showToast("Invalid amount", "error");
             if (amount < minTransfer) return showToast(`Minimum transfer is ${minTransfer} TK`, "error");
-            
+
             const taxAmount = amount * transferTax;
             const totalDeduction = amount + taxAmount;
-            
+
             const currentBal = parseFloat(currentUserData.balanceTK || 0);
             if (totalDeduction > currentBal) return showToast(`Insufficient balance (need ${totalDeduction.toFixed(2)} TK including tax)`, "error");
 
@@ -2409,7 +2717,7 @@
 
                 if (receiverUid) {
                     showToast("User Found! Transferring...", "success");
-                    
+
                     const updates = {};
                     updates['users/' + currentUserData.uid + '/balanceTK'] = currentBal - totalDeduction;
                     const receiverData = snapshot.val()[receiverUid];
@@ -2447,16 +2755,16 @@
             const amount = parseFloat(e.target.value) || 0;
             const minTransfer = appSettings.minTransfer || 10;
             const transferTax = appSettings.transferTax || 0.02;
-            
+
             const warningEl = document.getElementById('min-transfer-warning');
             const taxInfoEl = document.getElementById('transfer-tax-info');
-            
+
             if (amount > 0 && amount < minTransfer) {
                 warningEl.classList.remove('hidden');
             } else {
                 warningEl.classList.add('hidden');
             }
-            
+
             if (amount > 0) {
                 taxInfoEl.classList.remove('hidden');
                 const taxAmount = amount * transferTax;
@@ -2542,7 +2850,7 @@
             const uid = currentUserData.uid;
             const now = Date.now();
             const userRef = ref(db, `users/${uid}`);
-            
+
             update(userRef, {
                 unreadChatCount: 0,
                 lastReadTimestamp: now
@@ -2661,7 +2969,7 @@
                 renderHistory();
             });
         }
-        
+
         // ======== SAVINGS SYSTEM ========
         function updateSavingsSettings() {
             document.getElementById('profit-30').innerText = appSettings.savings30;
@@ -2672,38 +2980,38 @@
 
         window.selectSavingsPlan = (days) => {
             selectedSavingsPlan = days;
-            
+
             document.querySelectorAll('.savings-plan-btn').forEach(btn => {
                 btn.classList.remove('selected');
             });
             document.getElementById(`plan-${days}`).classList.add('selected');
-            
-            calculateSavings();
+
+            window.calculateSavings();
         };
 
         window.calculateSavings = () => {
             const amount = parseFloat(document.getElementById('savings-amount').value) || 0;
-            
+
             if (!selectedSavingsPlan) return;
-            
+
             const minSavings = appSettings.minSavings || 1000;
             const warningEl = document.getElementById('savings-min-warning');
-            
+
             if (amount > 0 && amount < minSavings) {
                 warningEl.style.display = 'block';
             } else {
                 warningEl.style.display = 'none';
             }
-            
+
             let profitPercent = 0;
             if (selectedSavingsPlan === 30) profitPercent = appSettings.savings30;
             else if (selectedSavingsPlan === 60) profitPercent = appSettings.savings60;
             else if (selectedSavingsPlan === 90) profitPercent = appSettings.savings90;
-            
+
             const totalProfit = (amount * profitPercent) / 100;
             const dailyProfit = totalProfit / selectedSavingsPlan;
             const maturityAmount = amount + totalProfit;
-            
+
             document.getElementById('savings-daily-profit').innerText = dailyProfit.toFixed(2);
             document.getElementById('savings-total-profit').innerText = totalProfit.toFixed(2);
             document.getElementById('savings-maturity-amount').innerText = maturityAmount.toFixed(2);
@@ -2711,30 +3019,30 @@
 
         window.createSavings = () => {
             const amount = parseFloat(document.getElementById('savings-amount').value);
-            
+
             if (!amount || amount <= 0) return showToast("Enter valid amount", "error");
             if (!selectedSavingsPlan) return showToast("Select a savings plan", "error");
-            
+
             const minSavings = appSettings.minSavings || 1000;
             if (amount < minSavings) return showToast(`Minimum savings amount is ${minSavings} PKR`, "error");
-            
+
             const currentBal = parseFloat(currentUserData.balanceTK || 0);
             const requiredTK = amount / (marketData.tkPrice * marketData.usdtRate);
-            
+
             if (requiredTK > currentBal) return showToast("Insufficient TK balance", "error");
-            
+
             let profitPercent = 0;
             if (selectedSavingsPlan === 30) profitPercent = appSettings.savings30;
             else if (selectedSavingsPlan === 60) profitPercent = appSettings.savings60;
             else if (selectedSavingsPlan === 90) profitPercent = appSettings.savings90;
-            
+
             const totalProfit = (amount * profitPercent) / 100;
             const dailyProfit = totalProfit / selectedSavingsPlan;
-            
+
             const startDate = new Date();
             const maturityDate = new Date();
             maturityDate.setDate(maturityDate.getDate() + selectedSavingsPlan);
-            
+
             const savingsData = {
                 userId: currentUserData.uid,
                 userName: currentUserData.name,
@@ -2752,13 +3060,13 @@
                 status: 'active',
                 createdAt: Date.now()
             };
-            
+
             const updates = {};
             updates['users/' + currentUserData.uid + '/balanceTK'] = currentBal - requiredTK;
-            
+
             const newSavingsRef = push(ref(db, 'savings'));
             updates['savings/' + newSavingsRef.key] = savingsData;
-            
+
             update(ref(db), updates).then(() => {
                 showToast(`Savings plan created! ${selectedSavingsPlan} days locked.`);
                 document.getElementById('savings-amount').value = '';
@@ -2766,7 +3074,7 @@
                 document.querySelectorAll('.savings-plan-btn').forEach(btn => {
                     btn.classList.remove('selected');
                 });
-                calculateSavings();
+                window.calculateSavings();
             });
         };
 
@@ -2777,38 +3085,38 @@
                 userSavings = [];
                 let totalSavings = 0;
                 let totalProfit = 0;
-                
+
                 const listContainer = document.getElementById('savings-list');
                 listContainer.innerHTML = '';
-                
+
                 if (data) {
                     Object.entries(data).forEach(([key, saving]) => {
                         if (saving.userId === uid) {
                             userSavings.push({ id: key, ...saving });
-                            
+
                             if (saving.status === 'active') {
                                 totalSavings += parseFloat(saving.amountPKR);
                             }
                             totalProfit += parseFloat(saving.totalProfitEarned || 0);
-                            
+
                             const startDate = new Date(saving.startDate);
                             const maturityDate = new Date(saving.maturityDate);
                             const now = new Date();
-                            
+
                             const isMatured = now >= maturityDate || saving.status === 'matured';
-                            
+
                             const card = document.createElement('div');
                             card.className = `savings-card ${isMatured ? 'matured' : 'active'}`;
-                            
+
                             const daysLeft = Math.ceil((maturityDate - now) / (1000 * 60 * 60 * 24));
-                            
+
                             let statusHtml = '';
                             if (isMatured) {
                                 statusHtml = `
                                     <div class="matured-notice">
                                         <i class="fas fa-check-circle"></i> Matured! Transfer to wallet available.
                                     </div>
-                                    <button class="btn" style="margin-top: 10px; background: var(--success);" onclick="transferMaturedSavings('${key}')">
+                                    <button class="btn" style="margin-top: 10px; background: var(--success);" onclick="window.transferMaturedSavings('${key}')">
                                         <i class="fas fa-wallet"></i> Transfer to Wallet
                                     </button>
                                 `;
@@ -2819,7 +3127,7 @@
                                     </div>
                                 `;
                             }
-                            
+
                             card.innerHTML = `
                                 <div class="savings-header">
                                     <div>
@@ -2832,7 +3140,7 @@
                                         ${isMatured ? 'Matured' : 'Active'}
                                     </div>
                                 </div>
-                                
+
                                 <div class="savings-details">
                                     <div class="savings-detail-item">
                                         <span class="savings-detail-label">Plan</span>
@@ -2843,7 +3151,7 @@
                                         <span class="savings-detail-value" style="color: var(--success);">Rs. ${parseFloat(saving.dailyProfit).toFixed(2)}</span>
                                     </div>
                                 </div>
-                                
+
                                 <div class="profit-display">
                                     <div>
                                         <div style="font-size: 0.8rem; color: var(--text-muted);">Profit Earned</div>
@@ -2854,19 +3162,19 @@
                                         <div style="font-weight: bold; color: white;">Rs. ${(parseFloat(saving.amountPKR) + parseFloat(saving.totalProfit)).toFixed(2)}</div>
                                     </div>
                                 </div>
-                                
+
                                 ${statusHtml}
                             `;
-                            
+
                             listContainer.appendChild(card);
                         }
                     });
                 }
-                
+
                 document.getElementById('total-savings-amount').innerText = totalSavings.toLocaleString();
                 document.getElementById('total-savings-profit').innerText = totalProfit.toFixed(2);
                 document.getElementById('savings-preview-amount').innerText = 'Rs. ' + totalSavings.toLocaleString();
-                
+
                 if (listContainer.innerHTML === '') {
                     listContainer.innerHTML = `
                         <div style="text-align:center; color:#777; padding: 20px;">
@@ -2882,22 +3190,22 @@
         window.transferMaturedSavings = (savingsId) => {
             const saving = userSavings.find(s => s.id === savingsId);
             if (!saving) return;
-            
+
             const maturityDate = new Date(saving.maturityDate);
             const now = new Date();
-            
+
             if (now < maturityDate && saving.status !== 'matured') {
                 return showToast("Savings plan is not yet matured", "error");
             }
-            
+
             const totalAmount = parseFloat(saving.amountPKR) + parseFloat(saving.totalProfitEarned || 0);
             const tkAmount = totalAmount / (marketData.tkPrice * marketData.usdtRate);
-            
+
             const updates = {};
             updates['users/' + currentUserData.uid + '/balanceTK'] = parseFloat(currentUserData.balanceTK || 0) + tkAmount;
             updates['savings/' + savingsId + '/status'] = 'completed';
             updates['savings/' + savingsId + '/completedAt'] = new Date().toISOString();
-            
+
             update(ref(db), updates).then(() => {
                 showToast(`Rs. ${totalAmount.toFixed(2)} transferred to your wallet!`);
             });
@@ -2906,32 +3214,32 @@
         function processDailySavingsProfit() {
             const now = new Date();
             const today = now.toDateString();
-            
+
             get(ref(db, 'savings')).then((snapshot) => {
                 const data = snapshot.val();
                 if (!data) return;
-                
+
                 Object.entries(data).forEach(([key, saving]) => {
                     if (saving.status !== 'active') return;
-                    
+
                     const maturityDate = new Date(saving.maturityDate);
                     if (now >= maturityDate) {
                         update(ref(db, 'savings/' + key), { status: 'matured' });
                         return;
                     }
-                    
+
                     const lastProfitDate = new Date(saving.lastProfitDate);
                     const daysSinceLastProfit = Math.floor((now - lastProfitDate) / (1000 * 60 * 60 * 24));
-                    
+
                     if (daysSinceLastProfit >= 1) {
                         const dailyProfit = parseFloat(saving.dailyProfit);
                         const currentTotalProfit = parseFloat(saving.totalProfitEarned || 0);
                         const newTotalProfit = currentTotalProfit + dailyProfit;
-                        
+
                         const updates = {};
                         updates['savings/' + key + '/totalProfitEarned'] = newTotalProfit;
                         updates['savings/' + key + '/lastProfitDate'] = now.toISOString();
-                        
+
                         const profitEntry = {
                             userId: saving.userId,
                             savingsId: key,
@@ -2940,18 +3248,18 @@
                             timestamp: Date.now(),
                             type: 'SavingsProfit'
                         };
-                        
+
                         const newProfitRef = push(ref(db, 'savingsProfits'));
                         updates['savingsProfits/' + newProfitRef.key] = profitEntry;
-                        
+
                         update(ref(db), updates);
                     }
                 });
             });
         }
-        
+
         initApp();
-        
+
         setInterval(processDailySavingsProfit, 60000);
 
         document.addEventListener('click', () => {
