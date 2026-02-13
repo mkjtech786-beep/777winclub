@@ -753,7 +753,7 @@
                 <div class="balance-card">
                     <div class="balance-title">Current TK Price</div>
                     <div class="balance-amount"><span id="market-price">0.00</span> PKR</div>
-                    <small style="opacity: 0.8;">Total Hold TK: 20M+ Coins</small>
+                    <small style="opacity: 0.8;">Total Hold TK: 24M+ Coins</small>
                 </div>
 
                 <div class="market-pressure-card">
@@ -774,7 +774,7 @@
                     <div class="today-chart-header">
                         <div class="today-chart-title">
                             <i class="fas fa-chart-line"></i> Today's Price Movement
-                            <span id="price-mode-badge" class="mode-indicator mode-manual">MANUAL</span>
+                            <span id="price-mode-badge" class="mode-indicator mode-manual">Updated</span>
                         </div>
                         <div class="today-stats">
                             <div class="stat-item">
@@ -2426,7 +2426,7 @@
         window.calculateWithdraw = () => {
             const tk = parseFloat(document.getElementById('withdraw-amount').value) || 0;
             
-            // FIX: Use getCurrentPrice() to get the correct price based on mode (auto/manual)
+            // FIX: Use getCurrentPrice() to get the correct price based on mode (update/updated)
             const currentPrice = getCurrentPrice();
             const currentPricePKR = currentPrice * marketData.usdtRate;
             
