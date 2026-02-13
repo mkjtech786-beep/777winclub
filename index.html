@@ -774,6 +774,7 @@
                     <div class="today-chart-header">
                         <div class="today-chart-title">
                             <i class="fas fa-chart-line"></i> Today's Price Movement
+                            <span id="price-mode-badge" class="mode-indicator mode-manual">MANUAL</span>
                         </div>
                         <div class="today-stats">
                             <div class="stat-item">
@@ -1945,7 +1946,15 @@
                     autoFluctuationRange = data.autoRange || 50;
                     autoUpdateInterval = data.autoInterval || 30;
                     
-                    // Update mode badge removed - no longer showing AUTO/MANUAL text
+                    // Update mode badge
+                    const modeBadge = document.getElementById('price-mode-badge');
+                    if (marketMode === 'auto') {
+                        modeBadge.innerText = 'AUTO';
+                        modeBadge.className = 'mode-indicator mode-auto';
+                    } else {
+                        modeBadge.innerText = 'MANUAL';
+                        modeBadge.className = 'mode-indicator mode-manual';
+                    }
                     
                     // Handle mode switch
                     if (marketMode === 'auto') {
@@ -2319,13 +2328,20 @@
             window.calculateDeposit();
         };
 
+        // ======== FIXED DEPOSIT CALCULATION - USES CURRENT PRICE ========
         window.calculateDeposit = () => {
             const amount = parseFloat(document.getElementById('deposit-amount').value) || 0;
+            
+            // FIX: Use getCurrentPrice() to get the correct price based on mode (auto/manual)
+            const currentPrice = getCurrentPrice();
+            const currentPricePKR = currentPrice * marketData.usdtRate;
+            
+            // Calculate: PKR → USDT → TK
             const usdtValue = amount / marketData.usdtRate;
-            const receive = usdtValue / marketData.tkPrice;
+            const receive = usdtValue / currentPrice;  // Use currentPrice instead of marketData.tkPrice
             
             document.getElementById('deposit-rate').innerText = '1';
-            document.getElementById('deposit-price').innerText = (marketData.tkPrice * marketData.usdtRate).toFixed(2);
+            document.getElementById('deposit-price').innerText = currentPricePKR.toFixed(2);  // Show current rate
             document.getElementById('deposit-calc-receive').innerText = receive.toFixed(2);
             document.getElementById('deposit-invest-value').innerText = amount.toFixed(2);
             
@@ -2346,6 +2362,7 @@
             window.showToast("Copied!");
         };
 
+        // ======== FIXED SUBMIT DEPOSIT - USES CURRENT PRICE ========
         window.submitDeposit = () => {
             const amountInput = parseFloat(document.getElementById('deposit-amount').value);
             const refId = document.getElementById('deposit-ref').value;
@@ -2359,9 +2376,13 @@
             if (!amountInput || amountInput <= 0) return window.showToast("Enter valid amount", "error");
             if (!refId) return window.showToast("Enter Transaction ID", "error");
             
+            // FIX: Use getCurrentPrice() to get the correct current rate
+            const currentPrice = getCurrentPrice();
+            const currentPricePKR = currentPrice * marketData.usdtRate;
+            
             const pkrAmount = amountInput;
             const usdtValue = pkrAmount / marketData.usdtRate;
-            const receiveTk = usdtValue / marketData.tkPrice;
+            const receiveTk = usdtValue / currentPrice;  // Use currentPrice
             
             const depositData = {
                 userId: currentUserData.uid,
@@ -2369,7 +2390,7 @@
                 method: method,
                 amount: receiveTk,
                 rawAmount: pkrAmount,
-                tkPriceAtDeposit: marketData.tkPrice,
+                tkPriceAtDeposit: currentPrice,  // FIX: Save current price, not marketData.tkPrice
                 usdtRateAtDeposit: marketData.usdtRate,
                 ref: refId,
                 date: new Date().toLocaleString(),
@@ -2401,10 +2422,17 @@
             });
         };
 
+        // ======== FIXED WITHDRAW CALCULATION - USES CURRENT PRICE ========
         window.calculateWithdraw = () => {
             const tk = parseFloat(document.getElementById('withdraw-amount').value) || 0;
-            const usdtVal = tk * marketData.tkPrice;
-            const pkrVal = usdtVal * marketData.usdtRate;
+            
+            // FIX: Use getCurrentPrice() to get the correct price based on mode (auto/manual)
+            const currentPrice = getCurrentPrice();
+            const currentPricePKR = currentPrice * marketData.usdtRate;
+            
+            // Calculate: TK → PKR directly using current rate
+            const pkrVal = tk * currentPricePKR;
+            
             document.getElementById('withdraw-calc-usdt').innerText = pkrVal.toFixed(2);
         }
 
@@ -2422,8 +2450,10 @@
 
             if (total > currentUserData.balanceTK) return window.showToast("Insufficient balance", "error");
 
-            const usdtVal = amount * marketData.tkPrice;
-            const pkrVal = usdtVal * marketData.usdtRate;
+            // FIX: Use getCurrentPrice() to get the correct current rate
+            const currentPrice = getCurrentPrice();
+            const currentPricePKR = currentPrice * marketData.usdtRate;
+            const pkrVal = amount * currentPricePKR;  // Use current rate
 
             const newWithdrawKey = push(ref(db, 'withdrawals')).key;
 
@@ -2433,7 +2463,7 @@
                 method: method,
                 account: account,
                 amount: amount, 
-                pkrAmount: pkrVal, 
+                pkrAmount: pkrVal,  // FIX: Use calculated PKR value with current rate
                 fee: fee,
                 total: total, 
                 date: new Date().toLocaleString(),
@@ -2805,7 +2835,11 @@
             if (amount < minSavings) return window.showToast(`Minimum savings amount is ${minSavings} PKR`, "error");
             
             const currentBal = parseFloat(currentUserData.balanceTK || 0);
-            const requiredTK = amount / (marketData.tkPrice * marketData.usdtRate);
+            
+            // FIX: Use getCurrentPrice() for savings calculation too
+            const currentPrice = getCurrentPrice();
+            const currentPricePKR = currentPrice * marketData.usdtRate;
+            const requiredTK = amount / currentPricePKR;
             
             if (requiredTK > currentBal) return window.showToast("Insufficient TK balance", "error");
             
@@ -2977,7 +3011,11 @@
             }
             
             const totalAmount = parseFloat(saving.amountPKR) + parseFloat(saving.totalProfitEarned || 0);
-            const tkAmount = totalAmount / (marketData.tkPrice * marketData.usdtRate);
+            
+            // FIX: Use getCurrentPrice() for transfer calculation
+            const currentPrice = getCurrentPrice();
+            const currentPricePKR = currentPrice * marketData.usdtRate;
+            const tkAmount = totalAmount / currentPricePKR;
             
             const updates = {};
             updates['users/' + currentUserData.uid + '/balanceTK'] = parseFloat(currentUserData.balanceTK || 0) + tkAmount;
