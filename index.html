@@ -1238,7 +1238,7 @@
         const db = getDatabase(app);
 
         let currentUserData = null; 
-        let marketData = { tkPrice: 1.50, usdtRate: 280 };
+        let marketData = { tkPrice: 1.50, usdtRate: 280, mode: 'manual', basePrice: 280, autoRange: 50, autoInterval: 30 };
         let appSettings = {
             easypaisa: '0300-1234567',
             jazzcash: '0321-7654321',
@@ -1261,7 +1261,7 @@
         let pressureInterval = null;
         let lastReadTimestamp = 0;
         let marketMode = 'manual';
-        let autoFluctuationRange = 100;
+        let autoFluctuationRange = 50;
         let autoUpdateInterval = 30;
         let currentFluctuatedPrice = null;
         let autoRateTimer = null;
@@ -1272,6 +1272,7 @@
         let userSavings = [];
         let serverTimeOffset = 0;
         let priceUpdateInterval = null;
+        let zigzagInterval = null;
 
         window.playSound = (type) => {
             const AudioContext = window.AudioContext || window.webkitAudioContext;
@@ -1350,15 +1351,31 @@
             return Date.now() + serverTimeOffset;
         }
 
+        // ======== ZIGZAG CHART ANIMATION - ALWAYS RUNNING ========
         function startZigzagAnimation() {
-            setInterval(() => {
+            // Clear any existing interval
+            if (zigzagInterval) clearInterval(zigzagInterval);
+            
+            // Start fresh zigzag animation
+            zigzagInterval = setInterval(() => {
                 if(!marketData) return;
-                const lastPrice = chartPoints.length > 0 ? chartPoints[chartPoints.length - 1] : marketData.tkPrice;
-                const change = (Math.random() - 0.5) * 0.05; 
-                let newPrice = lastPrice + change;
+                
+                // Get current displayed price
+                let currentPrice;
+                if (marketMode === 'auto' && currentFluctuatedPrice !== null) {
+                    currentPrice = currentFluctuatedPrice / marketData.usdtRate;
+                } else {
+                    currentPrice = marketData.tkPrice;
+                }
+                
+                // Add small random fluctuation for zigzag effect
+                const change = (Math.random() - 0.5) * 0.02; 
+                let newPrice = currentPrice + change;
                 if(newPrice < 0.1) newPrice = 0.1;
+                
                 chartPoints.push(newPrice);
                 if (chartPoints.length > 20) chartPoints.shift();
+                
                 drawChart();
             }, 1000); 
         }
@@ -1383,25 +1400,30 @@
         // ======== TIME-BASED AUTO PRICE SYSTEM ========
         function calculateTimeBasedPrice() {
             const serverTime = getServerTime();
-            const basePKR = marketData.tkPrice * marketData.usdtRate;
+            
+            // Use basePrice from market data (set by admin)
+            const basePrice = marketData.basePrice || (marketData.tkPrice * marketData.usdtRate) || 280;
+            const range = marketData.autoRange || autoFluctuationRange || 50;
+            const intervalSeconds = marketData.autoInterval || autoUpdateInterval || 30;
             
             // Create a deterministic price based on server time
-            // This ensures all devices see the same price at the same time
-            const intervalMs = (autoUpdateInterval || 30) * 1000;
+            const intervalMs = intervalSeconds * 1000;
             const timeSlot = Math.floor(serverTime / intervalMs);
             
             // Use sine wave for smooth up/down movement based on time
             const cycleDuration = 10; // Number of intervals per full cycle
             const positionInCycle = (timeSlot % cycleDuration) / cycleDuration;
             
-            // Generate price fluctuation using sine wave (0 to 1 range, then mapped to range)
+            // Generate price fluctuation using sine wave (-1 to 1 range)
             const sineValue = Math.sin(positionInCycle * Math.PI * 2);
-            const range = autoFluctuationRange || 100;
             
-            // Map sine (-1 to 1) to price range (0 to range)
-            const fluctuation = ((sineValue + 1) / 2) * range;
+            // Map sine (-1 to 1) to price range (-range to +range)
+            const fluctuation = sineValue * range;
             
-            return basePKR + fluctuation;
+            const finalPrice = basePrice + fluctuation;
+            
+            // Ensure price doesn't go negative
+            return Math.max(finalPrice, 1);
         }
 
         function updateAutoPrice() {
@@ -1410,14 +1432,18 @@
             const newPrice = calculateTimeBasedPrice();
             currentFluctuatedPrice = newPrice;
             
+            // Update UI
             updateMarketUI();
             
-            // Save to history if significantly different
+            // Save to history if significantly different (more than 1 PKR)
             if (todayPriceHistory.length > 0) {
                 const lastPrice = todayPriceHistory[todayPriceHistory.length - 1].price;
-                if (Math.abs(newPrice - lastPrice) > 0.5) {
+                if (Math.abs(newPrice - lastPrice) > 1) {
                     savePriceChangeToHistory(newPrice);
                 }
+            } else {
+                // First entry
+                savePriceChangeToHistory(newPrice);
             }
         }
 
@@ -1427,12 +1453,14 @@
                 clearInterval(priceUpdateInterval);
             }
             
-            // Initial calculation
+            // Immediate first calculation
             updateAutoPrice();
             
             // Set up interval based on admin settings
-            const intervalMs = (autoUpdateInterval || 30) * 1000;
+            const intervalMs = (marketData.autoInterval || autoUpdateInterval || 30) * 1000;
             priceUpdateInterval = setInterval(updateAutoPrice, intervalMs);
+            
+            console.log('Auto price started, interval:', intervalMs, 'ms');
         }
 
         function stopAutoPriceFluctuation() {
@@ -1440,6 +1468,8 @@
                 clearInterval(priceUpdateInterval);
                 priceUpdateInterval = null;
             }
+            currentFluctuatedPrice = null;
+            console.log('Auto price stopped');
         }
 
         function checkAndCreateUserInDB(firebaseUser) {
@@ -1913,7 +1943,7 @@
                     
                     marketData = data;
                     marketMode = data.mode || 'manual';
-                    autoFluctuationRange = data.autoRange || 100;
+                    autoFluctuationRange = data.autoRange || 50;
                     autoUpdateInterval = data.autoInterval || 30;
                     
                     // Update mode badge
@@ -1933,16 +1963,20 @@
                         }
                     } else {
                         stopAutoPriceFluctuation();
-                        currentFluctuatedPrice = null;
                         lastManualPrice = data.tkPrice * data.usdtRate;
                     }
                     
                     updateMarketUI();
                     updatePortfolioPriceDisplay();
                     
+                    // Initialize chart points if empty
                     if (chartPoints.length === 0) {
-                        for(let i=0; i<20; i++) chartPoints.push(marketData.tkPrice);
+                        const initialPrice = marketMode === 'auto' ? 
+                            (currentFluctuatedPrice || data.basePrice || data.tkPrice * data.usdtRate) : 
+                            data.tkPrice;
+                        for(let i=0; i<20; i++) chartPoints.push(initialPrice);
                     }
+                    
                     updateUI();
                     calculatePortfolioPL();
                 }
@@ -1998,7 +2032,10 @@
             loadReferralStats(user.uid);
             window.loadUserSavings(user.uid);
             monitorIncomingTransfers(user.uid); 
+            
+            // Start zigzag animation immediately and keep it running
             startZigzagAnimation();
+            
             loadTodayPriceHistory();
             updateMarketPressure();
             pressureInterval = setInterval(updateMarketPressure, 600000);
