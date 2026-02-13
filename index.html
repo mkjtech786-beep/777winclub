@@ -774,7 +774,6 @@
                     <div class="today-chart-header">
                         <div class="today-chart-title">
                             <i class="fas fa-chart-line"></i> Today's Price Movement
-                            <span id="price-mode-badge" class="mode-indicator mode-manual">Updated</span>
                         </div>
                         <div class="today-stats">
                             <div class="stat-item">
@@ -832,7 +831,7 @@
                         <span style="font-weight: bold; color: var(--primary);"><span id="portfolio-current-price">0.00</span> PKR</span>
                     </div>
                     <div class="deposit-info-row">
-                        <span>Ai Bot analysis:</span>
+                        <span>Today's Change:</span>
                         <span id="portfolio-price-change" style="font-weight: bold;">0%</span>
                     </div>
                 </div>
@@ -1103,9 +1102,8 @@
 
                 <h3>About</h3>
                 <div class="menu-card" onclick="window.showAboutModal()" style="text-align: left; margin-bottom: 10px;">
-                    <i class="fas fa-info-circle"></i>
-                </div>📫 Tk coin, Inc.
-228 Park Ave S #23008, New York, NY 10003, USA PHONE 📞 +1 (801) 997-1992
+                    <i class="fas fa-info-circle"></i> TK Coin is a Singapore-based digital finance platform offering fast, secure transactions and smart earning solutions for global users
+                </div>
                 <button class="btn" style="background: #333;" onclick="window.logout()">Logout</button>
             </section>
 
@@ -1947,15 +1945,7 @@
                     autoFluctuationRange = data.autoRange || 50;
                     autoUpdateInterval = data.autoInterval || 30;
                     
-                    // Update mode badge
-                    const modeBadge = document.getElementById('price-mode-badge');
-                    if (marketMode === 'auto') {
-                        modeBadge.innerText = 'AUTO';
-                        modeBadge.className = 'mode-indicator mode-auto';
-                    } else {
-                        modeBadge.innerText = 'MANUAL';
-                        modeBadge.className = 'mode-indicator mode-manual';
-                    }
+                    // Update mode badge removed - no longer showing AUTO/MANUAL text
                     
                     // Handle mode switch
                     if (marketMode === 'auto') {
