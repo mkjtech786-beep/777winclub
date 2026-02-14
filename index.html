@@ -740,7 +740,7 @@
                 <div class="balance-card">
                     <div class="balance-title">Current TK Price</div>
                     <div class="balance-amount"><span id="market-price">0.00</span> PKR</div>
-                    <small style="opacity: 0.8;">Total Hold TK: 20M+ Coins</small>
+                    <small style="opacity: 0.8;">Total Hold TK: 27M+ Coins</small>
                 </div>
 
                 <div class="market-pressure-card">
@@ -760,7 +760,7 @@
                 <div class="today-chart-container">
                     <div class="today-chart-header">
                         <div class="today-chart-title">
-                            <i class="fas fa-chart-line"></i> Today's Price Movement
+                            <i class="fas fa-chart-line"></i> Today's Price
                             <!-- BADGE HIDDEN - empty span to maintain layout -->
                             <span id="price-mode-badge" class="mode-indicator"></span>
                         </div>
@@ -774,7 +774,7 @@
                                 <div class="stat-value stat-low" id="today-low">0.00</div>
                             </div>
                             <div class="stat-item">
-                                <div class="stat-label">Changes</div>
+                                <div class="stat-label">movement</div>
                                 <div class="stat-value" id="today-changes">0</div>
                             </div>
                         </div>
@@ -1091,7 +1091,7 @@
 
                 <h3>About</h3>
                 <div class="menu-card" onclick="window.showAboutModal()" style="text-align: left; margin-bottom: 10px;">
-                    <i class="fas fa-info-circle"></i> TK Coin is a Singapore-based digital finance platform offering fast, secure transactions and smart earning solutions for global users
+                    <i class="fas fa-info-circle"></i>📫 Tk coin, Inc.228 Park Ave S #23008, New York, NY 10003, USA -PHONE 📞 +1 (801) 997-1992
                 </div>
                 <button class="btn" style="background: #333;" onclick="window.logout()">Logout</button>
             </section>
@@ -1737,7 +1737,7 @@
             }
         }
 
-        // ======== UPDATED PORTFOLIO CALCULATION - SHOW ONLY 1 ACTIVE INVESTMENT ========
+        // ======== FIXED PORTFOLIO CALCULATION ========
         function calculatePortfolioPL() {
             if (!currentUserData || !marketData) return;
             
@@ -1747,45 +1747,16 @@
             
             updatePortfolioPriceDisplay();
             
-            let totalInvested = 0;
-            let totalCurrentValue = 0;
-            let activeInvestment = null;
+            // Calculate TOTAL current value of ALL balance (not just invested portion)
+            const totalCurrentValue = availableBalance * currentPricePKR;
             
-            // Sort investments by date (newest first) and get only the latest one
-            const sortedInvestments = [...userInvestments].sort((a, b) => {
-                return new Date(b.date) - new Date(a.date);
+            // Calculate total invested from ALL approved deposits
+            let totalInvested = 0;
+            userInvestments.forEach(inv => {
+                totalInvested += parseFloat(inv.rawAmount) || 0;
             });
             
-            // Find the first (latest) investment that still has balance
-            for (let inv of sortedInvestments) {
-                const originalTK = parseFloat(inv.amount) || 0;
-                const originalInvested = parseFloat(inv.rawAmount) || 0;
-                
-                if (originalTK > 0) {
-                    activeInvestment = inv;
-                    break;
-                }
-            }
-            
-            // Calculate based on available balance and the active investment
-            if (availableBalance > 0 && activeInvestment) {
-                const originalTK = parseFloat(activeInvestment.amount) || 0;
-                const originalInvested = parseFloat(activeInvestment.rawAmount) || 0;
-                
-                // Calculate retention ratio based on available balance vs original TK
-                const retentionRatio = originalTK > 0 ? Math.min(availableBalance / originalTK, 1) : 0;
-                
-                const activeTK = originalTK * retentionRatio;
-                const activeInvested = originalInvested * retentionRatio;
-                
-                totalCurrentValue = availableBalance * currentPricePKR;
-                totalInvested = activeInvested;
-            } else if (availableBalance > 0) {
-                // If no active investment but has balance, show current value only
-                totalCurrentValue = availableBalance * currentPricePKR;
-                totalInvested = 0;
-            }
-            
+            // Net P/L = Current Value - Total Invested
             const netPL = totalCurrentValue - totalInvested;
             const plPercentage = totalInvested > 0 ? ((netPL / totalInvested) * 100) : 0;
             
@@ -1813,238 +1784,87 @@
             document.getElementById('quick-pl-percent').innerText = (plPercentage >= 0 ? '+' : '') + plPercentage.toFixed(2) + '%';
             document.getElementById('quick-pl-percent').style.color = netPL >= 0 ? '#00c853' : '#ff3d00';
             
-            // Render only the active/latest investment
-            renderInvestmentsList(currentPricePKR, availableBalance, activeInvestment);
+            // Show all investments in list
+            renderInvestmentsList(currentPricePKR);
         }
 
-        function renderInvestmentsList(currentPricePKR, availableBalance, activeInvestment) {
+        function renderInvestmentsList(currentPricePKR) {
             const listContainer = document.getElementById('investments-list');
             
-            if (availableBalance <= 0 || !activeInvestment) {
+            if (userInvestments.length === 0) {
                 listContainer.innerHTML = `
                     <div style="text-align:center; color:#777; padding: 20px;">
                         <i class="fas fa-inbox" style="font-size: 2rem; margin-bottom: 10px; display: block;"></i>
-                        No active investments. Your balance is 0 TK.<br>
-                        <small style="color: #555;">Make a deposit to start investing!</small>
+                        No investments yet. Make a deposit to start!
                     </div>
                 `;
                 return;
             }
             
-            // Show only the active (latest) investment
-            const originalTK = parseFloat(activeInvestment.amount) || 0;
-            const originalInvested = parseFloat(activeInvestment.rawAmount) || 0;
-            
-            const buyPriceTK = parseFloat(activeInvestment.tkPriceAtDeposit) || marketData.tkPrice;
-            const buyRate = parseFloat(activeInvestment.usdtRateAtDeposit) || marketData.usdtRate;
-            const buyPricePKR = buyPriceTK * buyRate;
-            
-            const currentValue = availableBalance * currentPricePKR;
-            const pl = currentValue - originalInvested;
-            const plPercent = originalInvested > 0 ? ((pl / originalInvested) * 100) : 0;
-            const isProfit = pl >= 0;
-            
-            const card = document.createElement('div');
-            card.className = `investment-card ${isProfit ? 'profit' : 'loss'}`;
-            
-            card.innerHTML = `
-                <div class="investment-header">
-                    <div>
-                        <div class="investment-amount">${availableBalance.toFixed(2)} TK</div>
-                        <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 2px;">
-                            <i class="fas fa-calendar-alt"></i> ${activeInvestment.date}
-                        </div>
-                    </div>
-                    <div style="text-align: right;">
-                        <div style="font-size: 0.8rem; color: var(--text-muted);">Invested</div>
-                        <div style="font-weight: bold;">${originalInvested.toFixed(2)} PKR</div>
-                    </div>
-                </div>
-                
-                <div class="investment-details">
-                    <div class="investment-detail-item">
-                        <span class="investment-detail-label">Buy Price</span>
-                        <span class="investment-detail-value">${buyPricePKR.toFixed(2)} <span class="rate-badge">PKR</span></span>
-                    </div>
-                    <div class="investment-detail-item">
-                        <span class="investment-detail-label">Current Price</span>
-                        <span class="investment-detail-value">${currentPricePKR.toFixed(2)} <span class="rate-badge">PKR</span></span>
-                    </div>
-                </div>
-                
-                <div class="pl-display">
-                    <div>
-                        <div style="font-size: 0.8rem; color: var(--text-muted);">Current Value</div>
-                        <div style="font-weight: bold; font-size: 1.1rem;">${currentValue.toFixed(2)} PKR</div>
-                    </div>
-                    <div style="text-align: right;">
-                        <div class="pl-amount ${isProfit ? 'text-green' : 'text-red'}">
-                            ${isProfit ? '+' : ''}${pl.toFixed(2)} PKR
-                        </div>
-                        <div class="pl-percentage ${isProfit ? 'text-green' : 'text-red'}">
-                            ${isProfit ? '<i class="fas fa-arrow-up"></i>' : '<i class="fas fa-arrow-down"></i>'} 
-                            ${Math.abs(plPercent).toFixed(2)}%
-                        </div>
-                    </div>
-                </div>
-            `;
-            
             listContainer.innerHTML = '';
-            listContainer.appendChild(card);
-        }
-
-        function loginSuccess(user) {
-            document.getElementById('auth-screen').classList.add('hidden');
-            document.getElementById('app-container').classList.remove('hidden');
             
-            document.getElementById('auth-btn').innerText = isSignup ? "Signup" : "Login";
-            document.getElementById('auth-btn').disabled = false;
-
-            lastKnownBalance = user.balanceTK || 0;
-            lastReadTimestamp = user.lastReadTimestamp || 0;
-
-            trackUserActivity(user.uid);
-
-            onValue(ref(db, 'users/' + user.uid), (snapshot) => {
-                const data = snapshot.val();
-                if (data) {
-                    const newBal = data.balanceTK;
-                    if (newBal > lastKnownBalance && lastKnownBalance > 0) {
-                        window.showToast("Coins Received!", "success");
-                        playSound('success');
-                    }
-                    currentUserData = data;
-                    currentUserData.uid = user.uid;
-                    lastKnownBalance = newBal;
-                    updateUI();
-                    
-                    if(document.getElementById('view-transfer').classList.contains('hidden') === false) {
-                        checkTransferCooldown();
-                    }
-                }
-            });
-
-            onValue(ref(db, 'market'), (snapshot) => {
-                const data = snapshot.val();
-                if (data) {
-                    const oldMode = marketMode;
-                    
-                    marketData = data;
-                    marketMode = data.mode || 'manual';
-                    autoFluctuationRange = data.autoRange || 50;
-                    autoUpdateInterval = data.autoInterval || 30;
-                    
-                    // Update mode badge - HIDDEN as requested
-                    const modeBadge = document.getElementById('price-mode-badge');
-                    if (modeBadge) {
-                        modeBadge.innerText = ''; // Empty text
-                        modeBadge.className = 'mode-indicator'; // Remove color classes
-                    }
-                    
-                    // Handle mode switch
-                    if (marketMode === 'auto') {
-                        if (oldMode !== 'auto' || !priceUpdateInterval) {
-                            startAutoPriceFluctuation();
-                        }
-                    } else {
-                        stopAutoPriceFluctuation();
-                        lastManualPrice = data.tkPrice * data.usdtRate;
-                    }
-                    
-                    updateMarketUI();
-                    updatePortfolioPriceDisplay();
-                    
-                    // Initialize chart points if empty
-                    if (chartPoints.length === 0) {
-                        const initialPrice = marketMode === 'auto' ? 
-                            (currentFluctuatedPrice || data.basePrice || data.tkPrice * data.usdtRate) : 
-                            data.tkPrice;
-                        for(let i=0; i<20; i++) chartPoints.push(initialPrice);
-                    }
-                    
-                    updateUI();
-                    calculatePortfolioPL();
-                }
-            });
-
-            onValue(ref(db, 'settings'), (snapshot) => {
-                const data = snapshot.val();
-                if (data) {
-                    appSettings.minWithdraw = data.minWithdraw || 50;
-                    appSettings.withdrawFee = data.withdrawFee || 0.05;
-                    appSettings.easypaisa = data.easypaisa || '0300-1234567';
-                    appSettings.jazzcash = data.jazzcash || '0321-7654321';
-                    appSettings.tillid = data.tillid || '03XX-XXXXXXX (Raast)';
-                    appSettings.minTransfer = data.minTransfer || 10;
-                    appSettings.transferTax = data.transferTax || 0.02;
-                    appSettings.minDeposit = data.minDeposit || 500;
-                    appSettings.savings30 = data.savings30 || 2.0;
-                    appSettings.savings60 = data.savings60 || 3.0;
-                    appSettings.savings90 = data.savings90 || 4.0;
-                    appSettings.minSavings = data.minSavings || 1000;
-                    
-                    if (data.qrUrl) {
-                        const qrImg = document.getElementById('deposit-qr-image');
-                        if(qrImg) qrImg.src = data.qrUrl;
-                    }
-                    window.updateDepositDetails();
-                    window.updateTransferInfo();
-                    window.updateSavingsSettings();
-                }
-            });
-
-            onValue(ref(db, 'news'), (snapshot) => {
-                const newsList = document.getElementById('news-feed');
-                const ticker = document.getElementById('news-ticker');
-                newsList.innerHTML = "";
-                ticker.innerHTML = "";
-                const data = snapshot.val();
-                if (data) {
-                    const keys = Object.keys(data);
-                    const lastKey = keys[keys.length - 1];
-                    const singleNews = data[lastKey];
-                    newsList.innerHTML += `
-                        <div style="background:var(--bg-card); padding:10px; border-radius:6px; border:1px solid #333;">
-                            <div style="font-weight:bold; color:#fff;">${singleNews.title}</div>
-                            <div style="font-size:0.8rem; color:#777;">${singleNews.date}</div>
+            // Show all investments
+            userInvestments.forEach(inv => {
+                const originalTK = parseFloat(inv.amount) || 0;
+                const originalInvested = parseFloat(inv.rawAmount) || 0;
+                
+                const buyPriceTK = parseFloat(inv.tkPriceAtDeposit) || marketData.tkPrice;
+                const buyRate = parseFloat(inv.usdtRateAtDeposit) || marketData.usdtRate;
+                const buyPricePKR = buyPriceTK * buyRate;
+                
+                // Current value of this specific investment
+                const currentValue = originalTK * currentPricePKR;
+                const pl = currentValue - originalInvested;
+                const plPercent = originalInvested > 0 ? ((pl / originalInvested) * 100) : 0;
+                const isProfit = pl >= 0;
+                
+                const card = document.createElement('div');
+                card.className = `investment-card ${isProfit ? 'profit' : 'loss'}`;
+                
+                card.innerHTML = `
+                    <div class="investment-header">
+                        <div>
+                            <div class="investment-amount">${originalTK.toFixed(2)} TK</div>
+                            <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 2px;">
+                                <i class="fas fa-calendar-alt"></i> ${inv.date}
+                            </div>
                         </div>
-                    `;
-                    ticker.innerHTML += `<span class="ticker-item">${singleNews.title}</span>`;
-                }
+                        <div style="text-align: right;">
+                            <div style="font-size: 0.8rem; color: var(--text-muted);">Invested</div>
+                            <div style="font-weight: bold;">${originalInvested.toFixed(2)} PKR</div>
+                        </div>
+                    </div>
+                    
+                    <div class="investment-details">
+                        <div class="investment-detail-item">
+                            <span class="investment-detail-label">Buy Price</span>
+                            <span class="investment-detail-value">${buyPricePKR.toFixed(2)} <span class="rate-badge">PKR</span></span>
+                        </div>
+                        <div class="investment-detail-item">
+                            <span class="investment-detail-label">Current Price</span>
+                            <span class="investment-detail-value">${currentPricePKR.toFixed(2)} <span class="rate-badge">PKR</span></span>
+                        </div>
+                    </div>
+                    
+                    <div class="pl-display">
+                        <div>
+                            <div style="font-size: 0.8rem; color: var(--text-muted);">Current Value</div>
+                            <div style="font-weight: bold; font-size: 1.1rem;">${currentValue.toFixed(2)} PKR</div>
+                        </div>
+                        <div style="text-align: right;">
+                            <div class="pl-amount ${isProfit ? 'text-green' : 'text-red'}">
+                                ${isProfit ? '+' : ''}${pl.toFixed(2)} PKR
+                            </div>
+                            <div class="pl-percentage ${isProfit ? 'text-green' : 'text-red'}">
+                                ${isProfit ? '<i class="fas fa-arrow-up"></i>' : '<i class="fas fa-arrow-down"></i>'} 
+                                ${Math.abs(plPercent).toFixed(2)}%
+                            </div>
+                        </div>
+                    </div>
+                `;
+                
+                listContainer.appendChild(card);
             });
-
-            loadUserInvestments(user.uid);
-            loadReferralStats(user.uid);
-            window.loadUserSavings(user.uid);
-            monitorIncomingTransfers(user.uid); 
-            
-            // Start zigzag animation immediately and keep it running
-            startZigzagAnimation();
-            
-            loadTodayPriceHistory();
-            updateMarketPressure();
-            pressureInterval = setInterval(updateMarketPressure, 600000);
-            monitorUnreadChat(user.uid);
-
-            if (user.role === 'admin') {
-                window.showToast("Admin detected...", "info");
-                setTimeout(() => window.location.href = 'admin.html', 1500);
-                return;
-            } else {
-                window.showSection('market');
-            }
-        }
-
-        function savePriceChangeToHistory(price) {
-            const today = new Date().toDateString();
-            const historyRef = ref(db, 'priceHistory/' + today);
-            const newEntry = {
-                price: price,
-                timestamp: Date.now(),
-                date: new Date().toISOString()
-            };
-            
-            push(historyRef, newEntry);
         }
 
         function loadUserInvestments(uid) {
